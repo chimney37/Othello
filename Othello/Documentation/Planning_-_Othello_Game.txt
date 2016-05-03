@@ -1,0 +1,162 @@
+Planning - Othello Game
+
+Features
+-1 Player versus 1 Player
+-1 Player versus A.I.
+-Save and Load
+-Undo and Redo
+-Game engine A.I module
+-client GUI
+
+
+Timeline:
+2013/12/16 - basic design complete
+12/17 - basic 1 versus 1 complete. Moves verified until end game. basic tests complete.  need more tests. SaveLoad complete.
+12/18 - Undo and Redo. 
+12/19 - plan for A.I
+12/20 - plan for A.I
+12/21 - 22 : break
+12/23 - WPF
+12/24 - A.I
+12/25 - A.I
+12/26 - break
+12/27 - break
+12/28 - break
+12/29 - 12/3 (TBD, other studies)
+
+
+Implementation
+
+		-notes
+			-should build and test debug and release modes
+			-32bit and 64bit builds and test
+
+		-classes
+			-OthelloState: Keeps all information in a single game state. [Serializable]
+				(Serializable: HashID	ScoreW	ScoreB	Turn	ChildIDs)
+				HashID - unique and persistent per state for quick fetching from stores and keeping child relationships
+				ScoreW
+				ScoreB
+				Turn
+				ChildIDs - links to other states
+				BoardData
+
+			-OthelloBoard : keep all board information optimized at a bit level. Use 16 bytes to present 8x8board
+
+			-OthelloToken: control a Othello bit with a coordinate. Move can inherit Token.
+				CreateToken (x,y, Player)
+				EvaluateMove(OthelloStates,x,y,Player)
+				GetAllowedMoves(OthelloStates)
+
+			-OthelloPlayer (abstract)
+				PlayerScore
+				-OthelloAI (type of Player)
+					GetMoveScore(OthelloMove, OthelloState, int Depth)
+					GetRankedMoves(OthelloMove, OthelloState)
+					GetBestMove(int difficulty, OthelloState)
+
+			-OthelloGame: Keeps all information about a single round of Game
+				PlayerW
+				PlayerB
+				CurrentOthelloState
+				PastMovesCollection
+				MakeMove(OthelloPlayer, OthelloMove, out Next OthelloState)
+				CreateNewGame
+				IsEndGame
+				SaveGame
+				LoadGame
+
+			-OthelloAI: Controls the A.I for producing a move given a board state
+				GetMoves
+					MinMax
+					AlphaBeta
+				GetNextState
+
+
+			-OthelloDataGen : Pre-generation for AI search
+				StatesCollection
+				LoadStates
+				SaveStates
+				GenerateStates
+				PreCalculateStatesScores
+				SearchState(ID)
+
+			-Configurability : Saving and Loading of AI tuning files (2014/09/21)
+				Saving and Loading of AI Configuration (alpha beta pruning paramters, turns, level, play difficulty), maybe TSV
+				Via OthelloGame instead of OthelloAI, as AI config depends on turn and difficulty level
+
+Test Project : Othello Tests
+	Speed up verification considerably in later stages.
+	Express has no unit test projects. Use NUnit.
+
+
+Test Notes 
+	Make it possible to ingest char based matrix for any board situation.
+	Make it possible to ingest move array. For quickly executing moves.
+	(5,4)w, (5,3)b, (3,2)w...
+
+A.I notes
+	Step 1: Create a basic A.I that does search for all moves in a single state node to get the highest score move. 
+	Step 2: Create a richer A.I that does search for all moves in a single state node to get the highest score adjusted by heuristics (move(x1,y1) can be more biased than move (x2, y2) even if they have similar score.
+	Step 3: Create a smarter A.I that does brute force search for all moves in future states to get the highest score move for a given state root node.
+	Step 4: Create a super smart A.I that does search to look for end games in future states, to prune down the number of searches (discard moves that loses)
+	Step 5: Create a machine learned A.I. Create database that stores "good move + board patterns". A.I is trained using machine learning and executes movesaccording to the moves it learnt.
+
+	Step 6: Combine machine learned A.I and brute force search. Discard paths using machine learning.
+
+
+
+
+
+
+
+Game File(Binary)
+HashID	ScoreW	ScoreB	Turn	ChildIDs	BoardData
+
+Debug File(Text)
+HashID,ScoreW,ScoreB,Turn,ChildIDs	
+BoardData
+xxxxxxxx	xxxxxxxx
+xxxxxxxx        xxxxxxxx
+xxxxxxxx        xxxxxxxx
+xxxwbxxx        xxxwbxxx
+xxwwwwxx        xxxbwxxx
+xxxxbxxx        xxxxxxxx
+xxxxxxxx        xxxxxxxx
+xxxxxxxx        xxxxxxxx
+
+On File, move and state management for A.I can be below. Hash ID can be used as Key to bring down data size. 
+Boarddata may be necssary to calculate A.I score, but can be deleted after score calculation to bring down data size.
+
+Move(x,y,player)	HashID1	HashID2
+Move(x,y,player)	HashID2	HashID3
+Move(x,y,player)	HashID3	HashID4
+
+HashID	AIScore	BoardData
+
+
+
+General Notes:
+		-Othello should have much less moves per state as not all squares are usable.
+		-each state should have ID, score and childs IDs
+		-IDs can be hashed using positions of all white and back moves.
+		-don't need to search every possible move on memory.
+		-can keep states on disk.
+		-black and white. 2 possible combinations to start. are these same, but just reflections at the origin? If so they are symmetric, just search for a equivalent move by transforming at the origin.
+		-how do we calculate scores? Number of BW from POV of B if A.I is B? How does score affect if look ahead included? Certain key moves may be labeled as ideal, which has score?
+			-adding all Bs and Ws over multiple states or the final state at depth=x
+		-how do we make the game not too difficult?
+		-turns can tell end of game
+		-use Trace.Writeline for debugging
+		-Binary BoardData : 2bits per coordinate and 8 x 8 = 128bits + bitlength encoding or other kind of compression
+		-turns and currentplayer should belong to game state
+		-A.I may decouple information within game states used for game management (as A.I does not need all the information)
+		-A.I need states and also moves for searching best moves
+
+
+
+	GUI - client of A.I module
+		-debug using a console stub with simple game loop
+		-2nd using WPF with graphics and animation - Shell in progress
+		-Debug: Load State
+

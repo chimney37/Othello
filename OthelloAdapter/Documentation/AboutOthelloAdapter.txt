@@ -1,0 +1,6 @@
+﻿What is OthelloAdapter
+
+OthelloAdapter allows a layer of abstraction between different version clients of Othello and different version
+of Othello library. This allows re-use of the Othello library without further testing (only the adapter is solely responsible for breaks)
+
+In the future, we can just use an adapter to deal with different version clients without having to re-test the Othello library without it.
