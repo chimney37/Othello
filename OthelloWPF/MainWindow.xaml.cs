@@ -15,7 +15,6 @@ namespace OthelloWPF
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
-    /// TODO: add a window that shows the game moves by both players.
     /// </summary>
     public partial class MainWindow : Window
     {
