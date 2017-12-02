@@ -88,7 +88,7 @@ namespace OthelloWPF
                 oFlipList = new List<OthelloToken>();
                 oIsInvalidMove = false;
 
-                MessageBox.AppendText(string.Format("{0}\n", "Initialized:Success"));
+                MessageBox.AppendText(string.Format("{0}\n", "Initialized:Success. Human vs. Human"));
             }
         }
 

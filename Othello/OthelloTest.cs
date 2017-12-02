@@ -1037,6 +1037,7 @@ namespace Othello
                                 "xxxxxxxx" +
                                 "xxxxxxxx";
 
+            target.GameDisableLog();
             target.GameSetBoardData(initboard);
             var oTarget = oAIPlayer.GetBestMove(oAIPlayer.AiPlayer, 5);
 

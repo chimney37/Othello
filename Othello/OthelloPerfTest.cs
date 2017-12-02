@@ -48,7 +48,6 @@ namespace Othello
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
             target.GameDisableLog();
 
-
             for (int i = 0; i < 100000; i++)
             {
                 target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
@@ -62,6 +61,8 @@ namespace Othello
         public static void PerfSpeedIsValidMoves()
         {
             var oState = new OthelloState(new OthelloPlayer(OthelloPlayerKind.White, "PlayerA"), 1, false);
+
+            OthelloLogger.Disable();
 
             ExecuteLoopIsValidMove(oState, oState.CurrentPlayer);
             ExecuteLoopIsValidMove(oState, oState.CurrentPlayer);

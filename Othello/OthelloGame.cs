@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,22 +31,10 @@ namespace Othello
         private const string fileNameSaveDirectory = "OthelloSaves";
         private const string fileNamePrefix = "Save";
         private const string fileNameSuffix = ".dat";
-        private const string fileMidNamePlayerW = "PW";
-        private const string fileMidNamePlayerB = "PB";
-        private const string fileMidNameCurrState = "State";
-        private const string fileMidNameUndoCollection = "StatesU";
-        private const string fileMidNameRedoCollection = "StatesR";
-        private const string fileMidNameGameMode = "GMode";
-        private const string fileMidNamePlayerAI = "PAI";
         private const string fileNameAIConfig = "AIConfig.txt";
+        private const string fileMidNameGame = "Game";
 
-        string filepathPlayerW;
-        string filepathPlayerB;
-        string filepathCurrState;
-        string filepathUndo;
-        string filepathRedo;
-        string filepathGMode;
-        string filepathAI;
+        string filepathGame;
 
         private IEnumerable<OthelloAIConfig> AIConfigs = null;
 
@@ -68,7 +57,10 @@ namespace Othello
 
         public GameMode GameMode { get; set; }
         public GameDifficultyMode GameDifficultyMode { get; set; }
-        
+
+        //store list of objects for serialization
+        private ArrayList gameObjectsToSerialized;
+
         #endregion
 
         #region CONSTRUCTORS
@@ -84,6 +76,9 @@ namespace Othello
             Factory = new OthelloAIFactory();
 
             GameMode = GameMode.HumanVSHuman;
+
+            //create game object to serialize all
+            gameObjectsToSerialized = new ArrayList();
         }
 
         /// <summary>
@@ -98,31 +93,21 @@ namespace Othello
         public OthelloGame(OthelloPlayer oPlayerWhite, OthelloPlayer oPlayerBlack, OthelloPlayer firstPlayer, bool IsAlternate = false, bool IsAIMode = false, bool IsPlayerBlackAI = true, GameDifficultyMode difficulty = GameDifficultyMode.Default)
             : this()
         {
-
-            //statesUndoCollection = new Stack<OthelloState>();
-            //statesRedoCollection = new Stack<OthelloState>();
-
-            //Factory = new OthelloAIFactory();
-
             GameCreateNew(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate);
+
+            //set up AI player type
+            AIPlayer = (OthelloGameAi)Factory.Create(this, 
+                    IsPlayerBlackAI ? oPlayerBlack : oPlayerWhite, 
+                    IsPlayerBlackAI ? oPlayerWhite : oPlayerBlack);
 
             if (IsAIMode)
             {
-                GameMode = GameMode.HumanVSComputer;
-
-                //set up AI player type
-                if (IsPlayerBlackAI)
-                    AIPlayer = (OthelloGameAi)Factory.Create(this, oPlayerBlack, oPlayerWhite);
-                else
-                    AIPlayer = (OthelloGameAi)Factory.Create(this, oPlayerWhite, oPlayerBlack);
-
                 //load AI difficulty config
                 GameDifficultyMode = difficulty;
                 LoadAiConfig();
             }
-            else
-                GameMode = GameMode.HumanVSHuman;
-            
+
+            GameMode = IsAIMode ? GameMode.HumanVSComputer : GameMode.HumanVSHuman;            
         }
         #endregion
 
@@ -450,20 +435,24 @@ namespace Othello
         //Save game
         public void GameSave(bool UseDefaultpath = true, string pathDir = @".\")
         {
-            GetSaveFilePaths(UseDefaultpath, pathDir, out filepathPlayerW, out filepathPlayerB, out filepathCurrState, out filepathUndo, out filepathRedo, out filepathGMode, out filepathAI);
+
+            //GetSaveFilePaths(UseDefaultpath, pathDir, out filepathPlayerW, out filepathPlayerB, out filepathCurrState, out filepathUndo, out filepathRedo, out filepathGMode, out filepathAI);
+
+            gameObjectsToSerialized.Add(this.PlayerWhite);
+            gameObjectsToSerialized.Add(this.PlayerBlack);
+            gameObjectsToSerialized.Add(this.CurrentOthelloState);
+            gameObjectsToSerialized.Add(this.statesUndoCollection);
+            gameObjectsToSerialized.Add(this.statesRedoCollection);
+            gameObjectsToSerialized.Add(this.GameMode);
+            gameObjectsToSerialized.Add(this.AIPlayer);
+
+            //TODO: replace all of below with just 1 save object below
+            string strDefaultSaveDir = UseDefaultpath ? GetSaveDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) : GetSaveDirectory(pathDir);
+
 
             try
             {
-                SaveToBinaryFile(this.PlayerWhite, filepathPlayerW);
-                SaveToBinaryFile(this.PlayerBlack, filepathPlayerB);
-                SaveToBinaryFile(this.CurrentOthelloState, filepathCurrState);
-                SaveToBinaryFile(this.statesUndoCollection, filepathUndo);
-                SaveToBinaryFile(this.statesRedoCollection, filepathRedo);
-                SaveToBinaryFile(this.GameMode, filepathGMode);
-
-                //save the AI player only when gamemode is HumanVersusAI
-                if(this.GameMode == GameMode.HumanVSComputer)
-                    SaveToBinaryFile(this.AIPlayer, filepathAI);
+                SaveToBinaryFile(this.gameObjectsToSerialized, GetFileSavePath(strDefaultSaveDir, fileMidNameGame));
             }
             catch (Exception e)
             {
@@ -477,53 +466,24 @@ namespace Othello
         {
             try
             {
-                GetSaveFilePaths(UseDefaultpath, pathDir, out filepathPlayerW, out filepathPlayerB, out filepathCurrState, out filepathUndo, out filepathRedo, out filepathGMode, out filepathAI);
+                //GetSaveFilePaths(UseDefaultpath, pathDir, out filepathPlayerW, out filepathPlayerB, out filepathCurrState, out filepathUndo, out filepathRedo, out filepathGMode, out filepathAI);
 
-                this.PlayerWhite = (OthelloPlayer)LoadFromBinaryFile(filepathPlayerW);
-                this.PlayerBlack = (OthelloPlayer)LoadFromBinaryFile(filepathPlayerB);
-                this.CurrentOthelloState = (OthelloState)LoadFromBinaryFile(filepathCurrState);
-                this.statesUndoCollection = (Stack<OthelloState>)LoadFromBinaryFile(filepathUndo);
-                this.statesRedoCollection = (Stack<OthelloState>)LoadFromBinaryFile(filepathRedo);
-                this.GameMode = (GameMode)LoadFromBinaryFile(filepathGMode);
+                string defaultSaveDir = UseDefaultpath ? GetSaveDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) : GetSaveDirectory(pathDir);
+                string fullpath = GetFileSavePath(defaultSaveDir, fileMidNameGame);
+                this.gameObjectsToSerialized = (ArrayList)LoadFromBinaryFile(fullpath);
 
-                //load the AI player only when game mode is human versus computer
-                if(this.GameMode == GameMode.HumanVSComputer)
-                    this.AIPlayer = (OthelloGameAi)LoadFromBinaryFile(filepathAI);
+                this.PlayerWhite = (OthelloPlayer)this.gameObjectsToSerialized[0];
+                this.PlayerBlack = (OthelloPlayer)this.gameObjectsToSerialized[1];
+                this.CurrentOthelloState = (OthelloState)this.gameObjectsToSerialized[2];
+                this.statesUndoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[3];
+                this.statesRedoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[4];
+                this.GameMode = (GameMode)this.gameObjectsToSerialized[5];
+                this.AIPlayer = (OthelloGameAi) this.gameObjectsToSerialized[6];
             }
             catch (FileNotFoundException e)
             {
                 throw new Exception(string.Format("GameLoad [FileNotFoundException] : FileName = {0}", e.FileName), e);
             }
-        }
-
-
-        private void GetSaveFilePaths(bool UseDefaultpath, 
-            string pathDir, 
-            out string filepathPlayerW, 
-            out string filepathPlayerB, 
-            out string filepathCurrState, 
-            out string filepathUndo, 
-            out string filepathRedo, 
-            out string filepathGMode,
-            out string filepathPlayerAI)
-        {
-            filepathPlayerW = "";
-            filepathPlayerB = "";
-            filepathCurrState = "";
-            filepathUndo = "";
-            filepathRedo = "";
-            filepathGMode = "";
-            filepathPlayerAI = "";
-
-            string strDefaultSaveDir = UseDefaultpath ? GetSaveDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) : GetSaveDirectory(pathDir);
-
-            filepathPlayerW = GetFileSavePath(strDefaultSaveDir, fileMidNamePlayerW);
-            filepathPlayerB = GetFileSavePath(strDefaultSaveDir, fileMidNamePlayerB);
-            filepathCurrState = GetFileSavePath(strDefaultSaveDir, fileMidNameCurrState);
-            filepathUndo = GetFileSavePath(strDefaultSaveDir, fileMidNameUndoCollection);
-            filepathRedo = GetFileSavePath(strDefaultSaveDir, fileMidNameRedoCollection);
-            filepathGMode = GetFileSavePath(strDefaultSaveDir, fileMidNameGameMode);
-            filepathPlayerAI = GetFileSavePath(strDefaultSaveDir, fileMidNamePlayerAI);
         }
 
         private string GetSaveDirectory(string pathString)
