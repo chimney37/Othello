@@ -9,6 +9,7 @@ using MethodTimer;
 
 namespace Othello
 {
+    //TODO: support fetching of pre-computed moves to speed up searches
     /// <summary>
     /// The concrete class that implements the concrete product, A.I for Othello, instatiated via the concrete implementation OthelloAIFactory
     /// </summary>
@@ -86,8 +87,13 @@ namespace Othello
         /// <returns></returns>
         public override OthelloToken GetBestMove(OthelloPlayer currentPlayer, int remainDepth, float alpha = 0f, float beta = 0.51f)
         {
+
             //get a list of moves
+            //TODO: implement a multiple key mapper of _currentState, alpha and beta values that can fetch a pre-computed version of oCalculatedMoves
+
             List<Tuple<OthelloToken, float>> calculatedMoves = GetMoves(currentPlayer, remainDepth, alpha, beta);
+            //TODO: store this oCalculatedMoves if we can, epresented by a unique map of tegether with _currentState, alpha and beta values
+
 
             //handle the case where Calculated moves is 0. or else index woul be -1 and would cause exception
             if (calculatedMoves.Count == 0)
@@ -192,10 +198,7 @@ namespace Othello
 #endif
 
             oCalculatedMoves.Sort(Comparison);
-
-            //TODO: store this oCalculatedMoves if we can
-            
-
+         
             Trace.WriteLine(string.Format("ComputedMoveCount={0}", totalmoves));
             return oCalculatedMoves;
         }
