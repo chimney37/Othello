@@ -132,6 +132,7 @@ namespace Othello
             //float movescore = 0;
             //float bestValue = -100.0f;
             List<OthelloToken> allowedMoves = _currentState.GetAllowedMoves(currentPlayer);
+     
             List<Tuple<OthelloToken, float>> oCalculatedMoves = new List<Tuple<OthelloToken, float>>();
 
             //since t is each a distinct and independent search, multithread this, but keep the original single threaded code for baseline purpose.
@@ -149,6 +150,9 @@ namespace Othello
                 oCalculatedMoves.Add(scoretuple);
             } 
 #else
+            //TODO: implement 1) compare current state to see if this can be loaded from a previous computation
+
+
             //for creating a monitor
             Trace.WriteLine("Parallel Search.");
             var syncObject = new object();
@@ -188,6 +192,9 @@ namespace Othello
 #endif
 
             oCalculatedMoves.Sort(Comparison);
+
+            //TODO: store this oCalculatedMoves if we can
+            
 
             Trace.WriteLine(string.Format("ComputedMoveCount={0}", totalmoves));
             return oCalculatedMoves;

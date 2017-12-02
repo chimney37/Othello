@@ -57,7 +57,7 @@ namespace Othello
         /// <returns></returns>
         public override string ToString()
         {
-            return this.Token.ToString();
+            return "["+((OthelloBitType)Token).ToString() + X.ToString() + Y.ToString()+"]";
         }
         #endregion
     }
