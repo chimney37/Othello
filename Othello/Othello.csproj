@@ -75,6 +75,7 @@
     <Compile Include="OthelloDataGen.cs" />
     <Compile Include="OthelloEnums.cs" />
     <Compile Include="OthelloGame.cs" />
+    <Compile Include="OthelloIO.cs" />
     <Compile Include="OthelloLogger.cs" />
     <Compile Include="OthelloPerfTest.cs">
       <SubType>Code</SubType>

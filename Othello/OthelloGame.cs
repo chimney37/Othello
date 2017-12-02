@@ -29,11 +29,9 @@ namespace Othello
     {
         #region FIELDS
         private const string fileNameSaveDirectory = "OthelloSaves";
-        private const string fileNamePrefix = "Save";
-        private const string fileNameSuffix = ".dat";
+        private const string fileName = "Save" + "Game" + ".dat";
         private const string fileNameAIConfig = "AIConfig.txt";
-        private const string fileMidNameGame = "Game";
-
+        
         string filepathGame;
 
         private IEnumerable<OthelloAIConfig> AIConfigs = null;
@@ -428,10 +426,7 @@ namespace Othello
 
         #endregion
 
-        #region SAVE_AND_LOAD
-
-        //TODO: support saves and loads for game difficulty
-        //TODO: should serialize variables to combine variables in 1 save and load file. Now too many files
+        #region SAVE_AND_LOAD      
         //Save game
         public void GameSave(bool UseDefaultpath = true, string pathDir = @".\")
         {
@@ -446,31 +441,32 @@ namespace Othello
             gameObjectsToSerialized.Add(this.GameMode);
             gameObjectsToSerialized.Add(this.AIPlayer);
 
-            //TODO: replace all of below with just 1 save object below
-            string strDefaultSaveDir = UseDefaultpath ? GetSaveDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) : GetSaveDirectory(pathDir);
-
+            string strDefaultSaveDir = UseDefaultpath ? 
+                OthelloIO.CreateDefaultDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) :
+                OthelloIO.CreateDefaultDirectory(pathDir);
 
             try
             {
-                SaveToBinaryFile(this.gameObjectsToSerialized, GetFileSavePath(strDefaultSaveDir, fileMidNameGame));
+                OthelloIO.SaveToBinaryFile(this.gameObjectsToSerialized, OthelloIO.GetFileSavePath(strDefaultSaveDir, fileName));
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format("SaveToBinaryFile [Exception] : Exception Message = {0}", e.Message));
+                throw new Exception(string.Format("OthelloIO.SaveToBinaryFile [Exception] : Exception Message = {0}", e.Message));
             }
         }
 
-
-        //Load game
+        //Load game                                                                                                                                                                                                                              
         public void GameLoad(bool UseDefaultpath = true, string pathDir = "./")
         {
             try
             {
                 //GetSaveFilePaths(UseDefaultpath, pathDir, out filepathPlayerW, out filepathPlayerB, out filepathCurrState, out filepathUndo, out filepathRedo, out filepathGMode, out filepathAI);
 
-                string defaultSaveDir = UseDefaultpath ? GetSaveDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) : GetSaveDirectory(pathDir);
-                string fullpath = GetFileSavePath(defaultSaveDir, fileMidNameGame);
-                this.gameObjectsToSerialized = (ArrayList)LoadFromBinaryFile(fullpath);
+                string defaultSaveDir = UseDefaultpath ?
+                    OthelloIO.CreateDefaultDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) :
+                    OthelloIO.CreateDefaultDirectory(pathDir);
+                string fullpath = OthelloIO.GetFileSavePath(defaultSaveDir, fileName);
+                this.gameObjectsToSerialized = (ArrayList)OthelloIO.LoadFromBinaryFile(fullpath);
 
                 this.PlayerWhite = (OthelloPlayer)this.gameObjectsToSerialized[0];
                 this.PlayerBlack = (OthelloPlayer)this.gameObjectsToSerialized[1];
@@ -482,49 +478,8 @@ namespace Othello
             }
             catch (FileNotFoundException e)
             {
-                throw new Exception(string.Format("GameLoad [FileNotFoundException] : FileName = {0}", e.FileName), e);
+                throw new Exception(string.Format("OthelloIO.LoadFromBinaryFile : FileName = {0}", e.FileName), e);
             }
-        }
-
-        private string GetSaveDirectory(string pathString)
-        {
-            if(!Directory.Exists(pathString))
-            {
-                try
-                {
-                    Directory.CreateDirectory(pathString);
-                }
-                catch(Exception e)
-                {
-                    throw new Exception(string.Format("GetDefaultSaveDirectory [Exception] : Exception Message = {0}", e.Message));
-                }
-            }
-       
-            return pathString;
-        }
-        private string GetFileSavePath(string strSaveDirPath, string fileMidName)
-        {
-            return Path.Combine(strSaveDirPath, string.Format("{0}{1}{2}", fileNamePrefix, fileMidName, fileNameSuffix));
-        }
-        private static object LoadFromBinaryFile(string path)
-        {
-            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
-            BinaryFormatter f = new BinaryFormatter();
-
-            //Deserialize and read
-            object obj = f.Deserialize(fs);
-            fs.Close();
-
-            return obj;
-        }
-        private static void SaveToBinaryFile(object obj, string path)
-        {
-            FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write);
-            BinaryFormatter bf = new BinaryFormatter();
-
-            // Serializer and write
-            bf.Serialize(fs, obj);
-            fs.Close();
         }
         #endregion
 
