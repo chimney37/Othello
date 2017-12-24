@@ -31,7 +31,8 @@ namespace Othello
         private const string fileNameSaveDirectory = "OthelloSaves";
         private const string fileName = "Save" + "Game" + ".dat";
         private const string fileNameAIConfig = "AIConfig.txt";
-        
+
+        string defaultSaveDir;
         string filepathGame;
 
         private IEnumerable<OthelloAIConfig> AIConfigs = null;
@@ -77,6 +78,8 @@ namespace Othello
 
             //create game object to serialize all
             gameObjectsToSerialized = new ArrayList();
+
+            defaultSaveDir = OthelloIO.CreateDefaultDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory));
         }
 
         /// <summary>
@@ -460,11 +463,7 @@ namespace Othello
         {
             try
             {
-                //GetSaveFilePaths(UseDefaultpath, pathDir, out filepathPlayerW, out filepathPlayerB, out filepathCurrState, out filepathUndo, out filepathRedo, out filepathGMode, out filepathAI);
-
-                string defaultSaveDir = UseDefaultpath ?
-                    OthelloIO.CreateDefaultDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) :
-                    OthelloIO.CreateDefaultDirectory(pathDir);
+                defaultSaveDir = UseDefaultpath ? this.defaultSaveDir: OthelloIO.CreateDefaultDirectory(pathDir);
                 string fullpath = OthelloIO.GetFileSavePath(defaultSaveDir, fileName);
                 this.gameObjectsToSerialized = (ArrayList)OthelloIO.LoadFromBinaryFile(fullpath);
 

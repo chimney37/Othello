@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using NUnit.Framework;
+
 
 namespace Othello
 {
@@ -15,6 +17,16 @@ namespace Othello
         public static Tuple<string, int, int>[] tlist;
 
         public static Tuple<string,int,int,string>[,] multilist;
+
+        /// <summary>
+        /// Fix to change the test directory to the location of the assembly. Default is within VS 2017's program directory
+        /// </summary>
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            var dir = Path.GetDirectoryName(typeof(OthelloTest).Assembly.Location);
+            Environment.CurrentDirectory = dir;
+        }
 
         public OthelloTest()
         {
@@ -955,8 +967,8 @@ namespace Othello
             Assert.AreEqual(type,ot.Token);
         }
 
-        [TestCase(OthelloBitType.White, Result = OthelloBitType.Black)]
-        [TestCase(OthelloBitType.Black,Result=OthelloBitType.White)]
+        [TestCase(OthelloBitType.White, ExpectedResult=OthelloBitType.Black)]
+        [TestCase(OthelloBitType.Black, ExpectedResult=OthelloBitType.White)]
         public static OthelloBitType CheckOthelloTokenInverse(OthelloBitType type)
         {
             return OthelloToken.GetInverse(new OthelloToken(-1, -1, type)).Token;

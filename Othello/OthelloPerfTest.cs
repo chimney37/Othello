@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using NUnit.Framework;
 using System.Diagnostics;
 using System.Reflection;
@@ -29,6 +30,15 @@ namespace Othello
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            var dir = Path.GetDirectoryName(typeof(OthelloTest).Assembly.Location);
+            Environment.CurrentDirectory = dir;
+        }
 
         #region PERFORMANCE and MEMORY TESTS
 
