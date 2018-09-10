@@ -9,7 +9,7 @@ Features
 -client GUI
 
 
-Timeline:
+Timeline: (2013)
 2013/12/16 - basic design complete
 12/17 - basic 1 versus 1 complete. Moves verified until end game. basic tests complete.  need more tests. SaveLoad complete.
 12/18 - Undo and Redo. 
@@ -160,3 +160,19 @@ General Notes:
 		-2nd using WPF with graphics and animation - Shell in progress
 		-Debug: Load State
 
+2018 Thoughts:
+		-New Features:
+			-Network Play
+				-Added the idea of observers in the game (further simplify OthelloPlayer to a OthelloPerson, that the observer can inherit from also)
+				-matching online players
+
+		-Leveraging Machine Learning: design a ML model to learn and predict good moves from past moves. 
+			-looks like a multiclass classification problem (classify moves into good, bad, or so so moves)
+				-this means techniques will be Naive Bayes, Support Vector Machines, Decision Trees, Neural Network
+					- Features look like heuristics for targeting scoring by traditional means (e.g. bad moves, othello pivots, vectorization of othello board: black and white, number of turns, ratio of black vs white)
+					- data collection: 
+						- through human to human playing, and storing each move as pairs (player 1 vs. player 2)
+						- through human to machine playing, and storing each move as pairs (human player vs machine)
+
+			- Read Paper for further techniques: (Learning to Player Othello with Deep Neural Networks, by Pawel Liskowski, et al)https://arxiv.org/pdf/1711.06583.pdf
+		-Btw, also think of how to apply this to other game creation techniques

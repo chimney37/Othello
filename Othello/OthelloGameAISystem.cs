@@ -14,12 +14,12 @@ namespace Othello
     /// The concrete class that implements the concrete product, A.I for Othello, instatiated via the concrete implementation OthelloAIFactory
     /// </summary>
     [Serializable]
-    public class OthelloGameAi : OthelloProduct
+    public class OthelloGameAiSystem : OthelloGameAISystemProduct
     {
         #region PROPERTIES AND FIELDS
         OthelloState _currentState;
-        public OthelloPlayer HumanPlayer {get;set;}
-        public OthelloPlayer AiPlayer { get; set; }
+        public OthelloGamePlayer HumanPlayer {get;set;}
+        public OthelloGamePlayer AiPlayer { get; set; }
 
         private List<OthelloToken> _maxPivotHeuristics;
         private List<OthelloToken> _majorPivotsHeuristics;
@@ -43,12 +43,12 @@ namespace Othello
         /// <param name="oGame"></param>
         /// <param name="aIplayer"></param>
         /// <param name="humanPlayer"></param>
-        internal OthelloGameAi(OthelloGame oGame, OthelloPlayer aIplayer, OthelloPlayer humanPlayer)
+        internal OthelloGameAiSystem(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer)
         {
             Initialize(oGame, aIplayer, humanPlayer);
         }
 
-        public void Initialize(OthelloGame oGame, OthelloPlayer aIplayer, OthelloPlayer humanPlayer)
+        public void Initialize(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer)
         {
             _currentState = (OthelloState)((IOthelloGameAiAccessor)oGame).GetCurrentState().Clone();
             this.HumanPlayer = humanPlayer;
@@ -85,7 +85,7 @@ namespace Othello
         /// <param name="alpha"></param>
         /// <param name="beta"></param>
         /// <returns></returns>
-        public override OthelloToken GetBestMove(OthelloPlayer currentPlayer, int remainDepth, float alpha = 0f, float beta = 0.51f)
+        public override OthelloToken GetBestMove(OthelloGamePlayer currentPlayer, int remainDepth, float alpha = 0f, float beta = 0.51f)
         {
 
             //get a list of moves
@@ -132,7 +132,7 @@ namespace Othello
         /// TODO: optimize using Iterative Deepening Depth-First-Search (IDDFS) as part of AlphaBeta.
         // TODO: optimize using Time to set a max time for search. If exceeded, return results found within the timelimit. May be part of difficulty setting.
         [Time]
-        private List<Tuple<OthelloToken, float>> GetMoves(OthelloPlayer currentPlayer, int remainDepth, float alpha =0f, float beta = 0.51f)
+        private List<Tuple<OthelloToken, float>> GetMoves(OthelloGamePlayer currentPlayer, int remainDepth, float alpha =0f, float beta = 0.51f)
         {
             int totalmoves = 0;
             //float movescore = 0;
@@ -300,7 +300,7 @@ namespace Othello
         /// <param name="remainDepth"></param>
         /// <param name="totalmoves"></param>
         /// <returns></returns>
-        private float AlphaBeta(OthelloPlayer currentPlayer, OthelloState currentState, float a, float b, int remainDepth, ref int totalmoves)
+        private float AlphaBeta(OthelloGamePlayer currentPlayer, OthelloState currentState, float a, float b, int remainDepth, ref int totalmoves)
         {
 
             //lock (syncObj)
@@ -402,7 +402,7 @@ namespace Othello
         }
 
         //create the next state given a game
-        private OthelloState GetNextState(OthelloToken t, OthelloState currentState, OthelloPlayer player)
+        private OthelloState GetNextState(OthelloToken t, OthelloState currentState, OthelloGamePlayer player)
         {
             //create deep copy of current state
             OthelloState oNextState = (OthelloState)currentState.Clone();
@@ -430,9 +430,9 @@ namespace Othello
         }
 
         //update a player to the next player given a state and player
-        private static OthelloPlayer UpdatePlayer(OthelloState state, OthelloPlayer humanPlayer, OthelloPlayer player, OthelloPlayer AIPlayer)
+        private static OthelloGamePlayer UpdatePlayer(OthelloState state, OthelloGamePlayer humanPlayer, OthelloGamePlayer player, OthelloGamePlayer AIPlayer)
         {
-            OthelloPlayer updatedplayer = player.PlayerKind == AIPlayer.PlayerKind ? humanPlayer : AIPlayer;
+            OthelloGamePlayer updatedplayer = player.PlayerKind == AIPlayer.PlayerKind ? humanPlayer : AIPlayer;
 
             if (!state.IsValidPlayer(updatedplayer))
                 updatedplayer = updatedplayer.PlayerKind == AIPlayer.PlayerKind ? humanPlayer : AIPlayer;

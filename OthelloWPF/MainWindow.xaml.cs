@@ -23,7 +23,7 @@ namespace OthelloWPF
         private OthelloAdapter.Othello OthelloGame;
         private OthelloToken[,] oBoard;
 
-        private Othello.OthelloPlayer oCurrentPlayer;
+        private Othello.OthelloGamePlayer oCurrentPlayer;
         private int oTurn;
         private List<OthelloToken> oFlipList;
         private bool oIsInvalidMove;

@@ -2,7 +2,7 @@
 
 namespace Othello
 {
-    public sealed class OthelloAIConfig
+    public sealed class OthelloGameAIConfig
     {
         public int depth { get; set; }
         public float alpha { get; set; }

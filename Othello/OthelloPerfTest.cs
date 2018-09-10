@@ -52,8 +52,8 @@ namespace Othello
         [Time]
         private static void ExecuteLoopMakeMove()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
 
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
             target.GameDisableLog();
@@ -70,7 +70,7 @@ namespace Othello
         [TestCase]
         public static void PerfSpeedIsValidMoves()
         {
-            var oState = new OthelloState(new OthelloPlayer(OthelloPlayerKind.White, "PlayerA"), 1, false);
+            var oState = new OthelloState(new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA"), 1, false);
 
             OthelloLogger.Disable();
 
@@ -79,7 +79,7 @@ namespace Othello
         }
 
         [Time]
-        private static void ExecuteLoopIsValidMove(OthelloState s, OthelloPlayer p)
+        private static void ExecuteLoopIsValidMove(OthelloState s, OthelloGamePlayer p)
         {
             for (int i = 0; i < 100000; i++)
             {

@@ -266,8 +266,8 @@ namespace Othello
         [TestCase(3,2)]
         public static void CheckTokenMatrixCoordinateSystem(int x, int y)
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             oGame.GameMakeMove(x, y, oPlayerA);
@@ -332,8 +332,8 @@ namespace Othello
         [TestCase(4)]
         public static void CheckTurn1MovesCases(int ExpectIndex)
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             target.GameMakeMove(tlist[ExpectIndex].Item2, tlist[ExpectIndex].Item3, oPlayerA);
@@ -347,8 +347,8 @@ namespace Othello
         [TestCase(3,6)]
         public static void CheckMultiMovesCases(int index, int turncount)
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA,oPlayerB, oPlayerA);
 
             for (int t = 0; t < turncount; t++)
@@ -417,8 +417,8 @@ namespace Othello
         [TestCase]
         public static void CheckInvalidMoves()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             string initboard =  "bxxxxxxx" +
@@ -444,8 +444,8 @@ namespace Othello
         [TestCase]
         public static void CheckMidGameMove()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             string initboard =  "bxxxxxxx" +
@@ -478,7 +478,7 @@ namespace Othello
         [TestCase]
         public static void CheckGetValidFlipsW()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
 
             //test Player A as white
             string[] paths = { "w", "b", "e,", "o", "ooo", "eee", "www", "bbb", "eb", "wbw", "wbbw",  "wbbwb", "wbbbwee" };
@@ -492,7 +492,7 @@ namespace Othello
         [TestCase]
         public static void CheckGetValidFlipsB()
         {
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
 
             //test Player B as white
             string[] paths2 = { "bwb", "bwwb", "bwwbw", "bwwwwweb", "bwwwwbeb"};
@@ -506,8 +506,8 @@ namespace Othello
         [TestCase]
         public static void CheckGetValidFlipsOnMove()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             var initboard = "xxxxxxxx" +
@@ -522,7 +522,7 @@ namespace Othello
             target.GameSetBoardData(initboard);
             target.GameSetPlayer(oPlayerB);
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             List<OthelloToken> fliptokens = target.GameMakeMove(5, 3, player);
 
             Assert.GreaterOrEqual(fliptokens.FindIndex(a => a.X == 5 && a.Y == 4 && a.Token == OthelloBitType.White),0);
@@ -534,8 +534,8 @@ namespace Othello
         [TestCase]
         public static void CheckAlternateBoardSettingMoves()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA, true);
 
             var Expect =    "xxxxxxxx" +
@@ -569,8 +569,8 @@ namespace Othello
         [TestCase]
         public static void CheckStartPlayerSwitch()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerB, false);
 
             var targetPlayer = oGame.GameUpdatePlayer();
@@ -583,13 +583,13 @@ namespace Othello
         [TestCase]
         public static void CheckCalculateTurn()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
          
             Console.WriteLine(string.Format("Before ExecuteMoves. Turn = {0}", target.GameUpdateTurn()));
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
 
             player = target.GameUpdatePlayer();
@@ -604,8 +604,8 @@ namespace Othello
         [TestCase]
         public static void CheckValidateEndGame1()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             //initialize a near end game
@@ -622,7 +622,7 @@ namespace Othello
             target.GameSetPlayer(oPlayerA);
             
             target.GameUpdateTurn();
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(0, 6, player);
 
             Console.WriteLine(string.Format("Calculated Turn = {0}", target.GameUpdateTurn()));
@@ -640,8 +640,8 @@ namespace Othello
         [TestCase]
         public static void CheckValidateEndGame2()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             string initboard = "wwwwwwwx" +
@@ -653,7 +653,7 @@ namespace Othello
                                "wwbbbwbb" +
                                "wbbbbbbb";
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameSetBoardData(initboard);
 
             Assert.AreEqual(true, target.GameIsEndGame());
@@ -663,11 +663,11 @@ namespace Othello
         [TestCase]
         public static void CheckAllowedPlayerMoveCount()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
-            OthelloPlayer player = oGame.GameUpdatePlayer();
+            OthelloGamePlayer player = oGame.GameUpdatePlayer();
             int targetcount = oGame.GameGetPlayerAllowedMoves(player).Count;
 
 
@@ -680,11 +680,11 @@ namespace Othello
         [TestCase]
         public static void CheckValidatePlayerSwitch1()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
 
             player = target.GameUpdatePlayer();
@@ -695,8 +695,8 @@ namespace Othello
         [TestCase]
         public static void CheckValidatePlayerSwitch2()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             //initialize a near end game
@@ -714,7 +714,7 @@ namespace Othello
             target.GameSetPlayer(oPlayerB);
             Console.WriteLine(string.Format("Validated and Set Player to Move = {0}, allowed moves count = {1}", oPlayerB.PlayerKind, target.GameGetPlayerAllowedMoves(oPlayerB).Count));
 
-            OthelloPlayer targetPlayer = target.GameUpdatePlayer();
+            OthelloGamePlayer targetPlayer = target.GameUpdatePlayer();
 
             Console.WriteLine(string.Format("Validated and Set Player to Move = {0}, allowed moves count = {1}", targetPlayer.PlayerKind, target.GameGetPlayerAllowedMoves(targetPlayer).Count));
 
@@ -725,13 +725,13 @@ namespace Othello
         [TestCase]
         public static void CheckCustomSaveLoad()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             var customPath = @"..\..\..\OthelloSaveGames";
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
             target.GameSave(false, customPath);
 
@@ -785,13 +785,13 @@ namespace Othello
         [TestCase]
         public static void CheckSaveLoadUndo()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             var customPath = @"../../../OthelloSaveGames";
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
 
             player = target.GameUpdatePlayer();
@@ -820,13 +820,13 @@ namespace Othello
         [TestCase]
         public static void CheckSaveLoadRedo()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             var customPath = @"../../../OthelloSaveGames";
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
 
             player = target.GameUpdatePlayer();
@@ -856,11 +856,11 @@ namespace Othello
         [TestCase]
         public static void CheckNoRedoAfterMove()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
 
             string Expect = "xxxxxxxx" +
@@ -931,11 +931,11 @@ namespace Othello
         [TestCase]
         public static void CheckScoresAreCorrect()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
 
             player = target.GameUpdatePlayer();
@@ -980,10 +980,10 @@ namespace Othello
         [TestCase]
         public static void CheckAIRandomBestMove()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
-            var oAIPlayer = new OthelloGameAi(oGame, oPlayerB, oPlayerA);
+            var oAIPlayer = new OthelloGameAiSystem(oGame, oPlayerB, oPlayerA);
 
             string initboard =  "xxxxxxxx" +
                                 "xxxxxxxx" +
@@ -1006,8 +1006,8 @@ namespace Othello
         [TestCase(GameDifficultyMode.Default)]
         public static void CheckAIConfigLoaderSanity(GameDifficultyMode modes)
         {
-            OthelloPlayer oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "Human");
-            OthelloPlayer oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "Computer");
+            OthelloGamePlayer oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "Human");
+            OthelloGamePlayer oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "Computer");
 
             OthelloGame oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerA, false, true);
 
@@ -1032,11 +1032,11 @@ namespace Othello
         [TestCase]
         public static void CheckAISaveLoadGame()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
 
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA, false, true);
-            var oAIPlayer = new OthelloGameAi(target, oPlayerB, oPlayerA);
+            var oAIPlayer = new OthelloGameAiSystem(target, oPlayerB, oPlayerA);
 
             var customPath = @"..\..\..\OthelloSaveGames";
 

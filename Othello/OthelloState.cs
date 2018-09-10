@@ -22,7 +22,7 @@ namespace Othello
         #region PROPERTIES AND FIELDS
         public int ScoreW { get; set; }
         public int ScoreB { get; set; }
-        public OthelloPlayer CurrentPlayer { get; set; }
+        public OthelloGamePlayer CurrentPlayer { get; set; }
         public int Turn { get; set; }
 
         private OthelloBoard BoardData;
@@ -35,7 +35,7 @@ namespace Othello
         /// <param name="currentPlayer"></param>
         /// <param name="turn"></param>
         /// <param name="IsAlternate"></param>
-        public OthelloState(OthelloPlayer currentPlayer, int turn, bool IsAlternate = false)
+        public OthelloState(OthelloGamePlayer currentPlayer, int turn, bool IsAlternate = false)
         {
             this.Initialize(currentPlayer,turn, IsAlternate);
         }
@@ -64,7 +64,7 @@ namespace Othello
         /// <param name="currentPlayer"></param>
         /// <param name="turn"></param>
         /// <param name="IsAlternate"></param>
-        private void Initialize(OthelloPlayer currentPlayer, int turn, bool IsAlternate = false)
+        private void Initialize(OthelloGamePlayer currentPlayer, int turn, bool IsAlternate = false)
         {
             //this.ChildIDs = new List<string>();
             this.BoardData = new OthelloBoard(IsAlternate);
@@ -95,7 +95,7 @@ namespace Othello
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public bool IsValidPlayer(OthelloPlayer player)
+        public bool IsValidPlayer(OthelloGamePlayer player)
         {
             if (this.GetAllowedMoves(player).Count() == 0)
             {
@@ -188,7 +188,7 @@ namespace Othello
         /// <param name="y"></param>
         /// <param name="p"></param>
         /// <returns></returns>
-        public bool IsValidMove(int x, int y, OthelloPlayer p)
+        public bool IsValidMove(int x, int y, OthelloGamePlayer p)
         {
             //get the token at the cell where a player is trying to place
             OthelloToken obTry = this.BoardData.GetCell(x, y);
@@ -244,7 +244,7 @@ namespace Othello
         /// <param name="y"></param>
         /// <param name="player"></param>
         /// <returns></returns>
-        public List<OthelloToken> GetAllFlipsTokens(int x, int y, OthelloPlayer player)
+        public List<OthelloToken> GetAllFlipsTokens(int x, int y, OthelloGamePlayer player)
         {
             OthelloToken ob = new OthelloToken(x, y, player.GetPlayerOthelloToken());
             OthelloToken obOpposition = OthelloToken.GetInverse(ob);
@@ -307,7 +307,7 @@ namespace Othello
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public List<OthelloToken> GetAllowedMoves(OthelloPlayer player)
+        public List<OthelloToken> GetAllowedMoves(OthelloGamePlayer player)
         {
             List<OthelloToken> moves = new List<OthelloToken>();
 

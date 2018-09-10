@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -67,10 +67,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OthelloAIConfig.cs" />
-    <Compile Include="OthelloAIFactory.cs" />
+    <Compile Include="OthelloGameAIConfig.cs" />
+    <Compile Include="OthelloGameAIFactory.cs" />
+    <Compile Include="OthelloFactory.cs" />
+    <Compile Include="OthelloGameObserver.cs" />
     <Compile Include="OthelloInterfaces.cs" />
-    <Compile Include="OthelloGameAI.cs" />
+    <Compile Include="OthelloGameAISystem.cs" />
     <Compile Include="OthelloBoard.cs" />
     <Compile Include="OthelloDataGen.cs" />
     <Compile Include="OthelloEnums.cs" />
@@ -80,12 +82,13 @@
     <Compile Include="OthelloPerfTest.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="OthelloProduct.cs" />
+    <Compile Include="OthelloGameAISystemProduct.cs" />
+    <Compile Include="OthelloPerson.cs" />
     <Compile Include="OthelloTest.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="OthelloToken.cs" />
-    <Compile Include="OthelloPlayer.cs" />
+    <Compile Include="OthelloGamePlayer.cs" />
     <Compile Include="OthelloState.cs" />
     <Compile Include="OthelloBoardIterator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

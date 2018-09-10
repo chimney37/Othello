@@ -4,16 +4,19 @@ using Othello;
 
 namespace OthelloAdapter
 {
+    /// <summary>
+    /// OthelloAdapter is a brige between the Othello Library and the Clients of it, such as the Console version of Othello, or the WPF version
+    /// </summary>
     public class OthelloAdapter : Othello
     {
         private OthelloGame _oGame;
 
         public override void GameCreateNewHumanVSHuman(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsAlternate = false)
         {
-            OthelloPlayer oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, playerWhiteName);
-            OthelloPlayer oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, playerBlackName);
+            OthelloGamePlayer oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, playerWhiteName);
+            OthelloGamePlayer oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, playerBlackName);
 
-            OthelloPlayer oPlayerFirst = oPlayerA;
+            OthelloGamePlayer oPlayerFirst = oPlayerA;
 
             if (firstPlayerKind == OthelloPlayerKind.Black)
                 oPlayerFirst = oPlayerB;
@@ -28,15 +31,15 @@ namespace OthelloAdapter
         {
             if (IsHumanWhite)
             {
-                OthelloPlayer oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "Human");
-                OthelloPlayer oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "Computer");
+                OthelloGamePlayer oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "Human");
+                OthelloGamePlayer oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "Computer");
 
                 _oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerA, false, true, true, DifficultyMode);
             }
             else
             {
-                OthelloPlayer oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "Computer");
-                OthelloPlayer oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "Human");
+                OthelloGamePlayer oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "Computer");
+                OthelloGamePlayer oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "Human");
 
                 _oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerB, false, true, false, DifficultyMode);
             }
@@ -74,14 +77,14 @@ namespace OthelloAdapter
             return OthelloBoard.BoardSize;
         }
 
-        public override List<OthelloToken> GameMakeMove(int GameX, int GameY, OthelloPlayer oCurrentPlayer, out bool IsValidMove)
+        public override List<OthelloToken> GameMakeMove(int GameX, int GameY, OthelloGamePlayer oCurrentPlayer, out bool IsValidMove)
         {
             List<OthelloToken> oFlipList = _oGame.GameMakeMove(GameX, GameY, oCurrentPlayer);
             IsValidMove = oFlipList.Count() < 1 ? true : false;
             return oFlipList;
         }
 
-        public override OthelloPlayer GameUpdatePlayer()
+        public override OthelloGamePlayer GameUpdatePlayer()
         {
             return _oGame.GameUpdatePlayer();
         }
@@ -117,22 +120,22 @@ namespace OthelloAdapter
             _oGame.GameDifficultyMode = mode;
         }
 
-        public override OthelloGameAi GameGetAiPlayer()
+        public override OthelloGameAiSystem GameGetAiPlayer()
         {
             return _oGame.AIPlayer;
         }
 
-        public override OthelloPlayer GameGetPlayerWhite()
+        public override OthelloGamePlayer GameGetPlayerWhite()
         {
             return _oGame.PlayerWhite;
         }
 
-        public override OthelloPlayer GameGetPlayerBlack()
+        public override OthelloGamePlayer GameGetPlayerBlack()
         {
             return _oGame.PlayerBlack;
         }
 
-        public override int GameGetScore(OthelloPlayer player)
+        public override int GameGetScore(OthelloGamePlayer player)
         {
             if (player.PlayerKind == OthelloPlayerKind.Black)
                 return _oGame.GameGetScoreBlack();

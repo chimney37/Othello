@@ -25,7 +25,7 @@ namespace Othello
     /// TODO : support logging via Singleton design pattern
     /// </summary>
     [Serializable]
-    public sealed class OthelloGame : OthelloGameAi.IOthelloGameAiAccessor
+    public sealed class OthelloGame : OthelloGameAiSystem.IOthelloGameAiAccessor
     {
         #region FIELDS
         private const string fileNameSaveDirectory = "OthelloSaves";
@@ -33,9 +33,9 @@ namespace Othello
         private const string fileNameAIConfig = "AIConfig.txt";
 
         string defaultSaveDir;
-        string filepathGame;
+        //string filepathGame;
 
-        private IEnumerable<OthelloAIConfig> AIConfigs = null;
+        private IEnumerable<OthelloGameAIConfig> AIConfigs = null;
 
         private OthelloState CurrentOthelloState;
         private Stack<OthelloState> statesUndoCollection;
@@ -44,10 +44,10 @@ namespace Othello
         //[NonSerializedAttribute]
         //private OthelloLogger Logger;
 
-        public OthelloAIFactory Factory;
-        public OthelloPlayer PlayerWhite;
-        public OthelloPlayer PlayerBlack;
-        public OthelloGameAi AIPlayer;
+        public OthelloGameAIFactory Factory;
+        public OthelloGamePlayer PlayerWhite;
+        public OthelloGamePlayer PlayerBlack;
+        public OthelloGameAiSystem AIPlayer;
 
         //AI best moved tracked here after making an AI Move
         public OthelloToken AIMove { get;set; }
@@ -72,7 +72,7 @@ namespace Othello
             statesRedoCollection = new Stack<OthelloState>();
 
             //instantiate factory to produce AI
-            Factory = new OthelloAIFactory();
+            Factory = new OthelloGameAIFactory();
 
             GameMode = GameMode.HumanVSHuman;
 
@@ -91,13 +91,13 @@ namespace Othello
         /// <param name="firstPlayer"></param>
         /// <param name="IsAlternate"></param>
         /// //TODO: shift configuration loader to per A.I in OthelloAI, the concrete implementation of OthelloProduct, as the new factory design pattern allows multiple A.I players
-        public OthelloGame(OthelloPlayer oPlayerWhite, OthelloPlayer oPlayerBlack, OthelloPlayer firstPlayer, bool IsAlternate = false, bool IsAIMode = false, bool IsPlayerBlackAI = true, GameDifficultyMode difficulty = GameDifficultyMode.Default)
+        public OthelloGame(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate = false, bool IsAIMode = false, bool IsPlayerBlackAI = true, GameDifficultyMode difficulty = GameDifficultyMode.Default)
             : this()
         {
             GameCreateNew(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate);
 
             //set up AI player type
-            AIPlayer = (OthelloGameAi)Factory.Create(this, 
+            AIPlayer = (OthelloGameAiSystem)Factory.Create(this, 
                     IsPlayerBlackAI ? oPlayerBlack : oPlayerWhite, 
                     IsPlayerBlackAI ? oPlayerWhite : oPlayerBlack);
 
@@ -120,7 +120,7 @@ namespace Othello
         /// <param name="oPlayerBlack"></param>
         /// <param name="firstPlayer"></param>
         /// <param name="IsAlternate"></param>
-        public void GameCreateNew(OthelloPlayer oPlayerWhite, OthelloPlayer oPlayerBlack, OthelloPlayer firstPlayer, bool IsAlternate = false)
+        public void GameCreateNew(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate = false)
         {
             if(oPlayerWhite.PlayerKind == oPlayerBlack.PlayerKind)
                 throw new Exception("cannot have both player of same type.");
@@ -149,7 +149,7 @@ namespace Othello
         /// <param name="y"></param>
         /// <param name="player"></param>
         /// <returns></returns>
-        public List<OthelloToken> GameMakeMove(int x, int y, OthelloPlayer player)
+        public List<OthelloToken> GameMakeMove(int x, int y, OthelloGamePlayer player)
         {
             List<OthelloToken> flipTokens = new List<OthelloToken>();
 
@@ -279,9 +279,9 @@ namespace Othello
         /// updates and return the correct player for this game given the state of a game
         /// </summary>
         /// <returns></returns>
-        public OthelloPlayer GameUpdatePlayer()
+        public OthelloGamePlayer GameUpdatePlayer()
         {
-            OthelloPlayer player = GetCurrentPlayer();
+            OthelloGamePlayer player = GetCurrentPlayer();
 
             if (!IsValidPlayer(player))
                 player = CurrentOthelloState.CurrentPlayer = GetOpposingCurrentPlayer();
@@ -294,7 +294,7 @@ namespace Othello
         /// </summary>
         /// <param name="oPlayer"></param>
         /// <returns></returns>
-        public bool GameSetPlayer(OthelloPlayer oPlayer)
+        public bool GameSetPlayer(OthelloGamePlayer oPlayer)
         {
             if (IsValidPlayer(oPlayer))
             {
@@ -309,7 +309,7 @@ namespace Othello
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public List<OthelloToken> GameGetPlayerAllowedMoves(OthelloPlayer player)
+        public List<OthelloToken> GameGetPlayerAllowedMoves(OthelloGamePlayer player)
         {
             return CurrentOthelloState.GetAllowedMoves(player);
         }
@@ -467,13 +467,13 @@ namespace Othello
                 string fullpath = OthelloIO.GetFileSavePath(defaultSaveDir, fileName);
                 this.gameObjectsToSerialized = (ArrayList)OthelloIO.LoadFromBinaryFile(fullpath);
 
-                this.PlayerWhite = (OthelloPlayer)this.gameObjectsToSerialized[0];
-                this.PlayerBlack = (OthelloPlayer)this.gameObjectsToSerialized[1];
+                this.PlayerWhite = (OthelloGamePlayer)this.gameObjectsToSerialized[0];
+                this.PlayerBlack = (OthelloGamePlayer)this.gameObjectsToSerialized[1];
                 this.CurrentOthelloState = (OthelloState)this.gameObjectsToSerialized[2];
                 this.statesUndoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[3];
                 this.statesRedoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[4];
                 this.GameMode = (GameMode)this.gameObjectsToSerialized[5];
-                this.AIPlayer = (OthelloGameAi) this.gameObjectsToSerialized[6];
+                this.AIPlayer = (OthelloGameAiSystem) this.gameObjectsToSerialized[6];
             }
             catch (FileNotFoundException e)
             {
@@ -491,7 +491,7 @@ namespace Othello
         /// <param name="player"></param>
         /// <param name="fliplist"></param>
         /// <returns></returns>
-        private OthelloState CreateNextState(int x, int y, OthelloPlayer player, ref List<OthelloToken> fliplist)
+        private OthelloState CreateNextState(int x, int y, OthelloGamePlayer player, ref List<OthelloToken> fliplist)
         {
             //create deep copy of current state
             OthelloState oNextState = (OthelloState)CurrentOthelloState.Clone();
@@ -543,7 +543,7 @@ namespace Othello
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        private bool IsValidPlayer(OthelloPlayer player)
+        private bool IsValidPlayer(OthelloGamePlayer player)
         {
             return CurrentOthelloState.IsValidPlayer(player);
         }
@@ -552,7 +552,7 @@ namespace Othello
         /// get current player 
         /// </summary>
         /// <returns></returns>
-        private OthelloPlayer GetCurrentPlayer()
+        private OthelloGamePlayer GetCurrentPlayer()
         {
             return CurrentOthelloState.CurrentPlayer;
         }
@@ -561,7 +561,7 @@ namespace Othello
         /// Get opposing player of current player
         /// </summary>
         /// <returns></returns>
-        private OthelloPlayer GetOpposingCurrentPlayer()
+        private OthelloGamePlayer GetOpposingCurrentPlayer()
         {
             return (GetCurrentPlayer().PlayerKind == OthelloPlayerKind.White) ? PlayerBlack : PlayerWhite;
         }
@@ -570,7 +570,7 @@ namespace Othello
         /// private member accessible from another class (friend)
         /// </summary>
         /// <returns></returns>
-        OthelloState OthelloGameAi.IOthelloGameAiAccessor.GetCurrentState()
+        OthelloState OthelloGameAiSystem.IOthelloGameAiAccessor.GetCurrentState()
         {
             return CurrentOthelloState;
         }
@@ -585,7 +585,7 @@ namespace Othello
                 string[] AIConfigLines = File.ReadAllLines(fileNameAIConfig, Encoding.UTF8);
 
                 AIConfigs = from data in AIConfigLines.Skip(1)
-                            select new OthelloAIConfig
+                            select new OthelloGameAIConfig
                             {
                                 depth = int.Parse(data.Split('\t')[0]),
                                 alpha = float.Parse(data.Split('\t')[1]),
@@ -629,9 +629,9 @@ namespace Othello
         /// <param name="depth"></param>
         /// <param name="alpha"></param>
         /// <param name="beta"></param>
-        private void GetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloAIConfig> configs, out int? depth, out float? alpha, out float? beta)
+        private void GetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloGameAIConfig> configs, out int? depth, out float? alpha, out float? beta)
         {
-            foreach(OthelloAIConfig c in configs)
+            foreach(OthelloGameAIConfig c in configs)
             {
                 if(c.IsInRange(turn, difficultymode))
                 {
@@ -666,14 +666,14 @@ namespace Othello
 
         #region DEBUGGING
 
-        public IEnumerable<OthelloAIConfig> DebugAIConfig()
+        public IEnumerable<OthelloGameAIConfig> DebugAIConfig()
         {
             if(AIConfigs == null)
                 LoadAiConfig();
             return AIConfigs;
         }
 
-        public void DebugGetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloAIConfig> configs, out int? depth, out float? alpha, out float? beta)
+        public void DebugGetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloGameAIConfig> configs, out int? depth, out float? alpha, out float? beta)
         {
             GetTurnConfig(difficultymode, turn, configs, out depth, out alpha, out beta);
         }

@@ -6,12 +6,14 @@ namespace Othello
     /// Class to encapsulate player information for an Othello game.
     /// </summary>
     [Serializable]
-    public class OthelloPlayer
+    public class OthelloGamePlayer : OthelloPerson
     {
         #region PROPERTIES
+        /// <summary>
+        /// In Othello, either you are black, or white, as the PlayerKind
+        /// </summary>
         public OthelloPlayerKind PlayerKind { get; set; }
-        public string PlayerName { get; set; }
-        //public float PlayerScore { get; set; }
+
         #endregion
 
         #region CONSTRUCTOR
@@ -20,7 +22,7 @@ namespace Othello
         /// </summary>
         /// <param name="oPKind"></param>
         /// <param name="PlayerName"></param>
-        public OthelloPlayer(OthelloPlayerKind oPKind, string PlayerName)
+        public OthelloGamePlayer(OthelloPlayerKind oPKind, string PlayerName)
         {
             this.PlayerKind = oPKind;
             //this.PlayerScore = 0.0f;

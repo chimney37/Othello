@@ -10,10 +10,10 @@ namespace OthelloEngineConsole
     {
         static bool gameContinue;
         static GameStateMode gameMode;
-        static Othello.OthelloPlayer oPlayerA;
-        static Othello.OthelloPlayer oPlayerB;
-        static Othello.OthelloPlayer ofirstPlayer;
-        static Othello.OthelloPlayer oCurrentPlayer;
+        static Othello.OthelloGamePlayer oPlayerA;
+        static Othello.OthelloGamePlayer oPlayerB;
+        static Othello.OthelloGamePlayer ofirstPlayer;
+        static Othello.OthelloGamePlayer oCurrentPlayer;
         static bool IsAlternateGame = true;
         static Othello.OthelloGame oGame;
         static OthelloToken[,] oBoard;
@@ -113,8 +113,8 @@ namespace OthelloEngineConsole
             gameContinue = true;
             gameMode = 0;
 
-            oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             ofirstPlayer = oPlayerA;
             IsAlternateGame = false;
 
@@ -166,7 +166,7 @@ namespace OthelloEngineConsole
                         int x = int.Parse(mc[0].Value);
                         int y = int.Parse(mc[1].Value);
 
-                        OthelloPlayer currentPlayer = oGame.GameUpdatePlayer();
+                        OthelloGamePlayer currentPlayer = oGame.GameUpdatePlayer();
                         int move = oGame.GameMakeMove(x, y, currentPlayer).Count();
 
                         if(move == 0)
@@ -183,9 +183,9 @@ namespace OthelloEngineConsole
                     Console.WriteLine("Redoing a move.");
                     break;
                 case GameStateMode.AIMove:
-                    OthelloAIFactory factory = new OthelloAIFactory();
-                    OthelloProduct AI1 = factory.Create(oGame, oCurrentPlayer, oPlayerA);
-                    oGame.AIPlayer = (OthelloGameAi)AI1;
+                    OthelloGameAIFactory factory = new OthelloGameAIFactory();
+                    OthelloGameAISystemProduct AI1 = factory.Create(oGame, oCurrentPlayer, oPlayerA);
+                    oGame.AIPlayer = (OthelloGameAiSystem)AI1;
 
                     Console.WriteLine("A.I {0} processing...", AI1.ToString());
 
