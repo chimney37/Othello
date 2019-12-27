@@ -1,110 +1,174 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Transform" : "AWS::Serverless-2016-10-31",
-  "Description" : "An AWS Serverless Application.",
+  "Description" : "AWS Serverless API that exposes the add, remove and get operations for a blogging platform using Amazon DynamoDB.",
+  "Parameters" : {
+    "ShouldCreateTable" : {
+      "Type" : "String",        
+      "AllowedValues" : ["true", "false"],
+      "Description" : "If true then the DynamoDB blogging table will be created with the CloudFormation stack."
+    },  
+    "TableName" : {
+        "Type" : "String",
+        "Description" : "Name of DynamoDB table used to store the blog post. If left blank a new table will be created.",
+        "MinLength" : "0"
+    },
+    "ReadCapacity" : {
+        "Type" : "Number",
+        "Description" : "Read capacity for the DynamoDB blog table.",
+        "Default" : "3",
+        "MinValue" : 1
+    },
+    "WriteCapacity" : {
+        "Type" : "Number",
+        "Description" : "Write capacity for the DynamoDB blog table.",
+        "Default" : "3",
+        "MinValue" : 1
+    }
+  },
+
+  "Conditions" : {
+    "CreateBlogTable" : {"Fn::Equals" : [{"Ref" : "ShouldCreateTable"}, "true"]},
+	  "TableNameGenerated" : {"Fn::Equals" : [{"Ref" : "TableName"}, ""]}
+  },
 
   "Resources" : {
 
-
-    "GreetingTask" : {
-        "Type" : "AWS::Lambda::Function",
-        "Properties" : {
-            "Handler" : "OthelloAWSServerless::OthelloAWSServerless.StepFunctionTasks::Greeting",
-            "Role"    : {"Fn::GetAtt" : [ "LambdaRole", "Arn"]},
-            "Runtime" : "dotnetcore2.1",
-            "MemorySize" : 256,
-            "Timeout" : 30,
-            "Code" : {
-                "S3Bucket" : "",
-                "S3Key" : ""
+    "GetBlogs" : {
+      "Type" : "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::GetBlogsAsync",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Description": "Function to get a list of blogs",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [ "AWSLambdaFullAccess" ],
+        "Environment" : {
+          "Variables" : {
+            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+          }
+        },
+        "Events": {
+          "PutResource": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/",
+              "Method": "GET"
             }
+          }
         }
+      }
     },
 
-    "SalutationsTask" : {
-        "Type" : "AWS::Lambda::Function",
-        "Properties" : {
-            "Handler" : "OthelloAWSServerless::OthelloAWSServerless.StepFunctionTasks::Salutations",            
-            "Role"    : {"Fn::GetAtt" : [ "LambdaRole", "Arn"]},
-            "Runtime" : "dotnetcore2.1",
-            "MemorySize" : 256,
-            "Timeout" : 30,
-            "Code" : {
-                "S3Bucket" : "",
-                "S3Key" : ""
+    "GetBlog" : {
+      "Type" : "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::GetBlogAsync",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Description": "Function to get a single blog",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [ "AWSLambdaFullAccess" ],
+        "Environment" : {
+          "Variables" : {
+            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+          }
+        },
+        "Events": {
+          "PutResource": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/{Id}",
+              "Method": "GET"
             }
+          }
         }
+      }
     },
+    
 
-    "StateMachine" : {
-        "Type" : "AWS::StepFunctions::StateMachine",
-        "Properties": {
-            "RoleArn": { "Fn::GetAtt": [ "StateMachineRole", "Arn" ] },
-            "DefinitionString": { "Fn::Sub": "" }
+    "AddBlog" : {
+      "Type" : "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::AddBlogAsync",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Description": "Function to add a blog",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [ "AWSLambdaFullAccess" ],
+        "Environment" : {
+          "Variables" : {
+            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+          }
+        },
+        "Events": {
+          "PutResource": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/",
+              "Method": "PUT"
+            }
+          }
         }
+      }
     },
 
-    "LambdaRole" : {
-        "Type" : "AWS::IAM::Role",
-        "Properties" : {
-            "AssumeRolePolicyDocument" : {
-                "Version" : "2012-10-17",
-                "Statement" : [
-                    {
-                        "Action" : [
-                            "sts:AssumeRole"
-                        ],
-                        "Effect" : "Allow",
-                        "Principal" : {
-                            "Service" : [
-                                "lambda.amazonaws.com"
-                            ]
-                        }
-                    }
-                ]
-            },
-            "ManagedPolicyArns" : [
-                "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-            ]
-       }
+    "RemoveBlog" : {
+      "Type" : "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::RemoveBlogAsync",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Description": "Function to remove a blog",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [ "AWSLambdaFullAccess" ],
+        "Environment" : {
+          "Variables" : {
+            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+          }
+        },
+        "Events": {
+          "PutResource": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/",
+              "Method": "DELETE"
+            }
+          }
+        }
+      }
     },
 
-
-    "StateMachineRole" : {
-        "Type" : "AWS::IAM::Role",
+    "BlogTable" : {
+        "Type" : "AWS::DynamoDB::Table",
+        "Condition" : "CreateBlogTable",
         "Properties" : {
-            "AssumeRolePolicyDocument" : {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Principal": {
-                    "Service": {"Fn::Sub" : "states.${AWS::Region}.amazonaws.com"}
-                  },
-                  "Action": "sts:AssumeRole"
-                }
-              ]
-            },
-            "Policies" : [{
-                "PolicyName": "StepFunctionLambdaInvoke",
-                "PolicyDocument": {
-                  "Version": "2012-10-17",
-                  "Statement": [
-                    {
-                      "Effect": "Allow",
-                      "Action": [
-                        "lambda:InvokeFunction"
-                      ],
-                      "Resource": "*"
-                    }
-                  ]
-                }
-            }]
+            "TableName" : { "Fn::If" : ["TableNameGenerated", {"Ref" : "AWS::NoValue" }, { "Ref" : "TableName" } ] },
+            "AttributeDefinitions" : [
+              {"AttributeName" : "Id", "AttributeType" : "S"}
+            ],
+            "KeySchema"            : [
+              {"AttributeName" : "Id", "KeyType" : "HASH"}
+            ],
+            "ProvisionedThroughput" : {
+                "ReadCapacityUnits" : { "Ref" : "ReadCapacity" },
+                "WriteCapacityUnits" : { "Ref" : "WriteCapacity" }
+            }
         }
     }
-
   },
 
   "Outputs" : {
+    "BlogTable" : {
+        "Value" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+    }
   }
 }
