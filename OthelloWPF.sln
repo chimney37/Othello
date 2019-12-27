@@ -11,10 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Othello", "Othello\Othello.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OthelloAdapter", "OthelloAdapter\OthelloAdapter.csproj", "{7855999C-4C46-436B-8679-16CF4F252951}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OthelloAWSServerless", "OthelloAWSServerless\OthelloAWSServerless.csproj", "{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OthelloAWSServerless.Tests", "OthelloAWSServerless.Tests\OthelloAWSServerless.Tests.csproj", "{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,22 +49,6 @@ Global
 		{7855999C-4C46-436B-8679-16CF4F252951}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7855999C-4C46-436B-8679-16CF4F252951}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7855999C-4C46-436B-8679-16CF4F252951}.Release|x64.ActiveCfg = Release|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Debug|x64.Build.0 = Debug|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Release|x64.ActiveCfg = Release|Any CPU
-		{8E04A6B5-7B96-4FD5-B38A-B4EA747878D4}.Release|x64.Build.0 = Release|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Debug|x64.Build.0 = Debug|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Release|x64.ActiveCfg = Release|Any CPU
-		{81DD3EA2-F44C-4F86-AA2E-8109DFE25250}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
