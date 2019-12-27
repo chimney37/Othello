@@ -11,6 +11,20 @@ namespace OthelloAdapter
     {
         private OthelloGame _oGame;
 
+        public OthelloAdapter(bool IsEnabledLogging = false): base()
+        {
+            _oGame = new OthelloGame();
+
+            if (IsEnabledLogging)
+            {
+                _oGame.GameEnableLogging();
+            }
+            else
+            {
+                _oGame.GameDisableLog();
+            }
+        }
+
         public override void GameCreateNewHumanVSHuman(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsAlternate = false)
         {
             OthelloGamePlayer oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, playerWhiteName);
@@ -23,8 +37,6 @@ namespace OthelloAdapter
 
             //create a new game by default
             _oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerFirst, false);
-
-            _oGame.GameEnableLogging();
         }
 
         public override void GameCreateNewHumanVSAI(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsHumanWhite= true, bool IsAlternate = false, GameDifficultyMode DifficultyMode = GameDifficultyMode.Easy)
@@ -43,8 +55,6 @@ namespace OthelloAdapter
 
                 _oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerB, false, true, false, DifficultyMode);
             }
-
-            _oGame.GameEnableLogging();
         }
 
         public override void GameLoad()
@@ -143,5 +153,14 @@ namespace OthelloAdapter
             return _oGame.GameGetScoreWhite();
         }
 
+        public override string GetGameJSON()
+        {
+            return _oGame.GameGetJSON();
+        }
+
+        public override void GetGameFromJSON(string json)
+        {
+            _oGame.GameGetGameFromJSON(json);
+        }
     }
 }

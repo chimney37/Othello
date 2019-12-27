@@ -25,6 +25,7 @@ namespace OthelloAdapter
         public abstract OthelloGamePlayer GameGetPlayerWhite();
         public abstract OthelloGamePlayer GameGetPlayerBlack();
         public abstract int GameGetScore(OthelloGamePlayer player);
-
+        public abstract string GetGameJSON();
+        public abstract void GetGameFromJSON(string json);
     }
 }
