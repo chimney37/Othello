@@ -1,3 +1,13 @@
+*****************************************************2019 Project***************************************************************************
+
+* OthelloServerless: uses AWS services, mainly Lambda to support mulitple instances of A.I games for multiple players, and DynamoDB to store game states.
+
+
+
+
+
+*****************************************************2013 Project***************************************************************************
+
 Planning - Othello Game
 
 Features

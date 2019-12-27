@@ -20,7 +20,7 @@ namespace OthelloWPF
     {
         #region PROPERTIES, ATTRIBUTES
         //private OthelloGame oGame;
-        private OthelloAdapter.Othello OthelloGame;
+        private OthelloAdapter.Othello OthelloGameAdapter;
         private OthelloToken[,] oBoard;
 
         private Othello.OthelloGamePlayer oCurrentPlayer;
@@ -72,9 +72,8 @@ namespace OthelloWPF
             try
             {
                 //create a new game by default
-                //oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerA, false);
-                OthelloGame = new OthelloAdapter.OthelloAdapter();
-                OthelloGame.GameCreateNewHumanVSHuman(playerAName, playerBName, OthelloPlayerKind.White, false);
+                OthelloGameAdapter = new OthelloAdapter.OthelloAdapter();
+                OthelloGameAdapter.GameCreateNewHumanVSHuman(playerAName, playerBName, OthelloPlayerKind.White, false);
 
             }
             catch(Exception e)
@@ -210,11 +209,11 @@ namespace OthelloWPF
             {
                 if (IsHumanWhiteChecked)
                 {
-                    OthelloGame.GameCreateNewHumanVSAI(playerHumanName, playerAIName, OthelloPlayerKind.White,IsHumanWhiteChecked, false, DifficultyMode);
+                    OthelloGameAdapter.GameCreateNewHumanVSAI(playerHumanName, playerAIName, OthelloPlayerKind.White,IsHumanWhiteChecked, false, DifficultyMode);
                 }
                 else
                 {
-                    OthelloGame.GameCreateNewHumanVSAI(playerAIName, playerHumanName, OthelloPlayerKind.Black,IsHumanWhiteChecked, false, DifficultyMode);
+                    OthelloGameAdapter.GameCreateNewHumanVSAI(playerAIName, playerHumanName, OthelloPlayerKind.Black,IsHumanWhiteChecked, false, DifficultyMode);
                 }
             }
             catch (Exception exception)
@@ -237,11 +236,11 @@ namespace OthelloWPF
         private void ClickLoad(object sender, RoutedEventArgs e)
         {
             //oGame.GameLoad();
-            OthelloGame.GameLoad();
+            OthelloGameAdapter.GameLoad();
 
             //TODO maybe design issue: OthelloGame does not support the loading of difficulty modes
             //switch(oGame.GameDifficultyMode)
-            switch(OthelloGame.GameGetDifficultyMode())
+            switch(OthelloGameAdapter.GameGetDifficultyMode())
             {
                 case GameDifficultyMode.Easy:
                     Difficulty_ComboBox.SelectedIndex = 0;
@@ -268,7 +267,7 @@ namespace OthelloWPF
         private void ClickSave(object sender, RoutedEventArgs e)
         {
             //oGame.GameSave();
-            OthelloGame.GameSave();
+            OthelloGameAdapter.GameSave();
             Refresh();
         }
 
@@ -280,7 +279,7 @@ namespace OthelloWPF
         private void ClickUndo(object sender, RoutedEventArgs e)
         {
             //oGame.GameUndo();
-            OthelloGame.GameUndo();
+            OthelloGameAdapter.GameUndo();
             Refresh();
         }
 
@@ -292,7 +291,7 @@ namespace OthelloWPF
         private void ClickRedo(object sender, RoutedEventArgs e)
         {
             //oGame.GameRedo();
-            OthelloGame.GameRedo();
+            OthelloGameAdapter.GameRedo();
             Refresh();
         }
 
@@ -312,11 +311,7 @@ namespace OthelloWPF
                GameY));
             
             //make a move
-            //oFlipList = oGame.GameMakeMove(GameX, GameY, oCurrentPlayer);
-            oFlipList = OthelloGame.GameMakeMove(GameX, GameY, oCurrentPlayer, out oIsInvalidMove);
-
-            //oGame.DebugGameBoard();
-            //oIsInvalidMove = oFlipList.Count() < 1 ? true : false;
+            oFlipList = OthelloGameAdapter.GameMakeMove(GameX, GameY, oCurrentPlayer, out oIsInvalidMove);
 
             Refresh();           
         }
@@ -366,10 +361,8 @@ namespace OthelloWPF
                     break;
             }
 
-            if (OthelloGame != null)
-                OthelloGame.GameSetDifficultyMode(DifficultyMode);
-                //oGame.GameDifficultyMode = DifficultyMode;
-
+            if (OthelloGameAdapter != null)
+                OthelloGameAdapter.GameSetDifficultyMode(DifficultyMode);
         }
 
         #endregion
@@ -389,13 +382,13 @@ namespace OthelloWPF
         private void UpdateGame()
         {
             //oCurrentPlayer = oGame.GameUpdatePlayer();
-            oCurrentPlayer = OthelloGame.GameUpdatePlayer();
+            oCurrentPlayer = OthelloGameAdapter.GameUpdatePlayer();
 
             //oTurn = oGame.GameUpdateTurn();
-            oTurn = OthelloGame.GameUpdateTurn();
+            oTurn = OthelloGameAdapter.GameUpdateTurn();
 
             //oBoard = (OthelloToken[,])oGame.GameGetBoardData(OthelloBoardType.TokenMatrix);
-            oBoard = OthelloGame.GameGetBoardData();
+            oBoard = OthelloGameAdapter.GameGetBoardData();
         }
 
         #endregion
@@ -492,20 +485,20 @@ namespace OthelloWPF
         private void RenderGameMetaData()
         {
             //update status text
-            StatusText1.Text = OthelloGame.GameGetPlayerWhite().PlayerName + " Score: " + OthelloGame.GameGetScore(OthelloGame.GameGetPlayerWhite());
-            StatusText2.Text = OthelloGame.GameGetPlayerBlack().PlayerName + " Score: " + OthelloGame.GameGetScore(OthelloGame.GameGetPlayerBlack());
+            StatusText1.Text = OthelloGameAdapter.GameGetPlayerWhite().PlayerName + " Score: " + OthelloGameAdapter.GameGetScore(OthelloGameAdapter.GameGetPlayerWhite());
+            StatusText2.Text = OthelloGameAdapter.GameGetPlayerBlack().PlayerName + " Score: " + OthelloGameAdapter.GameGetScore(OthelloGameAdapter.GameGetPlayerBlack());
             StatusText3.Text = string.Format("Turn = {0}", oTurn);
             StatusText4.Text = string.Format("Current Player = {0}", oCurrentPlayer);
             StatusText5.Text = oIsInvalidMove ? oInvalidMove : "";
-            StatusText6.Text = OthelloGame.GameIsEndGame() ? "Game Ended!" : "";
+            StatusText6.Text = OthelloGameAdapter.GameIsEndGame() ? "Game Ended!" : "";
 
             //update message box text
             MessageBox.AppendText(string.Format("Turn = {0}", oTurn) + "\n");
             MessageBox.AppendText(string.Format("Current Player = {0}", oCurrentPlayer) + "\n");
 
             //render othello token in status bar
-            RenderOthelloToken(OthelloGame.GameGetPlayerWhite().GetPlayerOthelloToken(), PlayerACanvas.PointToScreen(new Point(2, 2)), 10, 10);
-            RenderOthelloToken(OthelloGame.GameGetPlayerBlack().GetPlayerOthelloToken(), PlayerBCanvas.PointToScreen(new Point(2, 2)), 10, 10);
+            RenderOthelloToken(OthelloGameAdapter.GameGetPlayerWhite().GetPlayerOthelloToken(), PlayerACanvas.PointToScreen(new Point(2, 2)), 10, 10);
+            RenderOthelloToken(OthelloGameAdapter.GameGetPlayerBlack().GetPlayerOthelloToken(), PlayerBCanvas.PointToScreen(new Point(2, 2)), 10, 10);
         }
 
         //TODO make beautiful UI
@@ -542,12 +535,9 @@ namespace OthelloWPF
             if (IsAnimating.Count == 0)
             {
                 //Computer moves after human moves animation
-                //if (oGame.GameMode == GameMode.HumanVSComputer && 
-                //    !oGame.GameIsEndGame() &&
-                //    oGame.GameUpdatePlayer().PlayerKind == oGame.AIPlayer.PlayerKind)
-                if(OthelloGame.GameGetMode() == GameMode.HumanVSComputer &&
-                    !OthelloGame.GameIsEndGame() &&
-                    OthelloGame.GameUpdatePlayer().PlayerKind == OthelloGame.GameGetAiPlayer().AiPlayer.PlayerKind)
+                if(OthelloGameAdapter.GameGetMode() == GameMode.HumanVSComputer &&
+                    !OthelloGameAdapter.GameIsEndGame() &&
+                    OthelloGameAdapter.GameUpdatePlayer().PlayerKind == OthelloGameAdapter.GameGetAiPlayer().AiPlayer.PlayerKind)
                 {
                     var slowTask = Task.Factory.StartNew(() =>ComputerMoves());
 
@@ -577,10 +567,7 @@ namespace OthelloWPF
         private void ComputerMoves()
         {          
             //oFlipList = oGame.GameAIMakeMove();
-            oFlipList = OthelloGame.GameAIMakeMove();
-
-            //TODO : this statement necessary?
-            //oIsInvalidMove = oFlipList.Count() < 1 ? true : false;
+            oFlipList = OthelloGameAdapter.GameAIMakeMove();
         }
 
         #endregion
