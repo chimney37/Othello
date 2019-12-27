@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using NUnit.Framework;
-
+using System.Linq;
 
 namespace Othello
 {
@@ -750,36 +750,36 @@ namespace Othello
             Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
         }
 
-
-        #region REMOVED
-        //default Save / Load
-        /*
+        // Check Saves are idempotent - saving more than once will result in same file size
         [TestCase]
-        public static void CheckDefaultSaveLoad()
+        public static void CheckMultipleSaves()
         {
-            var oPlayerA = new OthelloPlayer(OthelloPlayerKind.White, "PlayerA");
-            var oPlayerB = new OthelloPlayer(OthelloPlayerKind.Black, "PlayerB");
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
+            var target_multiple_saves = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
-            OthelloPlayer player = target.GameUpdatePlayer();
+            OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
-            target.GameSave();
+            var customdir = @"./OthelloSaveGamesTest";
+            target.GameSave(false, customdir);
+            long Expect = new FileInfo(OthelloIO.GetFileSavePath(customdir, target.SaveFileName)).Length;
 
-            target.GameCreateNew(oPlayerA, oPlayerB, oPlayerB);
-            target.GameLoad();
+            player = target_multiple_saves.GameUpdatePlayer();
+            target_multiple_saves.GameMakeMove(5, 4, player);
 
-            string Expect = "xxxxxxxx" +
-                            "xxxxxxxx" +
-                            "xxxxxxxx" +
-                            "xxxbwxxx" +
-                            "xxxwwwxx" +
-                            "xxxxxxxx" +
-                            "xxxxxxxx" +
-                            "xxxxxxxx";
+            for (int i = 0; i < 100; i++)
+            {
+                target_multiple_saves.GameSave();
+            }
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
-        }*/
-        #endregion
+            long target_size = new FileInfo(OthelloIO.GetFileSavePath(target_multiple_saves.DefaultSaveDir, target_multiple_saves.SaveFileName)).Length;
+
+            Assert.AreEqual(Expect, target_size);
+
+            Directory.Delete(customdir, true);
+            Directory.Delete(target_multiple_saves.DefaultSaveDir, true);
+        }
 
         // for Custom path Load Undo
         [TestCase]
@@ -925,6 +925,27 @@ namespace Othello
                         "xxxxxxxx";
 
             Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+        }
+
+        // for JSON serialization and deserialization
+        [TestCase]
+        public static void CheckJSONSerializationAndDeserialization()
+        {
+            var oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "PlayerA");
+            var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
+            var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
+
+            //the first player is White and makes a move
+            OthelloGamePlayer player = target.GameUpdatePlayer();
+            target.GameMakeMove(5, 4, player);
+
+            string json = target.GameGetJSON();
+            OthelloGame game = (OthelloGame)target.GameGetGameFromJSON(json);
+            player = game.GameUpdatePlayer();
+
+            //the player should now be Black
+            var Expect = OthelloPlayerKind.Black;
+            Assert.AreEqual(Expect, player.PlayerKind);
         }
 
         //Score Check

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json;
 
 namespace Othello
 {
@@ -49,6 +46,36 @@ namespace Othello
             // Serializer and write
             bf.Serialize(fs, obj);
             fs.Close();
+        }
+
+        public static string GetBase64String(object obj)
+        {
+            using (MemoryStream m = new MemoryStream())
+            {
+                new BinaryFormatter().Serialize(m, obj);
+                return Convert.ToBase64String(m.ToArray());
+            }
+        }
+
+        public static object GetObjectFromBase64String(string b64str)
+        {
+            byte[] bytes = Convert.FromBase64String(b64str);
+            using (MemoryStream m = new MemoryStream(bytes, 0, bytes.Length))
+            {
+                m.Write(bytes, 0, bytes.Length);
+                m.Position = 0;
+                return new BinaryFormatter().Deserialize(m);
+            }
+        }
+
+        public static string ConvertBase64StringToJSON(string b64str)
+        {
+            return JsonConvert.SerializeObject(b64str);
+        }
+
+        public static string ConvertJSONToBase64String(string json)
+        {
+            return JsonConvert.DeserializeObject<string>(json);
         }
     }
 }

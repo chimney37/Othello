@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+
 
 namespace Othello
 {
@@ -32,8 +32,8 @@ namespace Othello
         private const string fileName = "Save" + "Game" + ".dat";
         private const string fileNameAIConfig = "AIConfig.txt";
 
-        string defaultSaveDir;
-        //string filepathGame;
+        public string SaveFileName {get;set;}
+        public string DefaultSaveDir { get; set; }
 
         private IEnumerable<OthelloGameAIConfig> AIConfigs = null;
 
@@ -41,15 +41,12 @@ namespace Othello
         private Stack<OthelloState> statesUndoCollection;
         private Stack<OthelloState> statesRedoCollection;
 
-        //[NonSerializedAttribute]
-        //private OthelloLogger Logger;
-
         public OthelloGameAIFactory Factory;
         public OthelloGamePlayer PlayerWhite;
         public OthelloGamePlayer PlayerBlack;
         public OthelloGameAiSystem AIPlayer;
 
-        //AI best moved tracked here after making an AI Move
+        //AI best move tracked here after making an AI Move
         public OthelloToken AIMove { get;set; }
 
         public int CurrentTurn { get { return CurrentOthelloState.Turn; } }
@@ -79,7 +76,9 @@ namespace Othello
             //create game object to serialize all
             gameObjectsToSerialized = new ArrayList();
 
-            defaultSaveDir = OthelloIO.CreateDefaultDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory));
+            DefaultSaveDir = Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory);
+
+            SaveFileName = fileName;
         }
 
         /// <summary>
@@ -429,7 +428,7 @@ namespace Othello
 
         #endregion
 
-        #region SAVE_AND_LOAD      
+        #region SAVE_AND_LOAD
         //Save game
         public void GameSave(bool UseDefaultpath = true, string pathDir = @".\")
         {
@@ -456,6 +455,10 @@ namespace Othello
             {
                 throw new Exception(string.Format("OthelloIO.SaveToBinaryFile [Exception] : Exception Message = {0}", e.Message));
             }
+            finally
+            {
+                gameObjectsToSerialized.Clear();
+            }
         }
 
         //Load game                                                                                                                                                                                                                              
@@ -463,8 +466,8 @@ namespace Othello
         {
             try
             {
-                defaultSaveDir = UseDefaultpath ? this.defaultSaveDir: OthelloIO.CreateDefaultDirectory(pathDir);
-                string fullpath = OthelloIO.GetFileSavePath(defaultSaveDir, fileName);
+                DefaultSaveDir = UseDefaultpath ? this.DefaultSaveDir: OthelloIO.CreateDefaultDirectory(pathDir);
+                string fullpath = OthelloIO.GetFileSavePath(DefaultSaveDir, fileName);
                 this.gameObjectsToSerialized = (ArrayList)OthelloIO.LoadFromBinaryFile(fullpath);
 
                 this.PlayerWhite = (OthelloGamePlayer)this.gameObjectsToSerialized[0];
@@ -479,7 +482,67 @@ namespace Othello
             {
                 throw new Exception(string.Format("OthelloIO.LoadFromBinaryFile : FileName = {0}", e.FileName), e);
             }
+            finally
+            {
+                gameObjectsToSerialized.Clear();
+            }
         }
+        #endregion
+
+        #region EXPERIMENTAL SERIALIZATION TO JSON
+        public string GameGetJSON()
+        {
+            gameObjectsToSerialized.Add(this.PlayerWhite);
+            gameObjectsToSerialized.Add(this.PlayerBlack);
+            gameObjectsToSerialized.Add(this.CurrentOthelloState);
+            gameObjectsToSerialized.Add(this.statesUndoCollection);
+            gameObjectsToSerialized.Add(this.statesRedoCollection);
+            gameObjectsToSerialized.Add(this.GameMode);
+            gameObjectsToSerialized.Add(this.AIPlayer);
+
+            try
+            {
+                var gamebase64Str = OthelloIO.GetBase64String(gameObjectsToSerialized);
+                return OthelloIO.ConvertBase64StringToJSON(gamebase64Str);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format("OthelloGame.GameGetJSON : something went wrong: {0}", e.ToString()));
+            }
+            finally
+            {
+                gameObjectsToSerialized.Clear();
+            }
+        }
+
+        public OthelloGame GameGetGameFromJSON(string json)
+        {
+            try
+            {
+                var b64str = OthelloIO.ConvertJSONToBase64String(json);
+                this.gameObjectsToSerialized = (ArrayList)OthelloIO.GetObjectFromBase64String(b64str);
+
+                this.PlayerWhite = (OthelloGamePlayer)this.gameObjectsToSerialized[0];
+                this.PlayerBlack = (OthelloGamePlayer)this.gameObjectsToSerialized[1];
+                this.CurrentOthelloState = (OthelloState)this.gameObjectsToSerialized[2];
+                this.statesUndoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[3];
+                this.statesRedoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[4];
+                this.GameMode = (GameMode)this.gameObjectsToSerialized[5];
+                this.AIPlayer = (OthelloGameAiSystem)this.gameObjectsToSerialized[6];
+
+                return this;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format("OthelloGame.GameGetGameFromJSON : something went wrong: {0}", e.ToString()));
+            }
+            finally
+            {
+                gameObjectsToSerialized.Clear();
+            }
+
+        }
+
         #endregion
 
         #region HELPER FUNCTIONS

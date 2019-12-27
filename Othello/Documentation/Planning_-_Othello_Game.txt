@@ -2,7 +2,49 @@
 
 * OthelloServerless: uses AWS services, mainly Lambda to support mulitple instances of A.I games for multiple players, and DynamoDB to store game states.
 
+* Prerequisites
+	 # Install AWS SDK for .NET
+	 # Install AWS Tookit for Visual Studio
 
+	 #Understand how AWS serverless applications work under the hood
+	     # Read https://aws.amazon.com/blogs/developer/aws-serverless-applications-in-visual-studio/
+		 # Set up IAM Users and get credentials
+		  * https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/getting-your-credentials.html
+ 
+		 # Apply policies with permissions, in particular lambda full access, dynamoDB full access using the default policies. And the following applied on specific resources.
+						(applied to "Resource": "arn:aws:iam::*:user/${aws:username}")
+						"iam:GetUser", 
+						"iam:CreateAccessKey", 
+						"iam:ListAccessKeys", 
+
+						("Resource": "*")
+						"iam:CreateAccessKey"
+						"iam:DeleteAccessKey",
+						"iam:GetAccessKeyLastUsed",
+						"iam:GetUser",
+						"iam:ListAccessKeys",
+						"iam:UpdateAccessKey",
+						"iam:GetRole",
+						"iam:CreateRole",
+						"iam:DeleteRole",
+						"iam:AttachRolePolicy",
+						"iam:DetachRolePolicy"
+						"cloudformation:ListStacks",
+						"cloudformation:CreateStack",
+						"cloudformation:UpdateStack",
+						"cloudformation:DeleteStack",
+						"cloudformation:CreateChangeSet",
+						"cloudformation:DescribeChangeSet",
+						"cloudformation:ExecuteChangeSet",
+						"cloudformation:DescribeStacks",
+						"cloudformation:DescribeStackEvents",
+						"apigateway:*"
+
+		# Deploy by publishing to AWS using Visual Studio context menu under serverless project
+
+	# Use tool like Postman (Windows App) to issue HTTP requests. For exact request definitions, read the Cloudformation serverless.template.
+	# Debug using AWS Serverless tests. They can be used to debug line by line through remote debugging
+	# Use tools like API Gateway Tests to see what is wrong..for e.g. "internal error" can be caused by, e.g. writing logs when lambda only allows readonly.
 
 
 
