@@ -163,5 +163,3 @@ OthelloSaveGames/
 /.vs/OthelloWPF/v15/Server/sqlite3
 /.vs/OthelloWPF/v16/Server/sqlite3/db.lock
 /.vs/OthelloWPF/v16/Server/sqlite3
-/OthelloAWSServerless.Tests
-/OthelloAWSServerless
