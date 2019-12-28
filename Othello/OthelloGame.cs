@@ -127,7 +127,7 @@ namespace Othello
         {
             List<OthelloToken> flipTokens = new List<OthelloToken>();
 
-            //check if move is valid. Note: Past comments indicate CreateNextState may included repetition with IsValidMove.
+            //Note: Past comments indicate CreateNextState may included repetition with IsValidMove.
             if (!CurrentOthelloState.IsValidMove(x, y, player))
             {
 #if TRACE
@@ -155,29 +155,18 @@ namespace Othello
         /// make an AI move given an AI player mode
         /// </summary>
         /// <returns></returns>
-        public List<OthelloToken> GameAIMakeMove()
+        public List<OthelloToken> GameAIMakeMove(int MilliSecondsTimeLimit = 10000)
         {
-            //http://msdn.microsoft.com/en-us/library/1t3y8s4s.aspx
-            //nullable types 
             int? depth = null;
             float? alpha = null;
             float? beta = null;
 
             List<OthelloToken> FlipList = new List<OthelloToken>();
 
-            AIPlayer.Initialize(this, this.AIPlayer.AiPlayer,this.GetOpposingCurrentPlayer());
+            AIPlayer.Initialize(this, this.AIPlayer.AiPlayer,this.GetOpposingCurrentPlayer(), MilliSecondsTimeLimit);
 
             this.GameUpdateTurn();
-
-            //load AI config if not already : when game loads from save file, this is required
-            if (AIConfigs == null)
-                LoadAiConfig();
-
-            ObtainTurnAIVariablesFromConfig(this.GameDifficultyMode, this.CurrentTurn,ref depth, ref alpha, ref beta);
-
-#if TRACE
-            Trace.WriteLine(string.Format("AIConfigs: @Turn(beforemove)={0}, depth={1}, alpha={2}, beta={3}, difficulty={4}", this.CurrentTurn, depth, alpha, beta, GameDifficultyMode));
-#endif
+            this.ObtainTurnAIVariablesFromConfig(this.GameDifficultyMode, this.CurrentTurn,ref depth, ref alpha, ref beta);
 
             AIMove = AIPlayer.GetBestMove(AIPlayer.AiPlayer, (int)depth, (float)alpha, (float)beta);
 
@@ -390,15 +379,9 @@ namespace Othello
         //Save game
         public void GameSave(bool UseDefaultpath = true, string pathDir = @".\")
         {
-            gameObjectsToSerialized.Add(this.PlayerWhite);
-            gameObjectsToSerialized.Add(this.PlayerBlack);
-            gameObjectsToSerialized.Add(this.CurrentOthelloState);
-            gameObjectsToSerialized.Add(this.statesUndoCollection);
-            gameObjectsToSerialized.Add(this.statesRedoCollection);
-            gameObjectsToSerialized.Add(this.GameMode);
-            gameObjectsToSerialized.Add(this.AIPlayer);
+            AddGameObjectsToObjectsArrayList();
 
-            string strDefaultSaveDir = UseDefaultpath ? 
+            string strDefaultSaveDir = UseDefaultpath ?
                 OthelloIO.CreateDefaultDirectory(Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory)) :
                 OthelloIO.CreateDefaultDirectory(pathDir);
 
@@ -421,39 +404,29 @@ namespace Othello
         {
             try
             {
-                DefaultSaveDir = UseDefaultpath ? this.DefaultSaveDir: OthelloIO.CreateDefaultDirectory(pathDir);
+                DefaultSaveDir = UseDefaultpath ? this.DefaultSaveDir : OthelloIO.CreateDefaultDirectory(pathDir);
                 string fullpath = OthelloIO.GetFileSavePath(DefaultSaveDir, fileName);
+
                 this.gameObjectsToSerialized = (ArrayList)OthelloIO.LoadFromBinaryFile(fullpath);
 
-                this.PlayerWhite = (OthelloGamePlayer)this.gameObjectsToSerialized[0];
-                this.PlayerBlack = (OthelloGamePlayer)this.gameObjectsToSerialized[1];
-                this.CurrentOthelloState = (OthelloState)this.gameObjectsToSerialized[2];
-                this.statesUndoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[3];
-                this.statesRedoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[4];
-                this.GameMode = (GameMode)this.gameObjectsToSerialized[5];
-                this.AIPlayer = (OthelloGameAiSystem) this.gameObjectsToSerialized[6];
+                GetGameObjectsFromGameObjectArrayList();
             }
-            catch (FileNotFoundException e)
+            catch (Exception e)
             {
-                throw new Exception(string.Format("OthelloIO.LoadFromBinaryFile : FileName = {0}", e.FileName), e);
+                throw new Exception(string.Format("OthelloIO.LoadFromBinaryFile : {0}", e.ToString()));
             }
             finally
             {
                 gameObjectsToSerialized.Clear();
             }
         }
+
         #endregion
 
         #region JSON SERIALIZATION
         public string GameGetJSON()
         {
-            gameObjectsToSerialized.Add(this.PlayerWhite);
-            gameObjectsToSerialized.Add(this.PlayerBlack);
-            gameObjectsToSerialized.Add(this.CurrentOthelloState);
-            gameObjectsToSerialized.Add(this.statesUndoCollection);
-            gameObjectsToSerialized.Add(this.statesRedoCollection);
-            gameObjectsToSerialized.Add(this.GameMode);
-            gameObjectsToSerialized.Add(this.AIPlayer);
+            AddGameObjectsToObjectsArrayList();
 
             try
             {
@@ -477,13 +450,7 @@ namespace Othello
                 var b64str = OthelloIO.ConvertJSONToBase64String(json);
                 this.gameObjectsToSerialized = (ArrayList)OthelloIO.GetObjectFromBase64String(b64str);
 
-                this.PlayerWhite = (OthelloGamePlayer)this.gameObjectsToSerialized[0];
-                this.PlayerBlack = (OthelloGamePlayer)this.gameObjectsToSerialized[1];
-                this.CurrentOthelloState = (OthelloState)this.gameObjectsToSerialized[2];
-                this.statesUndoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[3];
-                this.statesRedoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[4];
-                this.GameMode = (GameMode)this.gameObjectsToSerialized[5];
-                this.AIPlayer = (OthelloGameAiSystem)this.gameObjectsToSerialized[6];
+                GetGameObjectsFromGameObjectArrayList();
 
                 return this;
             }
@@ -592,6 +559,38 @@ namespace Othello
         {
             return CurrentOthelloState;
         }
+
+        /// <summary>
+        /// Used in Game Saving and Game to JSON serialization
+        /// </summary>
+        private void AddGameObjectsToObjectsArrayList()
+        {
+            gameObjectsToSerialized.Add(this.PlayerWhite);
+            gameObjectsToSerialized.Add(this.PlayerBlack);
+            gameObjectsToSerialized.Add(this.CurrentOthelloState);
+            gameObjectsToSerialized.Add(this.statesUndoCollection);
+            gameObjectsToSerialized.Add(this.statesRedoCollection);
+            gameObjectsToSerialized.Add(this.GameMode);
+            gameObjectsToSerialized.Add(this.AIPlayer);
+            gameObjectsToSerialized.Add(this.GameDifficultyMode);
+        }
+
+        /// <summary>
+        /// Inverse of AddGameObjectsToObjectsArrayList
+        /// </summary>
+        private void GetGameObjectsFromGameObjectArrayList()
+        {
+            int i = 0;
+            this.PlayerWhite = (OthelloGamePlayer)this.gameObjectsToSerialized[i++];
+            this.PlayerBlack = (OthelloGamePlayer)this.gameObjectsToSerialized[i++];
+            this.CurrentOthelloState = (OthelloState)this.gameObjectsToSerialized[i++];
+            this.statesUndoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[i++];
+            this.statesRedoCollection = (Stack<OthelloState>)this.gameObjectsToSerialized[i++];
+            this.GameMode = (GameMode)this.gameObjectsToSerialized[i++];
+            this.AIPlayer = (OthelloGameAiSystem)this.gameObjectsToSerialized[i++];
+            this.GameDifficultyMode = (GameDifficultyMode)this.gameObjectsToSerialized[i++];
+        }
+
 
 
         /// <summary>

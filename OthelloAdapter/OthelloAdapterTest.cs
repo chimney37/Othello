@@ -75,8 +75,8 @@ namespace OthelloAdapter
             target.GetGameFromJSON(json);
             var player = target.GameUpdatePlayer();
 
-            var Expect = OthelloPlayerKind.White;
-            Assert.AreEqual(Expect, player.PlayerKind);
+            var actual = OthelloPlayerKind.White;
+            Assert.AreEqual(player.PlayerKind, actual);
         }
 
         [TestCase]
@@ -89,8 +89,8 @@ namespace OthelloAdapter
             var loadtarget = new OthelloAdapter();
             loadtarget.GameLoad();
             var player = loadtarget.GameUpdatePlayer();
-            var Expect = OthelloPlayerKind.White;
-            Assert.AreEqual(Expect, player.PlayerKind);
+            var actual = OthelloPlayerKind.White;
+            Assert.AreEqual(player.PlayerKind, actual);
         }
 
 
@@ -99,6 +99,20 @@ namespace OthelloAdapter
         {
             var target = new OthelloAdapter();
 
+        }
+
+        [TestCase]
+        public static void CheckAISaveLoadGame()
+        {
+            var savetarget = new OthelloAdapter();
+            savetarget.GameCreateNewHumanVSAI(playerAName, playerBName, OthelloPlayerKind.White);
+            savetarget.GameSetDifficultyMode(GameDifficultyMode.Hard);
+            savetarget.GameSave();
+
+            var loadtarget = new OthelloAdapter();
+            loadtarget.GameLoad();
+            var actual = loadtarget.GameGetDifficultyMode();
+            Assert.AreEqual(GameDifficultyMode.Hard, actual);
         }
     }
 }

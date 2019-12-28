@@ -94,7 +94,7 @@
         <Button x:Name="NewGame_AI" Content="New (A.I)" HorizontalAlignment="Left" Height="23" VerticalAlignment="Top" Width="70" Click="ClickNewAIGame" Margin="40,10,0,0"/>
         <CheckBox x:Name="HumanWhiteCheck" Content="Human(White)" HorizontalAlignment="Left" Height="23" Margin="371,15,0,0" VerticalAlignment="Top" Click="WhiteHumanClick" Width="105"/>
         <ComboBox x:Name="Difficulty_ComboBox" Canvas.Left="371" Canvas.Top="38" SelectedIndex="0" Margin="470,11,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" Height="22" SelectionChanged="Difficulty_Changed" Loaded="Difficulty_ComboBox_Loaded"/>
-        <TextBox x:Name="MessageBox" Canvas.Left="371" TextWrapping="Wrap" Canvas.Top="39" Width="183" Margin="371,40,56,85" Cursor="ScrollNS" VerticalScrollBarVisibility="Auto" TextChanged="MessageBox_TextChanged"/>
+        <TextBox x:Name="MessageBox" Canvas.Left="371" TextWrapping="Wrap" Canvas.Top="39" Margin="371,40,20,85" Cursor="ScrollNS" VerticalScrollBarVisibility="Auto" TextChanged="MessageBox_TextChanged"/>
         <ProgressBar x:Name="ComputeProgressBar" HorizontalAlignment="Left" Height="20" Margin="43,413,0,0" VerticalAlignment="Top" Width="380"/>
         <StatusBar x:Name="statusBarOthelloPlayerA" HorizontalAlignment="Left" Height="24" Margin="43,363,0,0" VerticalAlignment="Top" Width="200" Foreground="{x:Null}" Background="{x:Null}">
             <StatusBarItem Grid.Column="1">

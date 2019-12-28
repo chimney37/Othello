@@ -233,11 +233,8 @@ namespace OthelloWPF
         /// <param name="e"></param>
         private void ClickLoad(object sender, RoutedEventArgs e)
         {
-            //oGame.GameLoad();
             OthelloGameAdapter.GameLoad();
 
-            //TODO maybe design issue: OthelloGame does not support the loading of difficulty modes
-            //switch(oGame.GameDifficultyMode)
             switch(OthelloGameAdapter.GameGetDifficultyMode())
             {
                 case GameDifficultyMode.Easy:
