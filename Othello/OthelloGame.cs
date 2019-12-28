@@ -65,20 +65,8 @@ namespace Othello
         /// </summary>
         public OthelloGame()
         {
-            statesUndoCollection = new Stack<OthelloState>();
-            statesRedoCollection = new Stack<OthelloState>();
-
-            //instantiate factory to produce AI
-            Factory = new OthelloGameAIFactory();
-
-            GameMode = GameMode.HumanVSHuman;
-
-            //create game object to serialize all
-            gameObjectsToSerialized = new ArrayList();
-
-            DefaultSaveDir = Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory);
-
-            SaveFileName = fileName;
+            InitializeOthelloGameVariables();
+            InitializeOthelloGameWithAI();
         }
 
         /// <summary>
@@ -93,21 +81,8 @@ namespace Othello
         public OthelloGame(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate = false, bool IsAIMode = false, bool IsPlayerBlackAI = true, GameDifficultyMode difficulty = GameDifficultyMode.Default)
             : this()
         {
-            GameCreateNew(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate);
-
-            //set up AI player type
-            AIPlayer = (OthelloGameAiSystem)Factory.Create(this, 
-                    IsPlayerBlackAI ? oPlayerBlack : oPlayerWhite, 
-                    IsPlayerBlackAI ? oPlayerWhite : oPlayerBlack);
-
-            if (IsAIMode)
-            {
-                //load AI difficulty config
-                GameDifficultyMode = difficulty;
-                LoadAiConfig();
-            }
-
-            GameMode = IsAIMode ? GameMode.HumanVSComputer : GameMode.HumanVSHuman;            
+            GameInitializeWithAI(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate, IsAIMode, IsPlayerBlackAI, difficulty);
+            GameMode = IsAIMode ? GameMode.HumanVSComputer : GameMode.HumanVSHuman;
         }
         #endregion
 
@@ -432,9 +407,6 @@ namespace Othello
         //Save game
         public void GameSave(bool UseDefaultpath = true, string pathDir = @".\")
         {
-
-            //GetSaveFilePaths(UseDefaultpath, pathDir, out filepathPlayerW, out filepathPlayerB, out filepathCurrState, out filepathUndo, out filepathRedo, out filepathGMode, out filepathAI);
-
             gameObjectsToSerialized.Add(this.PlayerWhite);
             gameObjectsToSerialized.Add(this.PlayerBlack);
             gameObjectsToSerialized.Add(this.CurrentOthelloState);
@@ -489,7 +461,7 @@ namespace Othello
         }
         #endregion
 
-        #region EXPERIMENTAL SERIALIZATION TO JSON
+        #region JSON SERIALIZATION
         public string GameGetJSON()
         {
             gameObjectsToSerialized.Add(this.PlayerWhite);
@@ -636,6 +608,74 @@ namespace Othello
         OthelloState OthelloGameAiSystem.IOthelloGameAiAccessor.GetCurrentState()
         {
             return CurrentOthelloState;
+        }
+
+
+        /// <summary>
+        /// Intializes game variables at the highest level
+        /// </summary>
+        private void InitializeOthelloGameVariables()
+        {
+            statesUndoCollection = new Stack<OthelloState>();
+            statesRedoCollection = new Stack<OthelloState>();
+
+            Factory = new OthelloGameAIFactory();
+
+            GameMode = GameMode.HumanVSHuman;
+
+            gameObjectsToSerialized = new ArrayList();
+
+            DefaultSaveDir = Path.Combine(Directory.GetCurrentDirectory(), fileNameSaveDirectory);
+
+            SaveFileName = fileName;
+        }
+
+        /// <summary>
+        /// Initialize Othello Core Game with AI at the highest level
+        /// </summary>
+        private void InitializeOthelloGameWithAI()
+        {
+            OthelloGamePlayer playerWhite = new OthelloGamePlayer(OthelloPlayerKind.White, "default");
+            OthelloGamePlayer playerBlack = new OthelloGamePlayer(OthelloPlayerKind.Black, "default");
+
+            GameInitializeWithAI(playerWhite, playerBlack, playerWhite, false, true, true, GameDifficultyMode.Default);
+        }
+
+        /// <summary>
+        /// Initialize Game with AI at the highest level
+        /// </summary>
+        /// <param name="oPlayerWhite"></param>
+        /// <param name="oPlayerBlack"></param>
+        /// <param name="firstPlayer"></param>
+        /// <param name="IsAlternate"></param>
+        /// <param name="IsAIMode"></param>
+        /// <param name="IsPlayerBlackAI"></param>
+        /// <param name="difficulty"></param>
+        private void GameInitializeWithAI(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate, bool IsAIMode, bool IsPlayerBlackAI, GameDifficultyMode difficulty)
+        {
+            GameCreateNew(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate);
+            GameSetupAI(oPlayerWhite, oPlayerBlack, IsAIMode, IsPlayerBlackAI, difficulty);
+        }
+        /// <summary>
+        /// Initialize all AI aspects
+        /// <param name="oPlayerWhite"></param>
+        /// <param name="oPlayerBlack"></param>
+        /// <param name="IsAIMode"></param>
+        /// <param name="IsPlayerBlackAI"></param>
+        /// <param name="difficulty"></param>
+        private void GameSetupAI(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, bool IsAIMode, bool IsPlayerBlackAI, GameDifficultyMode difficulty)
+        {
+            //set up AI player type
+            AIPlayer = (OthelloGameAiSystem)Factory.Create(this,
+                    IsPlayerBlackAI ? oPlayerBlack : oPlayerWhite,
+                    IsPlayerBlackAI ? oPlayerWhite : oPlayerBlack);
+
+            if (IsAIMode)
+            {
+                //load AI difficulty config
+                GameDifficultyMode = difficulty;
+                LoadAiConfig();
+            }
         }
 
         /// <summary>
