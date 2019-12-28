@@ -20,6 +20,7 @@ namespace Othello
         OthelloState _currentState;
         public OthelloGamePlayer HumanPlayer {get;set;}
         public OthelloGamePlayer AiPlayer { get; set; }
+        public int MillisecondsTimeLimit { get; set; }
 
         private List<OthelloToken> _maxPivotHeuristics;
         private List<OthelloToken> _majorPivotsHeuristics;
@@ -45,10 +46,10 @@ namespace Othello
         /// <param name="humanPlayer"></param>
         internal OthelloGameAiSystem(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer)
         {
-            Initialize(oGame, aIplayer, humanPlayer);
+            Initialize(oGame, aIplayer, humanPlayer, 1000);
         }
 
-        public void Initialize(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer)
+        public void Initialize(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer, int milliSecTimeLimit = 1000)
         {
             _currentState = (OthelloState)((IOthelloGameAiAccessor)oGame).GetCurrentState().Clone();
             this.HumanPlayer = humanPlayer;
@@ -59,6 +60,8 @@ namespace Othello
 
             AddHeuristics(_maxPivotHeuristics, _maxPivots);
             AddHeuristics(_majorPivotsHeuristics, _majorPivots);
+
+            MillisecondsTimeLimit = milliSecTimeLimit;
         }
 
         private void AddHeuristics(List<OthelloToken> list, string[] values)
@@ -122,6 +125,19 @@ namespace Othello
 
         /// <summary>
         /// GetMoves a list of evaluated moves given a current player
+        /// 
+        /// Multi-threaded approach for speed: https://stackoverflow.com/questions/14720014/immediately-exit-a-parallel-for-loop-in-c-sharp. 
+        /// For example, the first move (3,5) calculates 19539 moves for a particular depth. 
+        /// For particular machine, in the single threaded implementation, this took 4170msec compared to multi-threaded 2556msec.
+        /// Similarly, 408408 moves for a particular state (single threaded : 80612msec, multithreaded : 53033msec)
+        /// Not robustly tested, it seems to give around ~61%,65% of the original time, approx a 130%+ speed increase even for a lower bound. 
+        /// Number of moves calculation and move score has been made local variables (thread Local variables as according to MSDN documentation:
+        /// http://msdn.microsoft.com/en-us/library/dd460713(v=vs.110).aspx
+        /// in this case the local variables and its assignments are thread safe because each local variable is a unique memory location.
+        /// scoretuple is a local variable that is thread-safe.
+        /// assignment to totalmoves is not thread safe. adding to a list is also not thread-safe. These are locked.
+        /// removing the locks as much as possible is especially performance improving in large processing (Alpha-Beta) generating many moves.
+        /// making local variables inside of Parallel instead of outside had basically improved speed by 8% observed in one case.
         /// </summary>
         /// <param name="currentPlayer"></param>
         /// <param name="remainDepth"></param>
@@ -130,60 +146,25 @@ namespace Othello
         /// <returns></returns>
         /// 
         /// TODO: optimize using Iterative Deepening Depth-First-Search (IDDFS) as part of AlphaBeta.
-        // TODO: expose time limit variable to the class so we can set a limit when instantiating the game
+        /// TODO: implement compare current state to see if this can be loaded from a previous computation
         [Time]
         private List<Tuple<OthelloToken, float>> GetMoves(OthelloGamePlayer currentPlayer, int remainDepth, float alpha =0f, float beta = 0.51f)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             int totalmoves = 0;
-            List<OthelloToken> allowedMoves = _currentState.GetAllowedMoves(currentPlayer);
-     
+            List<OthelloToken> allowedMoves = _currentState.GetAllowedMoves(currentPlayer); 
             List<Tuple<OthelloToken, float>> oCalculatedMoves = new List<Tuple<OthelloToken, float>>();
 
-            //since t is each a distinct and independent search, multithread this, but keep the original single threaded code for baseline purpose.
-
-#if (SINGLE_THREAD_SEARCH)
-           Trace.WriteLine("Single-Threaded Search.");
-           foreach(OthelloToken t in allowedMoves)
-            {
-                OthelloState oNextState = GetNextState(t, CurrentState, currentPlayer);
-                //movescore = Minimax(oNextState.CurrentPlayer, oNextState, remainDepth, ref totalmoves);
-                movescore = AlphaBeta(oNextState.CurrentPlayer, oNextState, alpha, beta, remainDepth, ref totalmoves);
-                bestValue = Math.Max(bestValue, movescore);
-
-                Tuple<OthelloToken, float> scoretuple = new Tuple<OthelloToken, float>(t, movescore);
-                oCalculatedMoves.Add(scoretuple);
-            } 
-#else
-            //TODO: implement 1) compare current state to see if this can be loaded from a previous computation
-
-
             //for creating a monitor
-            Trace.WriteLine("Parallel Search.");
             var syncObject = new object();
 
-            //Multi-threaded approach. May speed things up a lot. For example, the first move (3,5) by human would take this particular machine
-            //to calculate 19539 moves for a particular depth. In the single threaded implementation, this took 4170msec.
-            //In the multi-threaded implementation this took 2556msec.
-            //Similarly, 408408 moves for a particular state (single threaded : 80612msec, multithreaded : 53033msec)
-            //Not robustly tested, it seems to give around ~61%,65% of the original time, approx a 130%+ speed increase even for a lower bound. 
-            //Number of moves calculation and move score has been made local variables (thread Local variables as according to MSDN documentation:
-            //http://msdn.microsoft.com/en-us/library/dd460713(v=vs.110).aspx
-            //in this case the local variables and its assignments are thread safe because each local variable is a unique memory location.
-            //scoretuple is a local variable that is thread-safe.
-            //assignment to totalmoves is not thread safe. adding to a list is also not thread-safe. These are locked.
-            // removing the locks as much as possible is especially performance improving in large processing (Alpha-Beta) generating many moves.
-            // making local variables inside of Parallel instead of outside had basically improved speed by 8% observed in one case.
             Parallel.ForEach(allowedMoves, (t, state) =>
             {
-                OthelloState oNextState = GetNextState(t, _currentState, currentPlayer);
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+
                 int move = 0;
-#if (USE_MIN_MAX)
-                float movescore = Minimax(oNextState.CurrentPlayer, oNextState, remainDepth, ref totalmoves);
-#else
-                float movescore = AlphaBeta(oNextState.CurrentPlayer, oNextState, alpha, beta, remainDepth, ref move);
-#endif
+                OthelloState oNextState = GetNextState(t, _currentState, currentPlayer);
+                float movescore = AlphaBeta(oNextState.CurrentPlayer, oNextState, alpha, beta, remainDepth, ref move, ref stopWatch);
 
                 Tuple<OthelloToken, float> scoretuple = new Tuple<OthelloToken, float>(t, movescore);
 
@@ -192,85 +173,14 @@ namespace Othello
                 {
                     totalmoves += move;
                     oCalculatedMoves.Add(scoretuple);
-
-                    if (stopWatch.Elapsed.TotalSeconds > 5)
-                    {
-                        Trace.WriteLine("Breaking loop after 5 seconds");
-
-                        // See this article about trying to stop a parallel loop
-                        // https://stackoverflow.com/questions/14720014/immediately-exit-a-parallel-for-loop-in-c-sharp
-                        state.Stop();
-                    }
                 }
             });
-#endif
 
             oCalculatedMoves.Sort(Comparison);
          
             Trace.WriteLine(string.Format("ComputedMoveCount={0}", totalmoves));
             return oCalculatedMoves;
         }
-
-#if (USE_MIN_MAX)
-        /// <summary>
-        /// Mini-max or min-max implementation. Attempts to minimize the maximum loss assuming player is perfect in their moves.
-        /// At the base condition (at the leaf node), is heuristic evaluation function CalculateStateSCore returns the score of the state in the perspective of the mazimizing player (A.I.)
-        /// 
-        /// At each level, depending on whether the turn is by the AI or the human, the maximizing and minimizing score is returned, correspondingly.
-        /// If it's the maximizing player's turn, the maximum value will be returned.
-        /// If it's the minimizing player's turn, the minimum value will be returned. (From the minimum player perspective, it is trying to maximize its score actually)
-        /// http://en.wikipedia.org/wiki/Minimax
-        /// At the root, whre it chooses to move with the largest score, this is the move that the computer should make to minimize the chances of the human winning
-        /// and correspondingly, maximizing its own chances to win. It's actually the maximum of the minimum score as a result that the opponent (human) might make..
-        /// </summary>
-        /// <param name="currentPlayer"></param>
-        /// <param name="currentState"></param>
-        /// <param name="remainDepth"></param>
-        /// <param name="totalmoves"></param>
-        /// <returns></returns>
-        private float Minimax(OthelloPlayer currentPlayer, OthelloState currentState, int remainDepth, ref int totalmoves)
-        {
-            totalmoves++;
-            float movescore = 0;
-            List<OthelloToken> allowedMoves = currentState.GetAllowedMoves(currentPlayer);
-
-            //Heuristic evaluation
-            if( remainDepth == 0 || allowedMoves.Count() == 0)
-            {
-                return CalcuateStateScore(currentState);
-            }
-
-            //if MAX player, return the result which has the best score out of all moves. 
-            //This score is the maximizing score of the MAX player
-            // This is the player running the algorithm which is the A.I.
-            if(currentPlayer == AiPlayer)
-            {
-                float bestValue = -100.0f;
-                foreach (OthelloToken t in allowedMoves)
-                {
-                    OthelloState oNextState = GetNextState(t, currentState, currentPlayer);
-                    movescore = Minimax(oNextState.CurrentPlayer, oNextState, remainDepth - 1, ref totalmoves);
-                    bestValue = Math.Max(bestValue, movescore);
-                }
-
-                return bestValue;
-            }
-            // MIN player, return the result which has the worst score out of all moves.
-            // THis score is the minizing score of the minmizing plaer, which is the human player in this case.
-            else
-            {
-                float bestValue = 100.0f;
-                foreach (OthelloToken t in allowedMoves)
-                {
-                    OthelloState oNextState = GetNextState(t, currentState, currentPlayer);
-                    movescore = Minimax(oNextState.CurrentPlayer, oNextState, remainDepth - 1, ref totalmoves);
-                    bestValue = Math.Min(bestValue, movescore);
-                }
-
-                return bestValue;
-            }
-        }
-#endif
      
         /// <summary>
         /// An algorithm that seeks to decrease the number of nodes that are evaluated by the minimax algorithm.
@@ -308,7 +218,7 @@ namespace Othello
         /// <param name="remainDepth"></param>
         /// <param name="totalmoves"></param>
         /// <returns></returns>
-        private float AlphaBeta(OthelloGamePlayer currentPlayer, OthelloState currentState, float a, float b, int remainDepth, ref int totalmoves)
+        private float AlphaBeta(OthelloGamePlayer currentPlayer, OthelloState currentState, float a, float b, int remainDepth, ref int totalmoves, ref Stopwatch stopWatch)
         {
 
             //lock (syncObj)
@@ -326,8 +236,8 @@ namespace Othello
                 foreach (OthelloToken t in allowedMoves)
                 {
                     OthelloState oNextState = GetNextState(t, currentState, currentPlayer);
-                    a = Math.Max(a, AlphaBeta(oNextState.CurrentPlayer, oNextState,a,b, remainDepth - 1, ref totalmoves));
-                    if( b <= a)
+                    a = Math.Max(a, AlphaBeta(oNextState.CurrentPlayer, oNextState,a,b, remainDepth - 1, ref totalmoves, ref stopWatch));
+                    if( b <= a || stopWatch.ElapsedMilliseconds > MillisecondsTimeLimit)
                         break;                
                 }
 
@@ -339,8 +249,8 @@ namespace Othello
                 foreach (OthelloToken t in allowedMoves)
                 {
                     OthelloState oNextState = GetNextState(t, currentState, currentPlayer);
-                    b = Math.Min(b, AlphaBeta(oNextState.CurrentPlayer, oNextState, a, b, remainDepth - 1, ref totalmoves));
-                    if (b <= a)
+                    b = Math.Min(b, AlphaBeta(oNextState.CurrentPlayer, oNextState, a, b, remainDepth - 1, ref totalmoves, ref stopWatch));
+                    if (b <= a || stopWatch.ElapsedMilliseconds > MillisecondsTimeLimit)
                         break;                  
                 }
 
