@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -118,9 +117,15 @@ namespace OthelloAWSServerless
                 };
             }
 
-            OthelloAdapter.Othello OthelloGameAdapter = new OthelloAdapter.OthelloAdapter();
-            OthelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
-            var player = OthelloGameAdapter.GameUpdatePlayer();
+            context.Logger.LogLine($"Loading game with representation: {game.OthelloGameStrRepresentation}");
+
+            OthelloAdapter.OthelloAdapter othelloGameAdapter = new OthelloAdapter.OthelloAdapter();
+            othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
+            var player = othelloGameAdapter.GameUpdatePlayer();
+            var gameMode = othelloGameAdapter.GameGetMode();
+
+            context.Logger.LogLine($"Next player is: {player.PlayerKind} and name={player.PlayerName}");
+            context.Logger.LogLine($"board data is: {gameMode.ToString()}");
 
             var response = new APIGatewayProxyResponse
             {
