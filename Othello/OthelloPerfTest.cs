@@ -58,12 +58,12 @@ namespace Othello
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
             target.GameDisableLog();
 
-            for (int i = 0; i < 1000; i++)
-            {
-                target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
-                
+            for (int i = 0; i < 100000; i++)
+            {     
                 target.GameMakeMove(5, 3, oPlayerA);
                 target.GameMakeMove(5, 4, oPlayerA);
+                target.GameUndo();
+                target.GameUndo();
             }
         }
 
