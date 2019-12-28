@@ -58,7 +58,7 @@ namespace Othello
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
             target.GameDisableLog();
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
                 

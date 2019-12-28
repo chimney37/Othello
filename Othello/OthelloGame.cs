@@ -669,7 +669,7 @@ namespace Othello
             {
                 string[] AIConfigLines = File.ReadAllLines(fileNameAIConfig, Encoding.UTF8);
 
-                AIConfigs = from data in AIConfigLines.Skip(1)
+                this.AIConfigs = from data in AIConfigLines.Skip(1)
                             select new OthelloGameAIConfig
                             {
                                 depth = int.Parse(data.Split('\t')[0]),
@@ -678,13 +678,6 @@ namespace Othello
                                 turnrange = data.Split('\t')[3],
                                 difficulty = int.Parse(data.Split('\t')[4])
                             };
-
-                foreach (var a in AIConfigs)
-                {
-#if DEBUG
-                    Trace.WriteLine(string.Format("{0},{1},{2},{3},{4}", a.depth, a.alpha, a.beta, a.turnrange, a.difficulty));
-#endif
-                }
 
                 //validate config. Any problems with loading these values will throw an exception
                 foreach(GameDifficultyMode mode in Enum.GetValues(typeof(GameDifficultyMode))) 
@@ -705,6 +698,20 @@ namespace Othello
         }
 
         /// <summary>
+        /// Gets and Validates the config, applying to whoever that uses the references to the config parameters
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <param name="alpha"></param>
+        /// <param name="beta"></param>
+        private void ObtainTurnAIVariablesFromConfig(GameDifficultyMode mode, int turn, ref int? depth, ref float? alpha, ref float? beta)
+        {
+            GetTurnConfig(mode, turn, AIConfigs, out depth, out alpha, out beta);
+
+            if (depth == null || alpha == null || beta == null)
+                throw new Exception("failed to load/parse AI config for this turn." + string.Format("mode={0},turn={1}",mode, turn) );
+        }
+
+        /// <summary>
         /// Parses and outputs the corresponding AI parameters given the difficulty mode and the game turn
         /// </summary>
         /// <param name="difficultymode"></param>
@@ -715,9 +722,9 @@ namespace Othello
         /// <param name="beta"></param>
         private void GetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloGameAIConfig> configs, out int? depth, out float? alpha, out float? beta)
         {
-            foreach(OthelloGameAIConfig c in configs)
+            foreach (OthelloGameAIConfig c in configs)
             {
-                if(c.IsInRange(turn, difficultymode))
+                if (c.IsInRange(turn, difficultymode))
                 {
                     depth = c.depth;
                     alpha = c.alpha;
@@ -728,22 +735,6 @@ namespace Othello
             depth = null;
             alpha = null;
             beta = null;
-        }
-
-        /// <summary>
-        /// Gets and Validates the config, applying to whoever that uses the references to the config parameters
-        /// </summary>
-        /// <param name="depth"></param>
-        /// <param name="alpha"></param>
-        /// <param name="beta"></param>
-        private void ObtainTurnAIVariablesFromConfig(GameDifficultyMode mode, int turn, ref int? depth, ref float? alpha, ref float? beta)
-        {
-            GetTurnConfig(mode, turn, AIConfigs, out depth, out alpha, out beta);
-
-            Trace.WriteLine(string.Format("{0},{1},{2},{3},{4}", mode, turn, depth, alpha, beta));
-
-            if (depth == null || alpha == null || beta == null)
-                throw new Exception("failed to load/parse AI config for this turn." + string.Format("mode={0},turn={1}",mode, turn) );
         }
 
         #endregion
@@ -833,6 +824,6 @@ namespace Othello
                 this.GetCurrentPlayer().PlayerName,
                 this.GetCurrentPlayer().PlayerKind));
         }
-        #endregion
+#endregion
     }
 }
