@@ -1,27 +1,37 @@
 About: 
 This is an othello game as a personal side project for educational purposes. 
-I made this because during university CS course more than 14 years ago,I had a bad attempt at an AI project and I flunked it badly :) 
-This project is a total re-work (though a totally different game I was told to work on).
+I made this based on an CS course on AI using search. 
 
 Game Features:
 Features are 1 Player versus 1 Player, 1 Player versus A.I. There are Save and Load, Undo and Redo. 
-It features a Game engine A.I module with adjustable difficulty. It uses WPF as the client GUI.
+It features a Game engine A.I module with adjustable difficulty. It uses WPF as the client GUI, and it also has a console version for debugging.
+It also has an adapter so it can potentially work with other clients and environments. 
+The lates feature involves scaling out the original library to work on an AWS server less complex configuration using API gateway, AWS Lambda and AWS DynamoDB. 
 
 How to Work on this project:
-You need a visual studio 2013 Express or equivalent or higher. Language is C#.
+You need at least a visual studio 2017 or higher. Language is C#.
 
 How to install:
 There is no installer at the moment. Use VS to build and run.
 
 About Projects within the VS Solution:
-  What is OthelloAdapter:
+  OthelloAdapter:
     OthelloAdapter allows a layer of abstraction between different version clients of Othello and different version
     of Othello library. This allows re-use of the Othello library without further testing (only the adapter is solely responsible for breaks)
   In the future, we can just use an adapter to deal with different version clients without having to re-test the Othello library without it.
 
-  What is OthelloEngineConsole:
+  OthelloEngineConsole:
     This is for debugging the othello engine with a barebone console mimicking the game loop.
 
-  What is OthelloWPF
-    The GUI shell to the engine. Acts as the main game windows application for users to play.
+  OthelloWPF
+    The GUI shell to the engine. A windows application for users to play.
+
+  OthelloServerless
+    The AWS serverless version that runs and store games using a RESTful API gateway, AWS Lambda to process game states, and AWS DynamoDB to store game data. 
+
+  OthelloServerless.Tests
+    Test to make sure serverless version works as intended.
+
+TODOs:
+  A.I feature based on ML prediction.
 
