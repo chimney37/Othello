@@ -11,7 +11,7 @@
 		 # Set up IAM Users and get credentials
 		  * https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/getting-your-credentials.html
  
-		 # Apply policies with permissions, in particular lambda full access, dynamoDB full access using the default policies. And the following applied on specific resources.
+		 # One-time on AWS side: Apply policies with permissions, in particular lambda full access, dynamoDB full access using the default policies. And the following applied on specific resources.
 						(applied to "Resource": "arn:aws:iam::*:user/${aws:username}")
 						"iam:GetUser", 
 						"iam:CreateAccessKey", 

@@ -127,21 +127,7 @@ namespace Othello
         {
             List<OthelloToken> flipTokens = new List<OthelloToken>();
 
-            #region OPTIMIZATIONS
-            //check if valid player turn
-            //Removing this is a huge optimization: originally loop of game inits and GameMakeMoves 100000 took 13.2 secs on average.
-            //Without this check: it takes about 3.6 sec, around (266% faster)
-            //if (!IsValidPlayer(player))
-            //{
-            //    Trace.WriteLine("MakeMove: The player to move on this turn is not valid");
-            //    return flipTokens;
-            //}
-            #endregion
-
-            //check if move is valid :
-            //note: having this may be faster than not having (), esp for non-valid moves
-            //though both below and CreateNextState attempts to calculate a list of valid paths so it's repetitive
-            //TRACE: http://msdn.microsoft.com/en-us/library/64yxa344(v=vs.85).aspx
+            //check if move is valid. Note: Past comments indicate CreateNextState may included repetition with IsValidMove.
             if (!CurrentOthelloState.IsValidMove(x, y, player))
             {
 #if TRACE
@@ -150,10 +136,8 @@ namespace Othello
                 return flipTokens;
             }
 
-            //create next state
             OthelloState oNextState = CreateNextState(x, y, player, ref flipTokens);
 
-            //Update state
             Update(oNextState);
 
 #if TRACE
@@ -186,11 +170,10 @@ namespace Othello
             this.GameUpdateTurn();
 
             //load AI config if not already : when game loads from save file, this is required
-            if (AIConfigs == null)
-                LoadAiConfig();
+            //if (AIConfigs == null)
+            //    LoadAiConfig();
 
-            //apply AI config
-            ApplyTurnConfig(this.GameDifficultyMode, this.CurrentTurn,ref depth, ref alpha, ref beta);
+            ObtainTurnAIVariablesFromConfig(this.GameDifficultyMode, this.CurrentTurn,ref depth, ref alpha, ref beta);
 
 #if TRACE
             Trace.WriteLine(string.Format("AIConfigs: @Turn(beforemove)={0}, depth={1}, alpha={2}, beta={3}, difficulty={4}", this.CurrentTurn, depth, alpha, beta, GameDifficultyMode));
@@ -704,7 +687,7 @@ namespace Othello
 #endif
                 }
 
-                //validate config
+                //validate config. Any problems with loading these values will throw an exception
                 foreach(GameDifficultyMode mode in Enum.GetValues(typeof(GameDifficultyMode))) 
                     for(int turn = 1; turn <= OthelloBoard.BoardSize*OthelloBoard.BoardSize; turn++)
                     {
@@ -712,13 +695,12 @@ namespace Othello
                         float? alpha = null;
                         float? beta= null;
 
-                        ApplyTurnConfig(mode,turn,ref depth, ref alpha, ref beta);
+                        ObtainTurnAIVariablesFromConfig(mode,turn,ref depth, ref alpha, ref beta);
                     }
 
             }
             catch (Exception e)
             {
-                //TODO: it's time we implemented a logging system
                 throw new Exception("Error with config file!", e);
             }
         }
@@ -755,7 +737,7 @@ namespace Othello
         /// <param name="depth"></param>
         /// <param name="alpha"></param>
         /// <param name="beta"></param>
-        private void ApplyTurnConfig(GameDifficultyMode mode, int turn, ref int? depth, ref float? alpha, ref float? beta)
+        private void ObtainTurnAIVariablesFromConfig(GameDifficultyMode mode, int turn, ref int? depth, ref float? alpha, ref float? beta)
         {
             GetTurnConfig(mode, turn, AIConfigs, out depth, out alpha, out beta);
 
