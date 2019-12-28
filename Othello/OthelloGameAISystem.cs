@@ -130,13 +130,13 @@ namespace Othello
         /// <returns></returns>
         /// 
         /// TODO: optimize using Iterative Deepening Depth-First-Search (IDDFS) as part of AlphaBeta.
-        // TODO: optimize using Time to set a max time for search. If exceeded, return results found within the timelimit. May be part of difficulty setting.
+        // TODO: expose time limit variable to the class so we can set a limit when instantiating the game
         [Time]
         private List<Tuple<OthelloToken, float>> GetMoves(OthelloGamePlayer currentPlayer, int remainDepth, float alpha =0f, float beta = 0.51f)
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             int totalmoves = 0;
-            //float movescore = 0;
-            //float bestValue = -100.0f;
             List<OthelloToken> allowedMoves = _currentState.GetAllowedMoves(currentPlayer);
      
             List<Tuple<OthelloToken, float>> oCalculatedMoves = new List<Tuple<OthelloToken, float>>();
@@ -175,7 +175,7 @@ namespace Othello
             //assignment to totalmoves is not thread safe. adding to a list is also not thread-safe. These are locked.
             // removing the locks as much as possible is especially performance improving in large processing (Alpha-Beta) generating many moves.
             // making local variables inside of Parallel instead of outside had basically improved speed by 8% observed in one case.
-            Parallel.ForEach(allowedMoves, t =>
+            Parallel.ForEach(allowedMoves, (t, state) =>
             {
                 OthelloState oNextState = GetNextState(t, _currentState, currentPlayer);
                 int move = 0;
@@ -184,7 +184,6 @@ namespace Othello
 #else
                 float movescore = AlphaBeta(oNextState.CurrentPlayer, oNextState, alpha, beta, remainDepth, ref move);
 #endif
-                //bestValue = Math.Max(bestValue, movescore);
 
                 Tuple<OthelloToken, float> scoretuple = new Tuple<OthelloToken, float>(t, movescore);
 
@@ -193,6 +192,15 @@ namespace Othello
                 {
                     totalmoves += move;
                     oCalculatedMoves.Add(scoretuple);
+
+                    if (stopWatch.Elapsed.TotalSeconds > 5)
+                    {
+                        Trace.WriteLine("Breaking loop after 5 seconds");
+
+                        // See this article about trying to stop a parallel loop
+                        // https://stackoverflow.com/questions/14720014/immediately-exit-a-parallel-for-loop-in-c-sharp
+                        state.Stop();
+                    }
                 }
             });
 #endif
@@ -356,12 +364,6 @@ namespace Othello
         //evaluation function of a given state. Used in conjunction with mini-max/alpha-beta pruning
         private float CalcuateStateScore(OthelloState oState)
         {
-            //float Total = 0;
-
-            //update score
-            //Total += oState.ScoreB = oState.GetBoardBlackCount();
-            //Total += oState.ScoreW = oState.GetBoardWhiteCount();
-
             //calculate basic score for this move given perspective of the A.I
             float score = oState.GetBoardCount(AiPlayer.GetPlayerOthelloToken()) / (float)oState.Turn;
 
@@ -441,81 +443,6 @@ namespace Othello
         }
 
 
-        #endregion
-
-        #region UNUSED
-        /*
-        public List<Tuple<OthelloToken, float>> GetMoves(OthelloPlayer currentPlayer)
-        {
-
-            List<OthelloToken> allowedMoves = CurrentState.GetAllowedMoves(currentPlayer);
-            List<Tuple<OthelloToken, float>> CalculatedMoves = new List<Tuple<OthelloToken, float>>();
-
-            foreach (OthelloToken t in allowedMoves)
-            {
-                OthelloState oNextState = GetNextState(t, CurrentState, currentPlayer);
-
-                float score = CalcuateStateScore(oNextState);
-
-                Tuple<OthelloToken, float> scoretuple = new Tuple<OthelloToken, float>(t, score);
-                CalculatedMoves.Add(scoretuple);
-                CalculatedMoves.Sort(comparison);
-            }
-            return CalculatedMoves;
-        }
-        
-        private float GetAccumulatedMoveScore(OthelloPlayer currentPlayer, OthelloState currentState, int remainDepth, out List<Tuple<OthelloToken, float>> CalculatedMoves, ref int totalmoves)
-        {
-            float movescore = 0;
-            CalculatedMoves = new List<Tuple<OthelloToken, float>>();
-            totalmoves++;
-
-            if (remainDepth >= 0)
-            {
-                List<OthelloToken> allowedMoves = currentState.GetAllowedMoves(currentPlayer);
-
-                foreach (OthelloToken t in allowedMoves)
-                {
-                    OthelloState oNextState = GetNextState(t, currentState, currentPlayer);
-
-                    List<Tuple<OthelloToken, float>> CalculatedMovesSub;
-
-                    //include calculating heuristic score for this move given perspective of the A.I.                   
-                    movescore = GetHeuristicScore(currentState, t) + CalcuateStateScore(oNextState) + GetAccumulatedMoveScore(oNextState.CurrentPlayer, oNextState, remainDepth - 1, out CalculatedMovesSub, ref totalmoves);
-                    //Trace.WriteLine(string.Format("depth={0},{1},({2},{3})={4}", remainDepth, currentPlayer, t.X, t.Y, score));
-
-                    Tuple<OthelloToken, float> scoretuple = new Tuple<OthelloToken, float>(t, movescore);
-                    CalculatedMoves.Add(scoretuple);
-                    CalculatedMoves.Sort(comparison);
-                }
-
-                //MEMO after testing... : this is not the corret interpretation of the min-max algorithm, though the thinking is roughly correct
-                //MEMO before correction: if the current move is by AI, then should return the maximum score out of all moves as the representative score of this move
-                //MEMO before correction: if current move is by human, than should return the minimum score out of all moves as the representative score of this move
-
-                if (currentPlayer.PlayerKind == this.PlayerKind)
-                {
-                    movescore = CalculatedMoves.Count() > 0 ? CalculatedMoves[0].Item2 : 0;
-                }
-                else
-                {
-                    movescore = CalculatedMoves.Count() > 0 ? CalculatedMoves[CalculatedMoves.Count - 1].Item2 : 0;
-                }
-
-            }
-            return movescore;
-        }
-        public float GetMoveScore(int x, int y, OthelloState state, int Depth)
-        {
-            return 0.0f;
-        }
-        public List<OthelloToken> GetRankedMoves(OthelloState state)
-        {
-            List<OthelloToken> moves = new List<OthelloToken>();
-
-            return moves;
-        }
-        */
         #endregion
 
         #region INTERFACES

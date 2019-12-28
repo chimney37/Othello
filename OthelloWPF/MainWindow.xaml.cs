@@ -379,13 +379,10 @@ namespace OthelloWPF
         // updates made by or to game engine
         private void UpdateGame()
         {
-            //oCurrentPlayer = oGame.GameUpdatePlayer();
             oCurrentPlayer = OthelloGameAdapter.GameUpdatePlayer();
 
-            //oTurn = oGame.GameUpdateTurn();
             oTurn = OthelloGameAdapter.GameUpdateTurn();
 
-            //oBoard = (OthelloToken[,])oGame.GameGetBoardData(OthelloBoardType.TokenMatrix);
             oBoard = OthelloGameAdapter.GameGetBoardData();
         }
 
@@ -564,7 +561,6 @@ namespace OthelloWPF
 
         private void ComputerMoves()
         {          
-            //oFlipList = oGame.GameAIMakeMove();
             oFlipList = OthelloGameAdapter.GameAIMakeMove();
         }
 

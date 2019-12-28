@@ -170,8 +170,8 @@ namespace Othello
             this.GameUpdateTurn();
 
             //load AI config if not already : when game loads from save file, this is required
-            //if (AIConfigs == null)
-            //    LoadAiConfig();
+            if (AIConfigs == null)
+                LoadAiConfig();
 
             ObtainTurnAIVariablesFromConfig(this.GameDifficultyMode, this.CurrentTurn,ref depth, ref alpha, ref beta);
 
