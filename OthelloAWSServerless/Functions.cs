@@ -119,7 +119,7 @@ namespace OthelloAWSServerless
 
             context.Logger.LogLine($"Loading game with representation: {game.OthelloGameStrRepresentation}");
 
-            OthelloAdapter.OthelloAdapter othelloGameAdapter = new OthelloAdapter.OthelloAdapter();
+            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
             var player = othelloGameAdapter.GameUpdatePlayer();
             var gameMode = othelloGameAdapter.GameGetMode();
@@ -147,7 +147,7 @@ namespace OthelloAWSServerless
 
             var othellogame = new OthelloGameRepresentation();
 
-            OthelloAdapter.Othello OthelloGameAdapter = new OthelloAdapter.OthelloAdapter();
+            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             //OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerA, playerdata.PlayerB, OthelloPlayerKind.White, false);
             OthelloGameAdapter.GameCreateNewHumanVSHuman("PlayerA", "PlayerB", OthelloPlayerKind.White, false);
 

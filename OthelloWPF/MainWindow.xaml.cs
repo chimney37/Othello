@@ -18,7 +18,7 @@ namespace OthelloWPF
     public partial class MainWindow : Window
     {
         #region PROPERTIES, ATTRIBUTES
-        private OthelloAdapter.Othello OthelloGameAdapter;
+        private OthelloAdapters.OthelloAdapterBase OthelloGameAdapter;
         private OthelloToken[,] oBoard;
 
         private Othello.OthelloGamePlayer oCurrentPlayer;
@@ -70,7 +70,7 @@ namespace OthelloWPF
             try
             {
                 //create a new game by default
-                OthelloGameAdapter = new OthelloAdapter.OthelloAdapter();
+                OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
                 OthelloGameAdapter.GameCreateNewHumanVSHuman(playerAName, playerBName, OthelloPlayerKind.White, false);
 
             }

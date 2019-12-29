@@ -44,7 +44,7 @@ namespace OthelloAWSServerless.Tests
 
             // Add a new blog post
             OthelloGameRepresentation myGame = new OthelloGameRepresentation();
-            OthelloAdapter.Othello OthelloGameAdapter = new OthelloAdapter.OthelloAdapter();
+            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSHuman("PlayerA", "PlayerB", OthelloPlayerKind.White, false);
 
             //myGame.Id = Guid.NewGuid().ToString();

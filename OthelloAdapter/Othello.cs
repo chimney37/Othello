@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Othello;
 
-namespace OthelloAdapter
+namespace OthelloAdapters
 {
-    public abstract class Othello
+    public abstract class OthelloAdapterBase
     {
         public abstract void GameCreateNewHumanVSHuman(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsAlternate = false);
         public abstract void GameCreateNewHumanVSAI(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsHumanWhite = true, bool IsAlternate = false, GameDifficultyMode mode = GameDifficultyMode.Easy);

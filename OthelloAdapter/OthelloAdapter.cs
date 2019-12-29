@@ -2,12 +2,12 @@
 using System.Linq;
 using Othello;
 
-namespace OthelloAdapter
+namespace OthelloAdapters
 {
     /// <summary>
     /// OthelloAdapter is a brige between the Othello Library and the Clients of it, such as the Console version of Othello, or the WPF version
     /// </summary>
-    public class OthelloAdapter : Othello
+    public class OthelloAdapter : OthelloAdapterBase
     {
         private OthelloGame _oGame;
 

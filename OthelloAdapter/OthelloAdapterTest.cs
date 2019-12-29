@@ -5,7 +5,7 @@ using NUnit.Framework;
 using System.Linq;
 using Othello;
 
-namespace OthelloAdapter
+namespace OthelloAdapters
 {
     [TestFixture]
     public class OthelloAdapterTest
