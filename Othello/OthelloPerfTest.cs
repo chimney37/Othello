@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System.Diagnostics;
 using System.Reflection;
 using MethodTimer;
+using System.Globalization;
 
 namespace Othello
 {
@@ -11,12 +12,12 @@ namespace Othello
     /// Perf Testing. For time and memory performance
     /// </summary>
     [TestFixture]
-    class OthelloPerfTest
+    public class OthelloPerfTest
     {
         /// <summary>
         /// A logger class used to log the output of a method timer framework (fody)
         /// </summary>
-        public static class MethodTimeLogger
+        private static class MethodTimeLogger
         {
             /// <summary>
             ///  Do some logging here
@@ -25,8 +26,8 @@ namespace Othello
             /// <param name="milliseconds"></param>
             public static void Log(MethodBase methodBase, long milliseconds)
             {
-                Trace.WriteLine(string.Format("{0}: {1} ms", methodBase.Name, milliseconds));
-                Console.WriteLine(string.Format("{0}: {1} ms", methodBase.Name, milliseconds));
+                OthelloExceptions.ThrowExceptionIfNull(methodBase);
+                Trace.WriteLine(string.Format(CultureInfo.CurrentCulture,"{0}: {1} ms", methodBase.Name, milliseconds));
             }
         }
 
@@ -56,7 +57,7 @@ namespace Othello
             var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
 
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
-            target.GameDisableLog();
+            OthelloGame.GameDisableLog();
 
             for (int i = 0; i < 100000; i++)
             {     

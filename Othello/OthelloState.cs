@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Othello
 {
@@ -17,7 +18,7 @@ namespace Othello
     ///     Several helper methods to aid the mechanics of above
     /// </summary>
     [Serializable]
-    public class OthelloState : OthelloPrototypeState
+    public class OthelloState : IOthelloPrototypeState
     {
         #region PROPERTIES AND FIELDS
         public int ScoreW { get; set; }
@@ -47,6 +48,8 @@ namespace Othello
         /// <param name="prevState"></param>
         protected OthelloState(OthelloState prevState)
         {
+            OthelloExceptions.ThrowExceptionIfNull(prevState);
+
             //do a member wise bit copy of all fields
             this.ScoreW = prevState.ScoreW;
             this.ScoreB = prevState.ScoreB;
@@ -80,7 +83,7 @@ namespace Othello
         /// http://developerscon.blogspot.jp/2008/06/c-object-clone-wars.html
         /// </summary>
         /// <returns></returns>
-        public OthelloPrototypeState Clone()
+        public IOthelloPrototypeState Clone()
         {
             return new OthelloState(this);
         }
@@ -186,10 +189,13 @@ namespace Othello
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        /// <param name="p"></param>
+        /// <param name="player"></param>
         /// <returns></returns>
-        public bool IsValidMove(int x, int y, OthelloGamePlayer p)
+        public bool IsValidMove(int x, int y, OthelloGamePlayer player)
         {
+            if (player == null)
+                throw new ArgumentNullException(nameof(player));
+
             //get the token at the cell where a player is trying to place
             OthelloToken obTry = this.BoardData.GetCell(x, y);
 
@@ -203,18 +209,7 @@ namespace Othello
                 return false;
             }
 
-            
-            #region REMOVED FOR OPTIMIZATION
-            //Execute 100000 loop of isValidMoves took 583ms on this environment (Debug 32)... Without this check takes about 515ms, 113% faster.
-            //Check if all adj are empty
-            //if (IsAllAdjacentEmptyOrOOB(x, y))
-            //{
-                //Trace.WriteLine("IsValidMove:(FAIL) adjacent is all empty or OOB"); 
-            //    return false;
-            //}
-            #endregion
-
-            OthelloToken ob = new OthelloToken(x, y, p.GetPlayerOthelloToken());
+            OthelloToken ob = new OthelloToken(x, y, player.GetPlayerOthelloToken());
             OthelloToken obOpposition = OthelloToken.GetInverse(ob);
 
             //check 8 paths: if no opposing token in between to flip
@@ -246,6 +241,9 @@ namespace Othello
         /// <returns></returns>
         public List<OthelloToken> GetAllFlipsTokens(int x, int y, OthelloGamePlayer player)
         {
+            if (player == null)
+                throw new ArgumentNullException(nameof(player));
+
             OthelloToken ob = new OthelloToken(x, y, player.GetPlayerOthelloToken());
             OthelloToken obOpposition = OthelloToken.GetInverse(ob);
 
@@ -277,6 +275,11 @@ namespace Othello
         /// <returns></returns>
         public static List<OthelloToken> GetFlipTokenFromPath(OthelloToken ob, List<OthelloToken> path)
         {
+            if (ob == null)
+                throw new ArgumentNullException(nameof(ob));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
             List<OthelloToken> FlipTokens = new List<OthelloToken>();
 
             //search start index is always 0 (by design)
@@ -334,6 +337,9 @@ namespace Othello
         /// <returns></returns>
         protected List<OthelloToken> GetPath(OthelloToken placementob, OthelloDirection odir)
         {
+            if (placementob == null)
+                throw new ArgumentNullException(nameof(placementob));
+
             //initialize new token at origin of path
             List<OthelloToken> path = new List<OthelloToken>();
 
@@ -381,6 +387,13 @@ namespace Othello
         /// <returns></returns>
         protected static List<List<OthelloToken>> GetValidPaths(OthelloToken ob, OthelloToken obOpposition, List<List<OthelloToken>> paths)
         {
+            if (ob == null)
+                throw new ArgumentNullException(nameof(ob));
+            if (obOpposition == null)
+                throw new ArgumentNullException(nameof(obOpposition));
+            if (paths == null)
+                throw new ArgumentNullException(nameof(paths));
+
             List<List<OthelloToken>> validPaths = new List<List<OthelloToken>>();
 
             //check if at least 1 opposing color and between 2 of the color by ob (player)
@@ -421,6 +434,13 @@ namespace Othello
         /// <returns></returns>
         protected static bool IsNotValidSandwich(OthelloToken ob, OthelloToken obOpposition, List<OthelloToken> path)
         {
+            if (ob == null)
+                throw new ArgumentNullException(nameof(ob));
+            if (obOpposition == null)
+                throw new ArgumentNullException(nameof(obOpposition));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
             //index of origin token is 0 (it's 0 by design)
             //find index of the end token that encloses a valid section
             int obIndexEnd = path.FindIndex(1, a => a.Token == ob.Token);
@@ -521,13 +541,16 @@ namespace Othello
         #region DEBUG OUTPUT
         public void DebugState()
         {
-            Console.WriteLine(string.Format("Hash: {0}\t{1}\t{2}\n", this.BoardData.HashID, this.ScoreW, this.ScoreB));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Hash: {0}\t{1}\t{2}\n", this.BoardData.HashID, this.ScoreW, this.ScoreB));
         }
-        protected string DebugPath(List<OthelloToken> path)
+        protected static string DebugPath(List<OthelloToken> path)
         {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
             StringBuilder sb = new StringBuilder();
             foreach (OthelloToken obit in path)
-                sb.Append(string.Format("[{0}({1},{2})]", obit.Token, obit.X, obit.Y));          
+                sb.Append(string.Format(CultureInfo.InvariantCulture, "[{0}({1},{2})]", obit.Token, obit.X, obit.Y));          
             sb.Append("\n");
             return sb.ToString();
         }

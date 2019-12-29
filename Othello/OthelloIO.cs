@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Globalization;
 using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
 
 namespace Othello
 {
-    public class OthelloIO
+    public static class OthelloIO
     {
         public static string CreateDefaultDirectory(string pathString)
         {
@@ -17,7 +18,7 @@ namespace Othello
                 }
                 catch (Exception e)
                 {
-                    throw new Exception(string.Format("CreateDefaultDirectory [Exception] : Exception Message = {0}", e.Message));
+                    throw new Exception(string.Format(CultureInfo.CurrentCulture, "CreateDefaultDirectory [Exception] : Exception Message = {0}", e.Message));
                 }
             }
 
@@ -32,27 +33,26 @@ namespace Othello
             FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
             BinaryFormatter f = new BinaryFormatter();
 
-            //Deserialize and read
             object obj = f.Deserialize(fs);
             fs.Close();
 
             return obj;
         }
-        public static void SaveToBinaryFile(object obj, string path)
+        public static void SaveToBinaryFile(object target, string path)
         {
             FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write);
             BinaryFormatter bf = new BinaryFormatter();
 
             // Serializer and write
-            bf.Serialize(fs, obj);
+            bf.Serialize(fs, target);
             fs.Close();
         }
 
-        public static string GetBase64String(object obj)
+        public static string GetBase64String(object target)
         {
             using (MemoryStream m = new MemoryStream())
             {
-                new BinaryFormatter().Serialize(m, obj);
+                new BinaryFormatter().Serialize(m, target);
                 return Convert.ToBase64String(m.ToArray());
             }
         }

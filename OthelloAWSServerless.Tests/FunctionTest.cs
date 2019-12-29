@@ -67,7 +67,7 @@ namespace OthelloAWSServerless.Tests
             // Confirm we can get the blog post back out
             request = new APIGatewayProxyRequest
             {
-                PathParameters = new Dictionary<string, string> { { Functions.ID_QUERY_STRING_NAME, gameId } }
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
             response = await functions.GetBlogAsync(request, context);
@@ -94,7 +94,7 @@ namespace OthelloAWSServerless.Tests
             // Delete the blog post
             request = new APIGatewayProxyRequest
             {
-                PathParameters = new Dictionary<string, string> { { Functions.ID_QUERY_STRING_NAME, gameId } }
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
             response = await functions.RemoveBlogAsync(request, context);
@@ -103,7 +103,7 @@ namespace OthelloAWSServerless.Tests
             // Make sure the post was deleted.
             request = new APIGatewayProxyRequest
             {
-                PathParameters = new Dictionary<string, string> { { Functions.ID_QUERY_STRING_NAME, gameId } }
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
             response = await functions.GetBlogAsync(request, context);
@@ -132,14 +132,14 @@ namespace OthelloAWSServerless.Tests
                     new KeySchemaElement
                     {
                         KeyType = KeyType.HASH,
-                        AttributeName = Functions.ID_QUERY_STRING_NAME
+                        AttributeName = Functions.IdQueryStringName
                     }
                 },
                 AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new AttributeDefinition
                     {
-                        AttributeName = Functions.ID_QUERY_STRING_NAME,
+                        AttributeName = Functions.IdQueryStringName,
                         AttributeType = ScalarAttributeType.S
                     }
                 }

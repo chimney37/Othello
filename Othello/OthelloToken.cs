@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Othello
 {
@@ -48,6 +49,9 @@ namespace Othello
         /// <returns></returns>
         public static OthelloToken GetInverse(OthelloToken ob)
         {
+            if (ob == null)
+                throw new ArgumentNullException(nameof(ob));
+
             return new OthelloToken(ob.X,ob.Y,(ob.Token == OthelloBitType.Black) ? OthelloBitType.White : OthelloBitType.Black);
         }
 
@@ -57,7 +61,7 @@ namespace Othello
         /// <returns></returns>
         public override string ToString()
         {
-            return "["+((OthelloBitType)Token).ToString() + X.ToString() + Y.ToString()+"]";
+            return string.Format(CultureInfo.InvariantCulture, "[{0}:{1},{2}]",((OthelloBitType)Token).ToString(), X.ToString(CultureInfo.InvariantCulture), Y.ToString(CultureInfo.InvariantCulture));
         }
         #endregion
     }
@@ -68,14 +72,16 @@ namespace Othello
     public class OthelloTokenEqualityComparer : IEqualityComparer<OthelloToken>
     {
         /// <summary>
-        /// Equals operator to check if 2 tokens are identical in Othello Space
+        /// Equals operator to check if 2 tokens are identical in Othello Space. If either Tokens are null, return false
         /// </summary>
         /// <param name="oToken1"></param>
         /// <param name="oToken2"></param>
         /// <returns></returns>
         public bool Equals(OthelloToken oToken1, OthelloToken oToken2)
         {
-            if(oToken1.Token == oToken2.Token &&
+            if(oToken1 != null && 
+                oToken2 != null && 
+                oToken1.Token == oToken2.Token &&
                 oToken1.X == oToken2.X &&
                 oToken1.Y == oToken2.Y)
                 return true;
@@ -91,6 +97,8 @@ namespace Othello
         /// <returns></returns>
         public int GetHashCode(OthelloToken oToken)
         {
+            OthelloExceptions.ThrowExceptionIfNull(oToken);
+
             int hCode = (int)oToken.Token ^ oToken.X ^ oToken.Y;
             return hCode.GetHashCode();
         }

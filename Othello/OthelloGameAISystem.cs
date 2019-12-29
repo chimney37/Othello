@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using MethodTimer;
+using System.Globalization;
 
 namespace Othello
 {
@@ -51,6 +52,9 @@ namespace Othello
 
         public void Initialize(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer, int milliSecTimeLimit = 1000)
         {
+            if (oGame == null)
+                throw new ArgumentNullException(nameof(oGame));
+
             _currentState = (OthelloState)((IOthelloGameAiAccessor)oGame).GetCurrentState().Clone();
             this.HumanPlayer = humanPlayer;
             this.AiPlayer = aIplayer;
@@ -64,16 +68,19 @@ namespace Othello
             MillisecondsTimeLimit = milliSecTimeLimit;
         }
 
-        private void AddHeuristics(List<OthelloToken> list, string[] values)
+        private static void AddHeuristics(List<OthelloToken> list, string[] values)
         {
             foreach (string s in values)
-                list.Add(new OthelloToken(Convert.ToInt32(s.Split(',')[0]), Convert.ToInt32(s.Split(',')[1]), OthelloBitType.White));
+                list.Add(new OthelloToken(Convert.ToInt32(s.Split(',')[0], CultureInfo.InvariantCulture), Convert.ToInt32(s.Split(',')[1], CultureInfo.InvariantCulture), OthelloBitType.White));
         }
         #endregion
 
         #region GETTERS AND SETTERS
         public void SetCurrentState(OthelloState oState)
         {
+            if (oState == null)
+                throw new ArgumentNullException(nameof(oState));
+
             _currentState = (OthelloState)oState.Clone();
         }
 
@@ -109,7 +116,7 @@ namespace Othello
             foreach (Tuple<OthelloToken, float> t in calculatedMoves)
             {
 #if TRACE
-                Trace.WriteLine(string.Format("[GetBestMove]({0},{1}),S={2}", t.Item1.X, t.Item1.Y, t.Item2));
+                Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "[GetBestMove]({0},{1}),S={2}", t.Item1.X, t.Item1.Y, t.Item2));
 #endif
             }
 
@@ -178,7 +185,7 @@ namespace Othello
 
             oCalculatedMoves.Sort(Comparison);
          
-            Trace.WriteLine(string.Format("ComputedMoveCount={0}", totalmoves));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "ComputedMoveCount={0}", totalmoves));
             return oCalculatedMoves;
         }
      

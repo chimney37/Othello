@@ -84,6 +84,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OthelloExceptions.cs" />
     <Compile Include="OthelloGameAIConfig.cs" />
     <Compile Include="OthelloGameAIFactory.cs" />
     <Compile Include="OthelloFactory.cs" />

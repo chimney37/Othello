@@ -13,6 +13,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Newtonsoft.Json;
 
 using Othello;
+using System.Globalization;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -23,10 +24,11 @@ namespace OthelloAWSServerless
     {
         // This const is the name of the environment variable that the serverless.template will use to set
         // the name of the DynamoDB table used to store Othello Game
-        const string TABLENAME_ENVIRONMENT_VARIABLE_LOOKUP = "BlogTable";
+        const string TableNameEnvironmentVariableLookup = "BlogTable";
 
-        public const string ID_QUERY_STRING_NAME = "Id";
+        public const string IdQueryStringName = "Id";
         IDynamoDBContext DDBContext { get; set; }
+        AmazonDynamoDBClient DDBClient { get; set; }
 
         /// <summary>
         /// Default constructor that Lambda will invoke.
@@ -35,14 +37,20 @@ namespace OthelloAWSServerless
         {
             // Check to see if a table name was passed in through environment variables and if so 
             // add the table mapping.
-            var tableName = System.Environment.GetEnvironmentVariable(TABLENAME_ENVIRONMENT_VARIABLE_LOOKUP);
+            var tableName = System.Environment.GetEnvironmentVariable(TableNameEnvironmentVariableLookup);
             if(!string.IsNullOrEmpty(tableName))
             {
                 AWSConfigsDynamoDB.Context.TypeMappings[typeof(OthelloGameRepresentation)] = new Amazon.Util.TypeMapping(typeof(OthelloGameRepresentation), tableName);
             }
 
             var config = new DynamoDBContextConfig { Conversion = DynamoDBEntryConversion.V2 };
-            this.DDBContext = new DynamoDBContext(new AmazonDynamoDBClient(), config);
+            this.DDBClient = new AmazonDynamoDBClient();
+            this.DDBContext = new DynamoDBContext(DDBClient, config);
+        }
+
+        ~Functions()
+        {
+            DDBClient.Dispose();
         }
 
         /// <summary>
@@ -68,7 +76,12 @@ namespace OthelloAWSServerless
         /// <returns>The list of blogs</returns>
         public async Task<APIGatewayProxyResponse> GetBlogsAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
-            context.Logger.LogLine("Getting blogs");
+            ThrowExceptionIfNull(context);
+
+            if (request == null)
+                context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "request is empty."));
+
+            context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "Getting blogs"));
             var search = this.DDBContext.ScanAsync<OthelloGameRepresentation>(null);
             var page = await search.GetNextSetAsync();
             context.Logger.LogLine($"Found {page.Count} blogs");
@@ -90,18 +103,21 @@ namespace OthelloAWSServerless
         /// <returns></returns>
         public async Task<APIGatewayProxyResponse> GetBlogAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
+            ThrowExceptionIfNull(request);
+            ThrowExceptionIfNull(context);
+
             string gameId = null;
-            if (request.PathParameters != null && request.PathParameters.ContainsKey(ID_QUERY_STRING_NAME))
-                gameId = request.PathParameters[ID_QUERY_STRING_NAME];
-            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(ID_QUERY_STRING_NAME))
-                gameId = request.QueryStringParameters[ID_QUERY_STRING_NAME];
+            if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
+                gameId = request.PathParameters[IdQueryStringName];
+            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
+                gameId = request.QueryStringParameters[IdQueryStringName];
 
             if (string.IsNullOrEmpty(gameId))
             {
                 return new APIGatewayProxyResponse
                 {
                     StatusCode = (int)HttpStatusCode.BadRequest,
-                    Body = $"Missing required parameter {ID_QUERY_STRING_NAME}"
+                    Body = $"Missing required parameter {IdQueryStringName}"
                 };
             }
 
@@ -143,12 +159,15 @@ namespace OthelloAWSServerless
         /// <returns></returns>
         public async Task<APIGatewayProxyResponse> AddBlogAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
-            //var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            if (request == null)
+                context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "request is empty."));
 
             var othellogame = new OthelloGameRepresentation();
 
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
-            //OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerA, playerdata.PlayerB, OthelloPlayerKind.White, false);
             OthelloGameAdapter.GameCreateNewHumanVSHuman("PlayerA", "PlayerB", OthelloPlayerKind.White, false);
 
             othellogame.Id = Guid.NewGuid().ToString();
@@ -161,7 +180,7 @@ namespace OthelloAWSServerless
             var response = new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.OK,
-                Body = othellogame.Id.ToString(),
+                Body = othellogame.Id.ToString(CultureInfo.InvariantCulture),
                 Headers = new Dictionary<string, string> { { "Content-Type", "text/plain" } }
             };
             return response;
@@ -173,18 +192,21 @@ namespace OthelloAWSServerless
         /// <param name="request"></param>
         public async Task<APIGatewayProxyResponse> RemoveBlogAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
+            ThrowExceptionIfNull(request);
+            ThrowExceptionIfNull(context);
+
             string blogId = null;
-            if (request.PathParameters != null && request.PathParameters.ContainsKey(ID_QUERY_STRING_NAME))
-                blogId = request.PathParameters[ID_QUERY_STRING_NAME];
-            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(ID_QUERY_STRING_NAME))
-                blogId = request.QueryStringParameters[ID_QUERY_STRING_NAME];
+            if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
+                blogId = request.PathParameters[IdQueryStringName];
+            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
+                blogId = request.QueryStringParameters[IdQueryStringName];
 
             if (string.IsNullOrEmpty(blogId))
             {
                 return new APIGatewayProxyResponse
                 {
                     StatusCode = (int)HttpStatusCode.BadRequest,
-                    Body = $"Missing required parameter {ID_QUERY_STRING_NAME}"
+                    Body = $"Missing required parameter {IdQueryStringName}"
                 };
             }
 
@@ -197,6 +219,11 @@ namespace OthelloAWSServerless
             };
         }
 
+        private static void ThrowExceptionIfNull(Object target)
+        {
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
+        }
 
     }
 }

@@ -10,7 +10,7 @@ namespace Othello
     {
         private static OthelloLogger othellologger = new OthelloLogger();
         private readonly string logpath = "othellolog.txt";
-        private static readonly string loggername = "othellologger";
+        private const string loggername = "othellologger";
         private static Stream myFile;
         private static object syncObj = new object();
 

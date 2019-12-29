@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Othello
 {
@@ -15,37 +16,34 @@ namespace Othello
             if (this.difficulty != (int)difficulty)
                 return false;
 
-            //Regex pattern = new Regex("(\\[|\\()[0-9]+:[0-9]+(\\]|\\])");
-            
-
-            //(0:30), (40:43]
+            //e.g. input is (0:30), (40:43]
             string[] ranges = turnrange.Split(':');
 
             if (ranges[0].Contains("("))
             {
-                if (Turn <= int.Parse(ranges[0].Remove(0, 1)))
+                if (Turn <= int.Parse(ranges[0].Remove(0, 1), CultureInfo.InvariantCulture))
                     return false;
             }
             else if (ranges[0].Contains("["))
             {
-                if (Turn < int.Parse(ranges[0].Remove(0, 1)))
+                if (Turn < int.Parse(ranges[0].Remove(0, 1), CultureInfo.InvariantCulture))
                     return false;
             }
             else
-                throw new Exception(string.Format("invalid config parameter in {0} in row: {1}\t{2}\t{3}\t{4}\t{5}",ranges[0],depth,alpha,beta,turnrange, difficulty));
+                throw new Exception(string.Format(CultureInfo.CurrentCulture,"invalid config parameter in {0} in row: {1}\t{2}\t{3}\t{4}\t{5}",ranges[0],depth,alpha,beta,turnrange, difficulty));
 
             if(ranges[1].Contains(")"))
             {
-                if (Turn >= int.Parse(ranges[1].TrimEnd(')')))
+                if (Turn >= int.Parse(ranges[1].TrimEnd(')'), CultureInfo.InvariantCulture))
                     return false;
             }
             else if(ranges[1].Contains("]"))
             {
-                if (Turn > int.Parse(ranges[1].TrimEnd(']')))
+                if (Turn > int.Parse(ranges[1].TrimEnd(']'), CultureInfo.InvariantCulture))
                     return false;
             }
             else
-                throw new Exception(string.Format("invalid config parameter in {0} in row: {1}\t{2}\t{3}\t{4}\t{5}", ranges[1], depth, alpha, beta, turnrange, difficulty));
+                throw new Exception(string.Format(CultureInfo.CurrentCulture, "invalid config parameter in {0} in row: {1}\t{2}\t{3}\t{4}\t{5}", ranges[1], depth, alpha, beta, turnrange, difficulty));
 
             return true;
         }

@@ -19,8 +19,8 @@
     /// TODO: should be extended to add "use" methods for extensibility and less dependence on OthelloState from other classes such as OthelloAI
     /// http://www.rarestyle.net/main/patterns/prototype.aspx
     /// </summary>
-    public interface OthelloPrototypeState
+    public interface IOthelloPrototypeState
     {
-        OthelloPrototypeState Clone();
+        IOthelloPrototypeState Clone();
     }
 }

@@ -23,6 +23,10 @@ namespace Othello
 
         protected override void RegisterProduct(OthelloGameAISystemProduct AI)
         {
+            if(AI == null)
+            {
+                throw new ArgumentNullException(nameof(AI));
+            }
             aiplayers.Add(((OthelloGameAiSystem)AI).AiPlayer.PlayerName);
         }
     }
@@ -47,6 +51,8 @@ namespace Othello
 
         protected override void RegisterProduct(OthelloGameAISystemProduct AI)
         {
+            OthelloExceptions.ThrowExceptionIfNull(AI);
+
             observers.Add(((OthelloGameAiSystem)AI).AiPlayer.PlayerName);
         }
     }

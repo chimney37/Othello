@@ -8,7 +8,7 @@
     public enum OthelloBitType { Empty = 0x0, Black = 0x1, White = 0x3, OOB = 0xffff};
     public enum OthelloPlayerKind { Black, White};
     public enum OthelloDirection { Deg0,Deg45,Deg90,Deg135,Deg180,Deg225,Deg270,Deg315};
-    public enum OthelloBoardType { TokenMatrix, CharMatrix, String, Bit};
+    public enum OthelloBoardType { TokenMatrix, CharMatrix, StringSequence, Bit};
 
     //GameState Modes used by the application (game) loop
     public enum GameStateMode { Debug, NewGame, NewAlternateGame, SwitchPlayer, LoadGame, SaveGame, InputMove, AIMove, TestMode, Undo, Redo, DoNothing };

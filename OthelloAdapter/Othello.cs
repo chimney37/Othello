@@ -13,7 +13,7 @@ namespace OthelloAdapters
         public abstract void GameRedo();
         public abstract OthelloToken[,] GameGetBoardData();
         public abstract int GameGetBoardSize();
-        public abstract List<OthelloToken> GameMakeMove(int GameX, int GameY, OthelloGamePlayer player, out bool IsValidMove);
+        public abstract List<OthelloToken> GameMakeMove(int GameX, int GameY, OthelloGamePlayer player, out bool IsInvalidMove);
         public abstract List<OthelloToken> GameAIMakeMove();
         public abstract OthelloGamePlayer GameUpdatePlayer();
         public abstract int GameUpdateTurn();

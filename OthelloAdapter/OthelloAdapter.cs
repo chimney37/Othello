@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Othello;
 
@@ -17,11 +18,11 @@ namespace OthelloAdapters
 
             if (IsEnabledLogging)
             {
-                _oGame.GameEnableLogging();
+                OthelloGame.GameEnableLogging();
             }
             else
             {
-                _oGame.GameDisableLog();
+                OthelloGame.GameDisableLog();
             }
         }
 
@@ -87,10 +88,10 @@ namespace OthelloAdapters
             return OthelloBoard.BoardSize;
         }
 
-        public override List<OthelloToken> GameMakeMove(int GameX, int GameY, OthelloGamePlayer oCurrentPlayer, out bool IsValidMove)
+        public override List<OthelloToken> GameMakeMove(int GameX, int GameY, OthelloGamePlayer oCurrentPlayer, out bool IsInvalidMove)
         {
             List<OthelloToken> oFlipList = _oGame.GameMakeMove(GameX, GameY, oCurrentPlayer);
-            IsValidMove = oFlipList.Count() < 1 ? true : false;
+            IsInvalidMove = !oFlipList.Any() ? true : false;
             return oFlipList;
         }
 
@@ -147,7 +148,9 @@ namespace OthelloAdapters
 
         public override int GameGetScore(OthelloGamePlayer player)
         {
-            if (player.PlayerKind == OthelloPlayerKind.Black)
+            OthelloExceptions.ThrowExceptionIfNull(player);
+
+            if (player!= null && player.PlayerKind == OthelloPlayerKind.Black)
                 return _oGame.GameGetScoreBlack();
             
             return _oGame.GameGetScoreWhite();

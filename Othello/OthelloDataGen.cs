@@ -3,12 +3,12 @@
 namespace Othello
 {
     #region FOR FUTURE USE
-    //For future use. This was  intended to store the good moves of an existing game (presumably by a grand master) and store it for future use. Meaning, 
+    //TODO: For future use. This was  intended to store the good moves of an existing game (presumably by a grand master) and store it for future use. Meaning, 
     //if a state of a board matches the state found in the database, create a move that gets the state to a next great move by the existing game.
 
     public class OthelloDataGen
     {
-        public List<OthelloState> statesCollection;
+        private List<OthelloState> statesCollection;
 
         public void LoadStates()
         {

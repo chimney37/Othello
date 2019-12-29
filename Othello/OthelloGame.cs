@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.IO;
-
+using System.Globalization;
 
 namespace Othello
 {
@@ -41,10 +41,10 @@ namespace Othello
         private Stack<OthelloState> statesUndoCollection;
         private Stack<OthelloState> statesRedoCollection;
 
-        public OthelloGameAIFactory Factory;
-        public OthelloGamePlayer PlayerWhite;
-        public OthelloGamePlayer PlayerBlack;
-        public OthelloGameAiSystem AIPlayer;
+        private OthelloGameAIFactory Factory;
+        public OthelloGamePlayer PlayerWhite { get; set; }
+        public OthelloGamePlayer PlayerBlack { get; set; }
+        public OthelloGameAiSystem AIPlayer { get; set; }
 
         //AI best move tracked here after making an AI Move
         public OthelloToken AIMove { get;set; }
@@ -95,17 +95,21 @@ namespace Othello
         /// <param name="IsAlternate"></param>
         public void GameCreateNew(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate = false)
         {
-            if(oPlayerWhite.PlayerKind == oPlayerBlack.PlayerKind)
-                throw new Exception("cannot have both player of same type.");
+            OthelloExceptions.ThrowExceptionIfNull(oPlayerWhite);
+            OthelloExceptions.ThrowExceptionIfNull(oPlayerBlack);
+            OthelloExceptions.ThrowExceptionIfNull(firstPlayer);
+
+            if (oPlayerWhite.PlayerKind == oPlayerBlack.PlayerKind)
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "cannot have both player of same type."));
             
 
             //check for exceptions and set up players
             if(oPlayerWhite.PlayerKind != OthelloPlayerKind.White)
-                throw new Exception("GameLoad [Wrong Player Kind] Black Player specfied when expected was White");
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "GameLoad [Wrong Player Kind] Black Player specfied when expected was White"));
             
 
             if(oPlayerBlack.PlayerKind != OthelloPlayerKind.Black)
-                throw new Exception("GameLoad [Wrong Player Kind] White Player specfied when expected was Black");
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "GameLoad [Wrong Player Kind] White Player specfied when expected was Black"));
             
             PlayerWhite = oPlayerWhite;
             PlayerBlack = oPlayerBlack;
@@ -140,7 +144,7 @@ namespace Othello
             Update(oNextState);
 
 #if TRACE
-            Trace.WriteLine(string.Format("MakeMove: Turn:{0} [{1}({2},{3})] Player={4}", 
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "MakeMove: Turn:{0} [{1}({2},{3})] Player={4}", 
                 CurrentOthelloState.Turn,
                 CurrentOthelloState.GetBoardData().GetCell(x, y).Token, 
                 x, 
@@ -181,7 +185,7 @@ namespace Othello
         /// </summary>
         public void GameUndo()
         {
-            Trace.WriteLine(string.Format("GameUndo: Undoable Count =  {0}", statesUndoCollection.Count));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture,"GameUndo: Undoable Count =  {0}", statesUndoCollection.Count));
             if (statesUndoCollection.Count > 0)
             {
                 OthelloState state = statesUndoCollection.Pop();
@@ -203,7 +207,7 @@ namespace Othello
         /// </summary>
         public void GameRedo()
         {
-            Trace.WriteLine(string.Format("GameUndo: Reddoable Count =  {0}", statesRedoCollection.Count));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "GameUndo: Reddoable Count =  {0}", statesRedoCollection.Count));
             if (statesRedoCollection.Count > 0)
             {
                 OthelloState state = statesRedoCollection.Pop();
@@ -325,8 +329,8 @@ namespace Othello
                     return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.CharMatrix);
                 case OthelloBoardType.TokenMatrix:
                     return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.TokenMatrix);
-                case OthelloBoardType.String:
-                    return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.String);
+                case OthelloBoardType.StringSequence:
+                    return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.StringSequence);
                 default:
                     return null;
             }
@@ -362,12 +366,12 @@ namespace Othello
         /// <summary>
         /// Disable Logging: for performance testing and other uses
         /// </summary>
-        public void GameDisableLog()
+        public static void GameDisableLog()
         {
             OthelloLogger.Disable();
         }
 
-        public void GameEnableLogging()
+        public static void GameEnableLogging()
         {
             OthelloLogger.GetInstance();
         }
@@ -390,7 +394,7 @@ namespace Othello
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format("OthelloIO.SaveToBinaryFile [Exception] : Exception Message = {0}", e.Message));
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "OthelloIO.SaveToBinaryFile [Exception] : Exception Message = {0}", e.Message));
             }
             finally
             {
@@ -412,7 +416,7 @@ namespace Othello
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format("OthelloIO.LoadFromBinaryFile : {0}", e.ToString()));
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "OthelloIO.LoadFromBinaryFile : {0}", e.ToString()));
             }
             finally
             {
@@ -434,7 +438,7 @@ namespace Othello
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format("OthelloGame.GameGetJSON : something went wrong: {0}", e.ToString()));
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "OthelloGame.GameGetJSON : something went wrong: {0}", e.ToString()));
             }
             finally
             {
@@ -455,7 +459,7 @@ namespace Othello
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format("OthelloGame.GameGetGameFromJSON : something went wrong: {0}", e.ToString()));
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "OthelloGame.GameGetGameFromJSON : something went wrong: {0}", e.ToString()));
             }
             finally
             {
@@ -666,11 +670,11 @@ namespace Othello
                 this.AIConfigs = from data in AIConfigLines.Skip(1)
                             select new OthelloGameAIConfig
                             {
-                                depth = int.Parse(data.Split('\t')[0]),
-                                alpha = float.Parse(data.Split('\t')[1]),
-                                beta = float.Parse(data.Split('\t')[2]),
+                                depth = int.Parse(data.Split('\t')[0], CultureInfo.InvariantCulture),
+                                alpha = float.Parse(data.Split('\t')[1], CultureInfo.InvariantCulture),
+                                beta = float.Parse(data.Split('\t')[2], CultureInfo.InvariantCulture),
                                 turnrange = data.Split('\t')[3],
-                                difficulty = int.Parse(data.Split('\t')[4])
+                                difficulty = int.Parse(data.Split('\t')[4], CultureInfo.InvariantCulture)
                             };
 
                 //validate config. Any problems with loading these values will throw an exception
@@ -687,7 +691,7 @@ namespace Othello
             }
             catch (Exception e)
             {
-                throw new Exception("Error with config file!", e);
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "Error with config file!"), e);
             }
         }
 
@@ -702,7 +706,7 @@ namespace Othello
             GetTurnConfig(mode, turn, AIConfigs, out depth, out alpha, out beta);
 
             if (depth == null || alpha == null || beta == null)
-                throw new Exception("failed to load/parse AI config for this turn." + string.Format("mode={0},turn={1}",mode, turn) );
+                throw new Exception("failed to load/parse AI config for this turn." + string.Format(CultureInfo.InvariantCulture, "mode={0},turn={1}",mode, turn) );
         }
 
         /// <summary>
@@ -714,7 +718,7 @@ namespace Othello
         /// <param name="depth"></param>
         /// <param name="alpha"></param>
         /// <param name="beta"></param>
-        private void GetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloGameAIConfig> configs, out int? depth, out float? alpha, out float? beta)
+        private static void GetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloGameAIConfig> configs, out int? depth, out float? alpha, out float? beta)
         {
             foreach (OthelloGameAIConfig c in configs)
             {
@@ -742,8 +746,10 @@ namespace Othello
             return AIConfigs;
         }
 
-        public void DebugGetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloGameAIConfig> configs, out int? depth, out float? alpha, out float? beta)
+        public static void DebugGetTurnConfig(GameDifficultyMode difficultymode, int turn, IEnumerable<OthelloGameAIConfig> configs, out int? depth, out float? alpha, out float? beta)
         {
+            OthelloExceptions.ThrowExceptionIfNull(configs);
+
             GetTurnConfig(difficultymode, turn, configs, out depth, out alpha, out beta);
         }
 
@@ -762,7 +768,7 @@ namespace Othello
                 sb.Append("\t ");
                 for (int i = 0; i < OthelloBoard.BoardSize; i++)
                 {
-                    sb.Append(Convert.ToString(i));
+                    sb.Append(Convert.ToString(i, CultureInfo.InvariantCulture));
                 }
                 sb.Append("\n");
             }
@@ -772,7 +778,7 @@ namespace Othello
                 //create y-axis
                 if (IsCreateAxis)
                 {
-                    sb.Append(string.Format("\t{0}", Convert.ToString(i)));
+                    sb.Append(string.Format(CultureInfo.InvariantCulture,"\t{0}", Convert.ToString(i, CultureInfo.InvariantCulture)));
                 }
 
                 for (int j = 0; j < OthelloBoard.BoardSize; j++)
@@ -801,11 +807,11 @@ namespace Othello
         }
         public void DebugGameInformation()
         {
-            Trace.WriteLine(string.Format("[DebugGameInformation]:{0} Allowed Move Count={1}",
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture,"[DebugGameInformation]:{0} Allowed Move Count={1}",
                 this.GetCurrentPlayer().PlayerName,
-                this.CurrentOthelloState.GetAllowedMoves(this.GetCurrentPlayer()).Count()));
+                this.CurrentOthelloState.GetAllowedMoves(this.GetCurrentPlayer()).Count));
 
-            Console.WriteLine(string.Format("{0}({1}) Score={2}, {3}({4}) Score={5}",
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "{0}({1}) Score={2}, {3}({4}) Score={5}",
                this.PlayerWhite.PlayerName,
                this.PlayerWhite.PlayerKind,
                this.GameGetScoreWhite(),
@@ -813,7 +819,7 @@ namespace Othello
                this.PlayerBlack.PlayerKind,
                this.GameGetScoreBlack()));
 
-            Console.WriteLine(string.Format("Turn: {0}, Player: {1}, Color: {2}",
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Turn: {0}, Player: {1}, Color: {2}",
                 this.CurrentOthelloState.Turn,
                 this.GetCurrentPlayer().PlayerName,
                 this.GetCurrentPlayer().PlayerKind));

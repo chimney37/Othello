@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Othello;
@@ -18,7 +19,7 @@ namespace OthelloEngineConsole
         static Othello.OthelloGame oGame;
         static OthelloToken[,] oBoard;
 
-        static void Main(string[] args)
+        static void Main()
         {
             //intiialize game
             InitializeGame();
@@ -89,8 +90,8 @@ namespace OthelloEngineConsole
         private static void Render()
         {
             Console.Clear();
-            Console.WriteLine("Press <Esc> to Exit");
-            Console.WriteLine("Menu: N:NewGame, L:LoadGame, S: SaveGame, 4: InputMove, 5: A.I., 6: Run Basic Tests\n");
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Press <Esc> to Exit"));
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Menu: N:NewGame, L:LoadGame, S: SaveGame, 4: InputMove, 5: A.I., 6: Run Basic Tests\n"));
 
             oGame.DebugGameState();
             oGame.DebugGameBoard();
@@ -98,7 +99,7 @@ namespace OthelloEngineConsole
 
             if (oGame.GameIsEndGame())
             {
-                Console.WriteLine("Game has ended. Start NewGame or End game");
+                Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Game has ended. Start NewGame or End game"));
             }
         }
 
@@ -130,73 +131,73 @@ namespace OthelloEngineConsole
                     break;
                 case GameStateMode.NewGame:
                     oGame.GameCreateNew(oPlayerA, oPlayerB, ofirstPlayer, IsAlternateGame = false); 
-                    Console.WriteLine("Creating New Game.");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Creating New Game."));
                     break;
                 case GameStateMode.NewAlternateGame:
                     oGame.GameCreateNew(oPlayerA, oPlayerB, ofirstPlayer, IsAlternateGame = true); 
-                    Console.WriteLine("Creating New Game (Alternate Layout).");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Creating New Game (Alternate Layout)."));
                     break;
                 case GameStateMode.SwitchPlayer:
                     if(oGame.GameUpdateTurn() == 1)
                     {
                         ofirstPlayer = ofirstPlayer.PlayerKind == oPlayerA.PlayerKind ? ofirstPlayer = oPlayerB : oPlayerA;
                         oGame.GameCreateNew(oPlayerA, oPlayerB, ofirstPlayer, IsAlternateGame);
-                        Console.WriteLine("Switching Players. PlayerA <=> PlayerB");
+                        Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Switching Players. PlayerA <=> PlayerB"));
                     }
                     else
-                        Console.WriteLine("Cannot Switch Player halfway in game");                  
+                        Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Cannot Switch Player halfway in game"));                  
                     
                     break;
                 case GameStateMode.LoadGame:
                     oGame.GameLoad();
-                    Console.WriteLine("Loading Game.");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Loading Game."));
                     break;
                 case GameStateMode.SaveGame:
                     oGame.GameSave();
-                    Console.WriteLine("Saving Game.");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Saving Game."));
                     break;
                 case GameStateMode.InputMove:
-                    Console.WriteLine("Menu: Enter x,y then <Enter>");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Menu: Enter x,y then <Enter>"));
                     string input = Console.ReadLine();
 
                     if(Regex.IsMatch(input, @"^\d,\d"))
                     {
                         MatchCollection mc = Regex.Matches(input, @"\d");
 
-                        int x = int.Parse(mc[0].Value);
-                        int y = int.Parse(mc[1].Value);
+                        int x = int.Parse(mc[0].Value, CultureInfo.InvariantCulture);
+                        int y = int.Parse(mc[1].Value, CultureInfo.InvariantCulture);
 
                         OthelloGamePlayer currentPlayer = oGame.GameUpdatePlayer();
-                        int move = oGame.GameMakeMove(x, y, currentPlayer).Count();
+                        int move = oGame.GameMakeMove(x, y, currentPlayer).Count;
 
                         if(move == 0)
-                            Console.WriteLine("Invalid Move..");
+                            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Invalid Move.."));
                     }
 
                     break;
                 case GameStateMode.Undo:
                     oGame.GameUndo();
-                    Console.WriteLine("Undoing a move.");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Undoing a move."));
                     break;
                 case GameStateMode.Redo:
                     oGame.GameRedo();
-                    Console.WriteLine("Redoing a move.");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Redoing a move."));
                     break;
                 case GameStateMode.AIMove:
                     OthelloGameAIFactory factory = new OthelloGameAIFactory();
                     OthelloGameAISystemProduct AI1 = factory.Create(oGame, oCurrentPlayer, oPlayerA);
                     oGame.AIPlayer = (OthelloGameAiSystem)AI1;
 
-                    Console.WriteLine("A.I {0} processing...", AI1.ToString());
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "A.I {0} processing...", AI1.ToString()));
 
                     oGame.GameAIMakeMove();
 
-                    Console.WriteLine("A.I move: ({0},{1}). Press Enter for next turn...", oGame.AIMove.X, oGame.AIMove.Y);
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "A.I move: ({0},{1}). Press Enter for next turn...", oGame.AIMove.X, oGame.AIMove.Y));
                     break;
                 case GameStateMode.TestMode:
                     //quickly test the results of a series of moves.
                     
-                    Console.WriteLine("Doing tests");
+                    Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Doing tests"));
                     //******************************write any tests here ****************************************
                     OthelloTest.CheckAIConfigLoaderSanity(GameDifficultyMode.Default);
                     //******************************end of tests*************************************************
@@ -204,7 +205,7 @@ namespace OthelloEngineConsole
                 default:
                     break;
             }
-            Console.WriteLine("Press <Enter> to continue");
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Press <Enter> to continue"));
             Console.ReadLine();
         }
     }

@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using NUnit.Framework;
 using System.Linq;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace Othello
 {
@@ -14,9 +16,8 @@ namespace Othello
     [TestFixture]
     public class OthelloTest
     {
-        public static Tuple<string, int, int>[] tlist;
-
-        public static Tuple<string,int,int,string>[,] multilist;
+        private static Tuple<string, int, int>[] tlist;
+        private static Tuple<string,int,int,string>[,] multilist;
 
         /// <summary>
         /// Fix to change the test directory to the location of the assembly. Default is within VS 2017's program directory
@@ -311,7 +312,7 @@ namespace Othello
                     
                 count++;
 
-                Console.Write("({0},{1})", oIter.Current.X, oIter.Current.Y);
+                Trace.Write(string.Format(CultureInfo.CurrentCulture,"({0},{1})", oIter.Current.X, oIter.Current.Y));
             }
 
             //check movenext returns false after hitting end
@@ -337,7 +338,7 @@ namespace Othello
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
 
             target.GameMakeMove(tlist[ExpectIndex].Item2, tlist[ExpectIndex].Item3, oPlayerA);
-            Assert.AreEqual(tlist[ExpectIndex].Item1, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(tlist[ExpectIndex].Item1, target.GameGetBoardData(OthelloBoardType.StringSequence));
         }
 
         //Check Basic multi moves
@@ -354,7 +355,7 @@ namespace Othello
             for (int t = 0; t < turncount; t++)
             {
                 target.GameMakeMove(multilist[t, index].Item2, multilist[t, index].Item3, multilist[t, index].Item4 == "w" ? oPlayerA : oPlayerB);
-                Assert.AreEqual(multilist[t, index].Item1, target.GameGetBoardData(OthelloBoardType.String));
+                Assert.AreEqual(multilist[t, index].Item1, target.GameGetBoardData(OthelloBoardType.StringSequence));
             }
         }
 
@@ -471,7 +472,7 @@ namespace Othello
             target.GameSetPlayer(oPlayerB);
             target.GameMakeMove(7, 7, oPlayerB);
 
-            Assert.AreEqual(expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
         }
 
         //Othello State checks : check that correct flips list can be obtaine from a path for white move
@@ -547,7 +548,7 @@ namespace Othello
                             "xxxxxxxx" +
                             "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
 
             var player = target.GameUpdatePlayer();
             target.GameMakeMove(4, 2, player);
@@ -561,7 +562,7 @@ namespace Othello
                             "xxxxxxxx" +
                             "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
 
         }
 
@@ -587,7 +588,7 @@ namespace Othello
             var oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "PlayerB");
             var target = new OthelloGame(oPlayerA, oPlayerB, oPlayerA);
          
-            Console.WriteLine(string.Format("Before ExecuteMoves. Turn = {0}", target.GameUpdateTurn()));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Before ExecuteMoves. Turn = {0}", target.GameUpdateTurn()));
 
             OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 4, player);
@@ -595,7 +596,7 @@ namespace Othello
             player = target.GameUpdatePlayer();
             target.GameMakeMove(5, 3, player);
 
-            Console.WriteLine(string.Format("After Execute 2 Moves. Current Turn = {0}", target.GameUpdateTurn()));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "After Execute 2 Moves. Current Turn = {0}", target.GameUpdateTurn()));
 
             Assert.AreEqual(3, target.GameUpdateTurn());
         }
@@ -625,12 +626,12 @@ namespace Othello
             OthelloGamePlayer player = target.GameUpdatePlayer();
             target.GameMakeMove(0, 6, player);
 
-            Console.WriteLine(string.Format("Calculated Turn = {0}", target.GameUpdateTurn()));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Calculated Turn = {0}", target.GameUpdateTurn()));
 
             player = target.GameUpdatePlayer();
             target.GameMakeMove(0, 7, player);
 
-            Console.WriteLine(string.Format("Calculated Turn = {0}", target.GameUpdateTurn()));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Calculated Turn = {0}", target.GameUpdateTurn()));
 
             Assert.AreEqual(true, target.GameIsEndGame());
 
@@ -671,7 +672,7 @@ namespace Othello
             int targetcount = oGame.GameGetPlayerAllowedMoves(player).Count;
 
 
-            Console.WriteLine(string.Format("Validated and Set Player to Move = {0}, allowed moves count = {1}", player, targetcount));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Validated and Set Player to Move = {0}, allowed moves count = {1}", player, targetcount));
 
             Assert.AreEqual(4, targetcount);
         }
@@ -712,11 +713,11 @@ namespace Othello
             target.GameSetBoardData(initboard);
 
             target.GameSetPlayer(oPlayerB);
-            Console.WriteLine(string.Format("Validated and Set Player to Move = {0}, allowed moves count = {1}", oPlayerB.PlayerKind, target.GameGetPlayerAllowedMoves(oPlayerB).Count));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Validated and Set Player to Move = {0}, allowed moves count = {1}", oPlayerB.PlayerKind, target.GameGetPlayerAllowedMoves(oPlayerB).Count));
 
             OthelloGamePlayer targetPlayer = target.GameUpdatePlayer();
 
-            Console.WriteLine(string.Format("Validated and Set Player to Move = {0}, allowed moves count = {1}", targetPlayer.PlayerKind, target.GameGetPlayerAllowedMoves(targetPlayer).Count));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Validated and Set Player to Move = {0}, allowed moves count = {1}", targetPlayer.PlayerKind, target.GameGetPlayerAllowedMoves(targetPlayer).Count));
 
             Assert.AreEqual(OthelloPlayerKind.White, targetPlayer.PlayerKind);
         }
@@ -747,7 +748,7 @@ namespace Othello
                             "xxxxxxxx" +
                             "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
         }
 
         // Check Saves are idempotent - saving more than once will result in same file size
@@ -813,7 +814,7 @@ namespace Othello
                             "xxxxxxxx" +
                             "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
         }
 
         //Custom path Load Redo
@@ -849,7 +850,7 @@ namespace Othello
                             "xxxxxxxx" +
                             "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
         }
 
         //add a test case for S1 -> M1 -> S2 -> M2 -> S3 -> M3 -> S4 -> U -> S3 -> M4 -> S5 -> R -> S5
@@ -872,7 +873,7 @@ namespace Othello
                             "xxxxxxxx" +
                             "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
 
 
             player = target.GameUpdatePlayer();
@@ -887,7 +888,7 @@ namespace Othello
                         "xxxxxxxx" +
                         "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
 
 
 
@@ -903,7 +904,7 @@ namespace Othello
                         "xxxxxxxx" +
                         "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
 
 
             player = target.GameUpdatePlayer();
@@ -924,7 +925,7 @@ namespace Othello
                         "xxxxxxxx" +
                         "xxxxxxxx";
 
-            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(Expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
         }
 
         // for JSON serialization and deserialization
@@ -1029,10 +1030,8 @@ namespace Othello
         {
             OthelloGamePlayer oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "Human");
             OthelloGamePlayer oPlayerB = new OthelloGamePlayer(OthelloPlayerKind.Black, "Computer");
-
             OthelloGame oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerA, false, true);
 
-            //oGame.DebugLoadAIConfig();
             int? depth;
             float? alpha, beta;
             int[] turn = new int[64];
@@ -1041,7 +1040,7 @@ namespace Othello
 
             foreach(int n in turn)
             {
-                oGame.DebugGetTurnConfig(modes, n, oGame.DebugAIConfig(), out depth, out alpha, out beta);
+                OthelloGame.DebugGetTurnConfig(modes, n, oGame.DebugAIConfig(), out depth, out alpha, out beta);
 
                 Assert.AreNotEqual(null, depth);
                 Assert.AreNotEqual(null, alpha);
@@ -1070,19 +1069,19 @@ namespace Othello
                                 "xxxxxxxx" +
                                 "xxxxxxxx";
 
-            target.GameDisableLog();
+            OthelloGame.GameDisableLog();
             target.GameSetBoardData(initboard);
             var oTarget = oAIPlayer.GetBestMove(oAIPlayer.AiPlayer, 5);
 
             target.GameAIMakeMove();
 
-            string expect = (string)target.GameGetBoardData(OthelloBoardType.String);
+            string expect = (string)target.GameGetBoardData(OthelloBoardType.StringSequence);
 
             target.GameSave(false, customPath);
             target.GameCreateNew(oPlayerA, oPlayerB, oPlayerB);
             target.GameLoad(false, customPath);
 
-            Assert.AreEqual(expect, target.GameGetBoardData(OthelloBoardType.String));
+            Assert.AreEqual(expect, target.GameGetBoardData(OthelloBoardType.StringSequence));
         }
 
 
