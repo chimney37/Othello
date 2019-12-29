@@ -61,7 +61,7 @@ namespace Othello
 
         #region CONSTRUCTORS
         /// <summary>
-        /// Default constructor
+        /// Default
         /// </summary>
         public OthelloGame()
         {
@@ -71,7 +71,6 @@ namespace Othello
 
         /// <summary>
         /// Constructor that uses given values to initiate a game
-        /// allows setting up HumanVSComputer moves
         /// </summary>
         /// <param name="oPlayerWhite"></param>
         /// <param name="oPlayerBlack"></param>
@@ -81,7 +80,7 @@ namespace Othello
         public OthelloGame(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate = false, bool IsAIMode = false, bool IsPlayerBlackAI = true, GameDifficultyMode difficulty = GameDifficultyMode.Default)
             : this()
         {
-            GameInitializeWithAI(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate, IsAIMode, IsPlayerBlackAI, difficulty);
+            GameInitializeWithAI(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate, IsPlayerBlackAI, difficulty);
             GameMode = IsAIMode ? GameMode.HumanVSComputer : GameMode.HumanVSHuman;
         }
         #endregion
@@ -591,8 +590,6 @@ namespace Othello
             this.GameDifficultyMode = (GameDifficultyMode)this.gameObjectsToSerialized[i++];
         }
 
-
-
         /// <summary>
         /// Intializes game variables at the highest level
         /// </summary>
@@ -620,7 +617,7 @@ namespace Othello
             OthelloGamePlayer playerWhite = new OthelloGamePlayer(OthelloPlayerKind.White, "default");
             OthelloGamePlayer playerBlack = new OthelloGamePlayer(OthelloPlayerKind.Black, "default");
 
-            GameInitializeWithAI(playerWhite, playerBlack, playerWhite, false, true, true, GameDifficultyMode.Default);
+            GameInitializeWithAI(playerWhite, playerBlack, playerWhite, false, true, GameDifficultyMode.Default);
         }
 
         /// <summary>
@@ -633,10 +630,10 @@ namespace Othello
         /// <param name="IsAIMode"></param>
         /// <param name="IsPlayerBlackAI"></param>
         /// <param name="difficulty"></param>
-        private void GameInitializeWithAI(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate, bool IsAIMode, bool IsPlayerBlackAI, GameDifficultyMode difficulty)
+        private void GameInitializeWithAI(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, OthelloGamePlayer firstPlayer, bool IsAlternate, bool IsPlayerBlackAI, GameDifficultyMode difficulty)
         {
             GameCreateNew(oPlayerWhite, oPlayerBlack, firstPlayer, IsAlternate);
-            GameSetupAI(oPlayerWhite, oPlayerBlack, IsAIMode, IsPlayerBlackAI, difficulty);
+            GameSetupAI(oPlayerWhite, oPlayerBlack, IsPlayerBlackAI, difficulty);
         }
         /// <summary>
         /// Initialize all AI aspects
@@ -645,19 +642,16 @@ namespace Othello
         /// <param name="IsAIMode"></param>
         /// <param name="IsPlayerBlackAI"></param>
         /// <param name="difficulty"></param>
-        private void GameSetupAI(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, bool IsAIMode, bool IsPlayerBlackAI, GameDifficultyMode difficulty)
+        private void GameSetupAI(OthelloGamePlayer oPlayerWhite, OthelloGamePlayer oPlayerBlack, bool IsPlayerBlackAI, GameDifficultyMode difficulty)
         {
             //set up AI player type
             AIPlayer = (OthelloGameAiSystem)Factory.Create(this,
                     IsPlayerBlackAI ? oPlayerBlack : oPlayerWhite,
                     IsPlayerBlackAI ? oPlayerWhite : oPlayerBlack);
 
-            if (IsAIMode)
-            {
-                //load AI difficulty config
-                GameDifficultyMode = difficulty;
-                LoadAiConfig();
-            }
+            GameDifficultyMode = difficulty;
+
+            LoadAiConfig();
         }
 
         /// <summary>
