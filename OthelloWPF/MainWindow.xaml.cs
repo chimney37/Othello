@@ -9,6 +9,7 @@ using System.Windows.Shapes;
 using System.Windows.Media.Animation;
 using System.Diagnostics;
 using Othello;
+using System.Globalization;
 
 namespace OthelloWPF
 {
@@ -67,26 +68,16 @@ namespace OthelloWPF
         /// </summary>
         private void InitializeOthelloGame()
         {            
-            try
-            {
-                //create a new game by default
-                OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
-                OthelloGameAdapter.GameCreateNewHumanVSHuman(playerAName, playerBName, OthelloPlayerKind.White, false);
+            //create a new game by default
+            OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloGameAdapter.GameCreateNewHumanVSHuman(playerAName, playerBName, OthelloPlayerKind.White, false);
 
-            }
-            catch(Exception e)
-            {
-                MessageBox.AppendText(string.Format("{0}\n",e.Message));
-            }
-            finally
-            {
-                //set rendering othello token size
-                OthelloTokenSize = GridSize * 0.8;
-                oFlipList = new List<OthelloToken>();
-                oIsInvalidMove = false;
+            //set rendering othello token size
+            OthelloTokenSize = GridSize * 0.8;
+            oFlipList = new List<OthelloToken>();
+            oIsInvalidMove = false;
 
-                MessageBox.AppendText(string.Format("{0}\n", "Initialized:Success. Human vs. Human"));
-            }
+            MessageBox.AppendText(string.Format(CultureInfo.CurrentCulture,"{0}\n", "Initialized:Success. Human vs. Human"));
         }
 
         /// <summary>
@@ -141,7 +132,7 @@ namespace OthelloWPF
             bt.BorderThickness = new Thickness(1);
             bt.Padding = new Thickness(2);
             bt.Click += ClickOthelloCell;
-            bt.ToolTip = string.Format("({0},{1})", i, j);
+            bt.ToolTip = string.Format(CultureInfo.CurrentCulture,"({0},{1})", i, j);
             bt.SetValue(Grid.ColumnProperty, i);
             bt.SetValue(Grid.RowProperty, j);
             return bt;
@@ -203,27 +194,19 @@ namespace OthelloWPF
         private void ClickNewAIGame(object sender, RoutedEventArgs e)
         {
             MessageBox.Clear();
-            try
+
+            if (IsHumanWhiteChecked)
             {
-                if (IsHumanWhiteChecked)
-                {
-                    OthelloGameAdapter.GameCreateNewHumanVSAI(playerHumanName, playerAIName, OthelloPlayerKind.White,IsHumanWhiteChecked, false, DifficultyMode);
-                }
-                else
-                {
-                    OthelloGameAdapter.GameCreateNewHumanVSAI(playerAIName, playerHumanName, OthelloPlayerKind.Black,IsHumanWhiteChecked, false, DifficultyMode);
-                }
+                OthelloGameAdapter.GameCreateNewHumanVSAI(playerHumanName, playerAIName, OthelloPlayerKind.White,IsHumanWhiteChecked, false, DifficultyMode);
             }
-            catch (Exception exception)
+            else
             {
-                //TODO: possible to redirect messages from Trace to here?
-                MessageBox.AppendText(string.Format("{0}\n", exception.Message));
+                OthelloGameAdapter.GameCreateNewHumanVSAI(playerAIName, playerHumanName, OthelloPlayerKind.Black,IsHumanWhiteChecked, false, DifficultyMode);
             }
-            finally
-            {
-                MessageBox.AppendText(string.Format("{0}\n", "AI Game Initialized:Success"));
-                Refresh();
-            }
+  
+            //TODO: possible to redirect messages from Trace to here?
+            MessageBox.AppendText(string.Format(CultureInfo.CurrentCulture,"{0}\n", "AI Game Initialized:Success"));
+            Refresh();           
         }
 
         /// <summary>
@@ -298,10 +281,10 @@ namespace OthelloWPF
         /// <param name="e"></param>
         private void ClickOthelloCell(object sender, RoutedEventArgs e)
         {
-            int GameX = Convert.ToInt32( ((Button)e.Source).GetValue(Grid.ColumnProperty));
-            int GameY = Convert.ToInt32( ((Button)e.Source).GetValue(Grid.RowProperty));
+            int GameX = Convert.ToInt32( ((Button)e.Source).GetValue(Grid.ColumnProperty), CultureInfo.InvariantCulture);
+            int GameY = Convert.ToInt32( ((Button)e.Source).GetValue(Grid.RowProperty), CultureInfo.InvariantCulture);
 
-            Trace.WriteLine(string.Format("Clicked {0},{1}",
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Clicked {0},{1}",
                GameX,
                GameY));
             
@@ -477,16 +460,16 @@ namespace OthelloWPF
         private void RenderGameMetaData()
         {
             //update status text
-            StatusText1.Text = OthelloGameAdapter.GameGetPlayerWhite().PlayerName + " Score: " + OthelloGameAdapter.GameGetScore(OthelloGameAdapter.GameGetPlayerWhite());
-            StatusText2.Text = OthelloGameAdapter.GameGetPlayerBlack().PlayerName + " Score: " + OthelloGameAdapter.GameGetScore(OthelloGameAdapter.GameGetPlayerBlack());
-            StatusText3.Text = string.Format("Turn = {0}", oTurn);
-            StatusText4.Text = string.Format("Current Player = {0}", oCurrentPlayer);
-            StatusText5.Text = oIsInvalidMove ? oInvalidMove : "";
-            StatusText6.Text = OthelloGameAdapter.GameIsEndGame() ? "Game Ended!" : "";
+            StatusText1.Text = string.Format(CultureInfo.InvariantCulture, "{0} Score: {1}", OthelloGameAdapter.GameGetPlayerWhite().PlayerName, OthelloGameAdapter.GameGetScore(OthelloGameAdapter.GameGetPlayerWhite()));
+            StatusText2.Text = string.Format(CultureInfo.InvariantCulture, "{0} Score: {1}", OthelloGameAdapter.GameGetPlayerBlack().PlayerName, OthelloGameAdapter.GameGetScore(OthelloGameAdapter.GameGetPlayerBlack()));
+            StatusText3.Text = string.Format(CultureInfo.InvariantCulture, "Turn = {0}", oTurn);
+            StatusText4.Text = string.Format(CultureInfo.InvariantCulture, "Current Player = {0}", oCurrentPlayer);
+            StatusText5.Text = oIsInvalidMove ? string.Format(CultureInfo.InvariantCulture, oInvalidMove) : "";
+            StatusText6.Text = OthelloGameAdapter.GameIsEndGame() ? string.Format(CultureInfo.InvariantCulture,"Game Ended!") : "";
 
             //update message box text
-            MessageBox.AppendText(string.Format("Turn = {0}", oTurn) + "\n");
-            MessageBox.AppendText(string.Format("Current Player = {0}", oCurrentPlayer) + "\n");
+            MessageBox.AppendText(string.Format(CultureInfo.InvariantCulture, "Turn = {0}", oTurn) + "\n");
+            MessageBox.AppendText(string.Format(CultureInfo.InvariantCulture, "Current Player = {0}", oCurrentPlayer) + "\n");
 
             //render othello token in status bar
             RenderOthelloToken(OthelloGameAdapter.GameGetPlayerWhite().GetPlayerOthelloToken(), PlayerACanvas.PointToScreen(new Point(2, 2)), 10, 10);

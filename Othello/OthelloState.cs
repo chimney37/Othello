@@ -100,7 +100,7 @@ namespace Othello
         /// <returns></returns>
         public bool IsValidPlayer(OthelloGamePlayer player)
         {
-            if (this.GetAllowedMoves(player).Count() == 0)
+            if (!this.GetAllowedMoves(player).Any())
             {
                 return false;
             }

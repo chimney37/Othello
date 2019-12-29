@@ -83,7 +83,7 @@ namespace OthelloAWSServerless
 
             context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "Getting blogs"));
             var search = this.DDBContext.ScanAsync<OthelloGameRepresentation>(null);
-            var page = await search.GetNextSetAsync();
+            var page = await search.GetNextSetAsync().ConfigureAwait(false);
             context.Logger.LogLine($"Found {page.Count} blogs");
 
             var response = new APIGatewayProxyResponse
@@ -122,7 +122,7 @@ namespace OthelloAWSServerless
             }
 
             context.Logger.LogLine($"Getting blog {gameId}");
-            var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId);
+            var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
             context.Logger.LogLine($"Found blog: {game != null}");
 
             if (game == null)
@@ -175,7 +175,7 @@ namespace OthelloAWSServerless
             othellogame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
 
             context.Logger.LogLine($"Saving game with id {othellogame.Id}");
-            await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame);
+            await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
 
             var response = new APIGatewayProxyResponse
             {
@@ -211,7 +211,7 @@ namespace OthelloAWSServerless
             }
 
             context.Logger.LogLine($"Deleting blog with id {blogId}");
-            await this.DDBContext.DeleteAsync<OthelloGameRepresentation>(blogId);
+            await this.DDBContext.DeleteAsync<OthelloGameRepresentation>(blogId).ConfigureAwait(false);
 
             return new APIGatewayProxyResponse
             {

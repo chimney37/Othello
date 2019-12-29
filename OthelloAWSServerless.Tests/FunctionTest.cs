@@ -59,7 +59,7 @@ namespace OthelloAWSServerless.Tests
             };
 
             context = new TestLambdaContext();
-            response = await functions.AddBlogAsync(request, context);
+            response = await functions.AddBlogAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
             var gameId = response.Body;
@@ -70,7 +70,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetBlogAsync(request, context);
+            response = await functions.GetBlogAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
@@ -82,7 +82,7 @@ namespace OthelloAWSServerless.Tests
             {
             };
             context = new TestLambdaContext();
-            response = await functions.GetBlogsAsync(request, context);
+            response = await functions.GetBlogsAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation[] gamePosts = JsonConvert.DeserializeObject<OthelloGameRepresentation[]>(response.Body);
@@ -97,7 +97,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
-            response = await functions.RemoveBlogAsync(request, context);
+            response = await functions.RemoveBlogAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
             // Make sure the post was deleted.
@@ -106,7 +106,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetBlogAsync(request, context);
+            response = await functions.GetBlogAsync(request, context).ConfigureAwait(false);
             Assert.Equal((int)HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -145,14 +145,14 @@ namespace OthelloAWSServerless.Tests
                 }
             };
 
-            await this.DDBClient.CreateTableAsync(request);
+            await this.DDBClient.CreateTableAsync(request).ConfigureAwait(false);
 
             var describeRequest = new DescribeTableRequest { TableName = this.TableName };
             DescribeTableResponse response = null;
             do
             {
                 Thread.Sleep(1000);
-                response = await this.DDBClient.DescribeTableAsync(describeRequest);
+                response = await this.DDBClient.DescribeTableAsync(describeRequest).ConfigureAwait(false);
             } while (response.Table.TableStatus != TableStatus.ACTIVE);
         }
 
