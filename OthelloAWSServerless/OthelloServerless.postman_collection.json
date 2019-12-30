@@ -45,7 +45,25 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"PlayerNameWhite\":\"Player A\"\n    \"PlayerNameBlack\":\"Player B\"\n    \"FirstPlayer\":\"OthelloPlayerKind.White\"\n}"
+					"raw": "{\n    \"PlayerNameWhite\":\"Player A: piece\",\n    \"PlayerNameBlack\":\"Player B: man\",\n    \"FirstPlayer\":\"White\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}",
+					"host": [
+						"{{url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - PUT makemove",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"PlayerNameWhite\":\"Player A: piece\",\n    \"PlayerNameBlack\":\"Player B: man\",\n    \"FirstPlayer\":\"White\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}",
@@ -144,6 +162,57 @@
 					"path": [
 						"Prod",
 						"1fd6f562-cf0b-4fb0-9502-978cc843c46c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - GET current player using Id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"protocol": "https",
+					"host": [
+						"xez1ssog7c",
+						"execute-api",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"Prod",
+						"1fd6f562-cf0b-4fb0-9502-978cc843c46c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - PUT move using Id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"host": [
+						"{{url}}1fd6f562-cf0b-4fb0-9502-978cc843c46c"
 					]
 				}
 			},
