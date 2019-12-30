@@ -42,3 +42,6 @@ Deploy application
     cd "OthelloAWSServerless"
     dotnet lambda deploy-serverless
 ```
+
+#steps to follow from postman
+refer to OthelloServerless.postman_collection.json on how to use the REST API, including request bodies, query string parameters and path parameters
