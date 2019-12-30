@@ -1,12 +1,12 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Transform" : "AWS::Serverless-2016-10-31",
-  "Description" : "AWS Serverless API that exposes the add, remove and get operations for a blogging platform using Amazon DynamoDB.",
+  "Description" : "AWS Serverless API that exposes the add, remove and get operations for an othello game platform using Amazon DynamoDB.",
   "Parameters" : {
     "ShouldCreateTable" : {
       "Type" : "String",        
       "AllowedValues" : ["true", "false"],
-      "Description" : "If true then the DynamoDB blogging table will be created with the CloudFormation stack."
+      "Description" : "If true then the DynamoDB Othello game management table will be created with the CloudFormation stack."
     },  
     "TableName" : {
         "Type" : "String",
@@ -16,38 +16,38 @@
     "ReadCapacity" : {
         "Type" : "Number",
         "Description" : "Read capacity for the DynamoDB blog table.",
-        "Default" : "3",
+        "Default" : "10",
         "MinValue" : 1
     },
     "WriteCapacity" : {
         "Type" : "Number",
         "Description" : "Write capacity for the DynamoDB blog table.",
-        "Default" : "3",
+        "Default" : "10",
         "MinValue" : 1
     }
   },
 
   "Conditions" : {
-    "CreateBlogTable" : {"Fn::Equals" : [{"Ref" : "ShouldCreateTable"}, "true"]},
+    "CreateGameTable" : {"Fn::Equals" : [{"Ref" : "ShouldCreateTable"}, "true"]},
 	  "TableNameGenerated" : {"Fn::Equals" : [{"Ref" : "TableName"}, ""]}
   },
 
   "Resources" : {
 
-    "GetBlogs" : {
+    "GetGames" : {
       "Type" : "AWS::Serverless::Function",
       "Properties": {
-        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::GetBlogsAsync",
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::GetGamesAsync",
         "Runtime": "dotnetcore2.1",
         "CodeUri": "",
-        "Description": "Function to get a list of blogs",
+        "Description": "Function to get a list of games",
         "MemorySize": 256,
         "Timeout": 30,
         "Role": null,
         "Policies": [ "AWSLambdaFullAccess" ],
         "Environment" : {
           "Variables" : {
-            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+            "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
           }
         },
         "Events": {
@@ -62,20 +62,20 @@
       }
     },
 
-    "GetBlog" : {
+    "GetGame" : {
       "Type" : "AWS::Serverless::Function",
       "Properties": {
-        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::GetBlogAsync",
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::GetGameAsync",
         "Runtime": "dotnetcore2.1",
         "CodeUri": "",
-        "Description": "Function to get a single blog",
+        "Description": "Function to get a single game",
         "MemorySize": 256,
         "Timeout": 30,
         "Role": null,
         "Policies": [ "AWSLambdaFullAccess" ],
         "Environment" : {
           "Variables" : {
-            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+            "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
           }
         },
         "Events": {
@@ -90,21 +90,20 @@
       }
     },
     
-
-    "AddBlog" : {
+    "AddGame" : {
       "Type" : "AWS::Serverless::Function",
       "Properties": {
-        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::AddBlogAsync",
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::AddGameAsync",
         "Runtime": "dotnetcore2.1",
         "CodeUri": "",
-        "Description": "Function to add a blog",
+        "Description": "Function to add a game",
         "MemorySize": 256,
         "Timeout": 30,
         "Role": null,
         "Policies": [ "AWSLambdaFullAccess" ],
         "Environment" : {
           "Variables" : {
-            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+            "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
           }
         },
         "Events": {
@@ -119,10 +118,10 @@
       }
     },
 
-    "RemoveBlog" : {
+    "RemoveGame" : {
       "Type" : "AWS::Serverless::Function",
       "Properties": {
-        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::RemoveBlogAsync",
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::RemoveGameAsync",
         "Runtime": "dotnetcore2.1",
         "CodeUri": "",
         "Description": "Function to remove a blog",
@@ -132,7 +131,7 @@
         "Policies": [ "AWSLambdaFullAccess" ],
         "Environment" : {
           "Variables" : {
-            "BlogTable" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+            "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
           }
         },
         "Events": {
@@ -147,9 +146,9 @@
       }
     },
 
-    "BlogTable" : {
+    "OthelloGameTable" : {
         "Type" : "AWS::DynamoDB::Table",
-        "Condition" : "CreateBlogTable",
+        "Condition" : "CreateGameTable",
         "Properties" : {
             "TableName" : { "Fn::If" : ["TableNameGenerated", {"Ref" : "AWS::NoValue" }, { "Ref" : "TableName" } ] },
             "AttributeDefinitions" : [
@@ -167,8 +166,8 @@
   },
 
   "Outputs" : {
-    "BlogTable" : {
-        "Value" : { "Fn::If" : ["CreateBlogTable", {"Ref":"BlogTable"}, { "Ref" : "TableName" } ] }
+    "OthelloGameTable" : {
+        "Value" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
     }
   }
 }

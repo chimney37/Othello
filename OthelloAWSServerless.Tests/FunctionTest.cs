@@ -34,7 +34,7 @@ namespace OthelloAWSServerless.Tests
         }
 
         [Fact]
-        public async Task BlogTestAsync()
+        public async Task GameTestAsync()
         {
             TestLambdaContext context;
             APIGatewayProxyRequest request;
@@ -42,12 +42,11 @@ namespace OthelloAWSServerless.Tests
 
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
-            // Add a new blog post
+            // Add a new game
             OthelloGameRepresentation myGame = new OthelloGameRepresentation();
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSHuman("PlayerA", "PlayerB", OthelloPlayerKind.White, false);
 
-            //myGame.Id = Guid.NewGuid().ToString();
             myGame.CreatedTimestamp = DateTime.Now;
             myGame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
 
@@ -59,30 +58,30 @@ namespace OthelloAWSServerless.Tests
             };
 
             context = new TestLambdaContext();
-            response = await functions.AddBlogAsync(request, context).ConfigureAwait(false);
+            response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
             var gameId = response.Body;
 
-            // Confirm we can get the blog post back out
+            // Confirm we can get the game back out
             request = new APIGatewayProxyRequest
             {
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetBlogAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
             Assert.Equal(gameId, readGame.Id);
             Assert.Equal(myGame.OthelloGameStrRepresentation, readGame.OthelloGameStrRepresentation);
 
-            // List the Games
+            // List the games
             request = new APIGatewayProxyRequest
             {
             };
             context = new TestLambdaContext();
-            response = await functions.GetBlogsAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGamesAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation[] gamePosts = JsonConvert.DeserializeObject<OthelloGameRepresentation[]>(response.Body);
@@ -91,22 +90,22 @@ namespace OthelloAWSServerless.Tests
             Assert.Equal(myGame.OthelloGameStrRepresentation, gamePosts[0].OthelloGameStrRepresentation);
 
 
-            // Delete the blog post
+            // Delete the game
             request = new APIGatewayProxyRequest
             {
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
-            response = await functions.RemoveBlogAsync(request, context).ConfigureAwait(false);
+            response = await functions.RemoveGameAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
-            // Make sure the post was deleted.
+            // Make sure the game was deleted.
             request = new APIGatewayProxyRequest
             {
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetBlogAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
             Assert.Equal((int)HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -156,7 +155,6 @@ namespace OthelloAWSServerless.Tests
             } while (response.Table.TableStatus != TableStatus.ACTIVE);
         }
 
-
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
@@ -178,6 +176,7 @@ namespace OthelloAWSServerless.Tests
         public void Dispose()
         {
             Dispose(true);
+            // https://docs.microsoft.com/ja-jp/visualstudio/code-quality/ca1816-call-gc-suppressfinalize-correctly?view=vs-2015
             GC.SuppressFinalize(this);
         }
         #endregion

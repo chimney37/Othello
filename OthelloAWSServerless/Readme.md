@@ -1,4 +1,4 @@
-# Amazon DynamoDB Blog API Serverless Application Project
+# Amazon DynamoDB Othello Game API Serverless Application Project
 
 This project consists of:
 * serverless.template - an AWS CloudFormation Serverless Application Model template file for declaring your Serverless functions and other AWS resources

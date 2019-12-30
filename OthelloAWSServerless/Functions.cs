@@ -24,7 +24,7 @@ namespace OthelloAWSServerless
     {
         // This const is the name of the environment variable that the serverless.template will use to set
         // the name of the DynamoDB table used to store Othello Game
-        const string TableNameEnvironmentVariableLookup = "BlogTable";
+        const string TableNameEnvironmentVariableLookup = "OthelloGameTable";
 
         public const string IdQueryStringName = "Id";
         IDynamoDBContext DDBContext { get; set; }
@@ -54,7 +54,7 @@ namespace OthelloAWSServerless
         }
 
         /// <summary>
-        /// Constructor used for testing passing in a preconfigured DynamoDB client.
+        /// Constructor for Lambda will invoke to set up the DDB context using a preconfigured DynamoDB client.
         /// </summary>
         /// <param name="ddbClient"></param>
         /// <param name="tableName"></param>
@@ -74,7 +74,7 @@ namespace OthelloAWSServerless
         /// </summary>
         /// <param name="request"></param>
         /// <returns>The list of blogs</returns>
-        public async Task<APIGatewayProxyResponse> GetBlogsAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> GetGamesAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(context);
 
@@ -101,7 +101,7 @@ namespace OthelloAWSServerless
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<APIGatewayProxyResponse> GetBlogAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> GetGameAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(request);
             ThrowExceptionIfNull(context);
@@ -157,7 +157,7 @@ namespace OthelloAWSServerless
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<APIGatewayProxyResponse> AddBlogAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> AddGameAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -190,7 +190,7 @@ namespace OthelloAWSServerless
         /// A Lambda function that removes a Othello Game from the DynamoDB table.
         /// </summary>
         /// <param name="request"></param>
-        public async Task<APIGatewayProxyResponse> RemoveBlogAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> RemoveGameAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(request);
             ThrowExceptionIfNull(context);
