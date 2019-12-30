@@ -81,7 +81,8 @@ namespace OthelloAWSServerless
         /// A Lambda function that returns back a page worth of Othello Games
         /// </summary>
         /// <param name="request"></param>
-        /// <returns>The list of blogs</returns>
+        /// <param name="context"></param>
+        /// <returns>The list of games</returns>
         public async Task<APIGatewayProxyResponse> GetGamesAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(context);
@@ -108,7 +109,8 @@ namespace OthelloAWSServerless
         /// A Lambda function that returns the Othello Game identified by Id
         /// </summary>
         /// <param name="request"></param>
-        /// <returns></returns>
+        /// <param name="context"></param>
+        /// <returns>return base64 string version of Othello game object</returns>
         public async Task<APIGatewayProxyResponse> GetGameAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(request);
@@ -156,6 +158,7 @@ namespace OthelloAWSServerless
         /// A Lambda function that adds (creates) a Human vs Human Othello Game.
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
         public async Task<APIGatewayProxyResponse> AddGameAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
@@ -189,6 +192,8 @@ namespace OthelloAWSServerless
         /// A Lambda function that removes a Othello Game from the DynamoDB table.
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task<APIGatewayProxyResponse> RemoveGameAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(request);
@@ -215,7 +220,7 @@ namespace OthelloAWSServerless
         /// </summary>
         /// <param name="request"></param>
         /// <param name="context"></param>
-        /// <returns></returns>
+        /// <returns>current player kind</returns>
         public async Task<APIGatewayProxyResponse> GetGameCurrentPlayerAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(request);
