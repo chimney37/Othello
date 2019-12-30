@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -514,25 +515,25 @@ namespace OthelloWPF
                     !OthelloGameAdapter.GameIsEndGame() &&
                     OthelloGameAdapter.GameUpdatePlayer().PlayerKind == OthelloGameAdapter.GameGetAiPlayer().AiPlayer.PlayerKind)
                 {
-                    var slowTask = Task.Factory.StartNew(() =>ComputerMoves());
+                    var slowTask = Task.Factory.StartNew(() => ComputerMoves(), 
+                        CancellationToken.None, 
+                        TaskCreationOptions.None,
+                        TaskScheduler.Default);
 
-                    //disable all cell buttons when computing
                     SetEnableGridButtons(false);
-                    //disable all UI buttons when computing
-                    SetUIButton(false);
+                    SetEnableUIButton(false);
 
                     //start a progress bar in case the computation for ComputerMoves is very slow
                     DoubleAnimation dblAnimProgress = new DoubleAnimation(0, 100, TimeSpan.FromMilliseconds(30000));
                     ComputeProgressBar.BeginAnimation(ProgressBar.ValueProperty, dblAnimProgress);
 
-                    await slowTask;
+                    await slowTask.ConfigureAwait(true);
 
                     //stop the animation
                     ComputeProgressBar.BeginAnimation(ProgressBar.ValueProperty, null);
 
-                    //enable all buttons again
                     SetEnableGridButtons(true);
-                    SetUIButton(true);
+                    SetEnableUIButton(true);
 
                     Refresh();
                 }
@@ -592,7 +593,7 @@ namespace OthelloWPF
 
         }
 
-        private void SetUIButton(bool enable)
+        private void SetEnableUIButton(bool enable)
         {
             Load.IsEnabled = enable;
             Save.IsEnabled = enable;
