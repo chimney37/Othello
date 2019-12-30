@@ -1,0 +1,154 @@
+{
+	"info": {
+		"_postman_id": "386b4b98-7f56-4d5d-afb9-8467b972c465",
+		"name": "OthelloServerless",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Othello request",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Id\": \"9288a3dc-aba4-4f7c-b6cd-844504a89148\"\n}"
+				},
+				"url": {
+					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod",
+					"protocol": "https",
+					"host": [
+						"xez1ssog7c",
+						"execute-api",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"Prod"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": ""
+						}
+					]
+				},
+				"description": "Requests to test Othello serverless"
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - PUT",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"PlayerNameWhite\":\"Player A\"\n    \"PlayerNameBlack\":\"Player B\"\n    \"FirstPlayer\":\"OthelloPlayerKind.White\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}",
+					"host": [
+						"{{url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - GET",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod",
+					"protocol": "https",
+					"host": [
+						"xez1ssog7c",
+						"execute-api",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"Prod"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - DELETE",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod?Id=1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"protocol": "https",
+					"host": [
+						"xez1ssog7c",
+						"execute-api",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"Prod"
+					],
+					"query": [
+						{
+							"key": "Id",
+							"value": "1fd6f562-cf0b-4fb0-9502-978cc843c46c"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - GET using Id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"protocol": "https",
+					"host": [
+						"xez1ssog7c",
+						"execute-api",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"Prod",
+						"1fd6f562-cf0b-4fb0-9502-978cc843c46c"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
