@@ -27,6 +27,10 @@ namespace OthelloAWSServerless
         const string TableNameEnvironmentVariableLookup = "OthelloGameTable";
 
         public const string IdQueryStringName = "Id";
+        public const string FirstPlayer = "FirstPlayer";
+        public const string PlayerNameWhite = "PlayerNameWhite";
+        public const string PlayerNameBlack = "PlayerNameBlack";
+
         IDynamoDBContext DDBContext { get; set; }
         AmazonDynamoDBClient DDBClient { get; set; }
 
@@ -81,10 +85,10 @@ namespace OthelloAWSServerless
             if (request == null)
                 context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "request is empty."));
 
-            context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "Getting blogs"));
+            context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "Getting games."));
             var search = this.DDBContext.ScanAsync<OthelloGameRepresentation>(null);
             var page = await search.GetNextSetAsync().ConfigureAwait(false);
-            context.Logger.LogLine($"Found {page.Count} blogs");
+            context.Logger.LogLine($"Found {page.Count} games");
 
             var response = new APIGatewayProxyResponse
             {
@@ -153,22 +157,24 @@ namespace OthelloAWSServerless
         }
 
         /// <summary>
-        /// A Lambda function that adds a Othello Game.
+        /// A Lambda function that adds (creates) a Human vs Human Othello Game.
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         public async Task<APIGatewayProxyResponse> AddGameAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            ThrowExceptionIfNull(context);
+            ThrowExceptionIfNull(request);
 
-            if (request == null)
-                context.Logger.LogLine(string.Format(CultureInfo.InvariantCulture, "request is empty."));
-
+            var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
             var othellogame = new OthelloGameRepresentation();
 
+            OthelloPlayerKind playerkind;
+            if (!Enum.TryParse(playerdata.FirstPlayer, out playerkind))
+                throw new Exception(string.Format(CultureInfo.InvariantCulture,"failed enum parse"));
+
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
-            OthelloGameAdapter.GameCreateNewHumanVSHuman("PlayerA", "PlayerB", OthelloPlayerKind.White, false);
+            OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, playerkind, false);
 
             othellogame.Id = Guid.NewGuid().ToString();
             othellogame.CreatedTimestamp = DateTime.Now;

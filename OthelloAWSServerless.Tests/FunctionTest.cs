@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,19 +42,25 @@ namespace OthelloAWSServerless.Tests
 
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
-            // Add a new game
+            // Add a new game using player parameters
             OthelloGameRepresentation myGame = new OthelloGameRepresentation();
+            OthelloServerlessPlayers myPlayers = new OthelloServerlessPlayers();
+            myPlayers.PlayerNameWhite = "PlayerA";
+            myPlayers.PlayerNameBlack = "PlayerB";
+            myPlayers.FirstPlayer = "White";
+            var playerkind = (OthelloPlayerKind)Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
+
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
-            OthelloGameAdapter.GameCreateNewHumanVSHuman("PlayerA", "PlayerB", OthelloPlayerKind.White, false);
+            OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind, false);
 
             myGame.CreatedTimestamp = DateTime.Now;
             myGame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
 
-            Console.WriteLine(JsonConvert.SerializeObject(myGame));
+            Trace.WriteLine(JsonConvert.SerializeObject(myPlayers));
 
             request = new APIGatewayProxyRequest
             {
-                Body = JsonConvert.SerializeObject(myGame)
+                Body = JsonConvert.SerializeObject(myPlayers)
             };
 
             context = new TestLambdaContext();
