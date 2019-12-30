@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,7 +68,7 @@ namespace OthelloAWSServerless.Tests
         }
 
         [Fact]
-        public async Task GameGetGameTestAsync()
+        public async Task GameAddAndGetGameTestAsync()
         {
             TestLambdaContext context;
             APIGatewayProxyRequest request;
@@ -77,7 +76,7 @@ namespace OthelloAWSServerless.Tests
 
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
-            // Add a new game using player parameters
+            // Test adding a new game using player parameters
             var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
@@ -91,7 +90,7 @@ namespace OthelloAWSServerless.Tests
 
             var gameId = response.Body;
 
-            // get the game back out
+            // Test getting the game back out
             request = new APIGatewayProxyRequest
             {
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
@@ -244,7 +243,6 @@ namespace OthelloAWSServerless.Tests
 
             return myGame;
         }
-
 
         /// <summary>
         /// Create the DynamoDB table for testing. This table is deleted as part of the object dispose method.
