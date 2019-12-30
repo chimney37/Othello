@@ -12,7 +12,7 @@
     "framework"     : "netcoreapp2.1",
     "s3-prefix"     : "OthelloAWSServerless/",
     "template"      : "serverless.template",
-    "template-parameters" : "\"ShouldCreateTable\"=\"true\";\"TableName\"=\"\";\"ReadCapacity\"=\"3\";\"WriteCapacity\"=\"3\"",
-    "s3-bucket"           : "othello-norm-blogger",
-    "stack-name"          : "OthelloNormBlogger"
+    "template-parameters" : "\"ShouldCreateTable\"=\"true\";\"TableName\"=\"\";\"ReadCapacity\"=\"10\";\"WriteCapacity\"=\"10\"",
+    "s3-bucket"           : "othello-games",
+    "stack-name"          : "OthelloGamesStack"
 }
