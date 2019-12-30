@@ -154,7 +154,6 @@ namespace Othello
         /// 
         /// TODO: optimize using Iterative Deepening Depth-First-Search (IDDFS) as part of AlphaBeta.
         /// TODO: implement compare current state to see if this can be loaded from a previous computation
-        [Time]
         private List<Tuple<OthelloToken, float>> GetMoves(OthelloGamePlayer currentPlayer, int remainDepth, float alpha =0f, float beta = 0.51f)
         {
             int totalmoves = 0;

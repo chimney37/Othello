@@ -25,7 +25,6 @@ namespace Othello
         public OthelloGamePlayer(OthelloPlayerKind oPKind, string PlayerName)
         {
             this.PlayerKind = oPKind;
-            //this.PlayerScore = 0.0f;
             this.PlayerName = PlayerName;
         }
         #endregion
