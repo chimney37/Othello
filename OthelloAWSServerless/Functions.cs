@@ -31,6 +31,10 @@ namespace OthelloAWSServerless
         public const string PlayerNameWhite = "PlayerNameWhite";
         public const string PlayerNameBlack = "PlayerNameBlack";
 
+        public const string GameX = "GameX";
+        public const string GameY = "GameY";
+        public const string CurrentPlayer = "CurrentPlayer";
+
         IDynamoDBContext DDBContext { get; set; }
         AmazonDynamoDBClient DDBClient { get; set; }
 
@@ -125,9 +129,9 @@ namespace OthelloAWSServerless
                 };
             }
 
-            context.Logger.LogLine($"Getting blog {gameId}");
+            context.Logger.LogLine($"Getting game: {gameId}");
             var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
-            context.Logger.LogLine($"Found blog: {game != null}");
+            context.Logger.LogLine($"Found game: {game != null}");
 
             if (game == null)
             {
@@ -201,13 +205,13 @@ namespace OthelloAWSServerless
             ThrowExceptionIfNull(request);
             ThrowExceptionIfNull(context);
 
-            string blogId = null;
+            string gameId = null;
             if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
-                blogId = request.PathParameters[IdQueryStringName];
+                gameId = request.PathParameters[IdQueryStringName];
             else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
-                blogId = request.QueryStringParameters[IdQueryStringName];
+                gameId = request.QueryStringParameters[IdQueryStringName];
 
-            if (string.IsNullOrEmpty(blogId))
+            if (string.IsNullOrEmpty(gameId))
             {
                 return new APIGatewayProxyResponse
                 {
@@ -216,8 +220,8 @@ namespace OthelloAWSServerless
                 };
             }
 
-            context.Logger.LogLine($"Deleting blog with id {blogId}");
-            await this.DDBContext.DeleteAsync<OthelloGameRepresentation>(blogId).ConfigureAwait(false);
+            context.Logger.LogLine($"Deleting game with id {gameId}");
+            await this.DDBContext.DeleteAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
 
             return new APIGatewayProxyResponse
             {
@@ -225,6 +229,45 @@ namespace OthelloAWSServerless
             };
         }
 
+        public async Task<APIGatewayProxyResponse> GetGameCurrentPlayerAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            ThrowExceptionIfNull(request);
+            ThrowExceptionIfNull(context);
+
+            string gameId = null;
+            if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
+                gameId = request.PathParameters[IdQueryStringName];
+            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
+                gameId = request.QueryStringParameters[IdQueryStringName];
+
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = $"Missing required parameter {IdQueryStringName}"
+                };
+            }
+
+            context.Logger.LogLine($"Getting game: {gameId}");
+            var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
+            context.Logger.LogLine($"Found game: {game != null}");
+
+            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
+            var player = othelloGameAdapter.GameUpdatePlayer();
+
+            var currentplayer = new OthelloServerlessCurrentPlayer();
+            currentplayer.CurrentPlayer = player.PlayerKind.ToString();
+
+            var response = new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = JsonConvert.SerializeObject(currentplayer),
+                Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+            };
+            return response;
+        }
         private static void ThrowExceptionIfNull(Object target)
         {
             if (target == null)

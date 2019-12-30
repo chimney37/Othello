@@ -52,6 +52,8 @@ namespace OthelloAWSServerless.Tests
 
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind, false);
+            var currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
+            var currentPlayerKind = currentPlayer.PlayerKind.ToString();
 
             myGame.CreatedTimestamp = DateTime.Now;
             myGame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
@@ -66,8 +68,8 @@ namespace OthelloAWSServerless.Tests
             context = new TestLambdaContext();
             response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
-
             var gameId = response.Body;
+
 
             // Confirm we can get the game back out
             request = new APIGatewayProxyRequest
@@ -81,6 +83,19 @@ namespace OthelloAWSServerless.Tests
             OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
             Assert.Equal(gameId, readGame.Id);
             Assert.Equal(myGame.OthelloGameStrRepresentation, readGame.OthelloGameStrRepresentation);
+
+
+            //Confirm we can get the game's current player
+            request = new APIGatewayProxyRequest
+            {
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
+            };
+            context = new TestLambdaContext();
+            response = await functions.GetGameCurrentPlayerAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            OthelloServerlessCurrentPlayer getcurrentPlayer = JsonConvert.DeserializeObject<OthelloServerlessCurrentPlayer>(response.Body);
+            Assert.Equal(currentPlayer.ToString(), getcurrentPlayer.CurrentPlayer);
 
             // List the games
             request = new APIGatewayProxyRequest
