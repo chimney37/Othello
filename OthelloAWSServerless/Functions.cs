@@ -114,19 +114,11 @@ namespace OthelloAWSServerless
             ThrowExceptionIfNull(request);
             ThrowExceptionIfNull(context);
 
-            string gameId = null;
-            if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
-                gameId = request.PathParameters[IdQueryStringName];
-            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
-                gameId = request.QueryStringParameters[IdQueryStringName];
+            var gameId = SetGameId(request);
 
             if (string.IsNullOrEmpty(gameId))
             {
-                return new APIGatewayProxyResponse
-                {
-                    StatusCode = (int)HttpStatusCode.BadRequest,
-                    Body = $"Missing required parameter {IdQueryStringName}"
-                };
+                return ApiGatewayProxyResponseMissingGameId();
             }
 
             context.Logger.LogLine($"Getting game: {gameId}");
@@ -137,7 +129,7 @@ namespace OthelloAWSServerless
             {
                 return new APIGatewayProxyResponse
                 {
-                    StatusCode = (int)HttpStatusCode.NotFound
+                    StatusCode = (int) HttpStatusCode.NotFound
                 };
             }
 
@@ -153,9 +145,9 @@ namespace OthelloAWSServerless
 
             var response = new APIGatewayProxyResponse
             {
-                StatusCode = (int)HttpStatusCode.OK,
+                StatusCode = (int) HttpStatusCode.OK,
                 Body = JsonConvert.SerializeObject(game),
-                Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                Headers = new Dictionary<string, string> {{"Content-Type", "application/json"}}
             };
             return response;
         }
@@ -171,15 +163,12 @@ namespace OthelloAWSServerless
             ThrowExceptionIfNull(request);
 
             var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
-            var othellogame = new OthelloGameRepresentation();
-
-            OthelloPlayerKind playerkind;
-            if (!Enum.TryParse(playerdata.FirstPlayer, out playerkind))
-                throw new Exception(string.Format(CultureInfo.InvariantCulture,"failed enum parse"));
+            OthelloPlayerKind playerkind = OthelloPlayerKind(playerdata.FirstPlayer);
 
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, playerkind, false);
 
+            var othellogame = new OthelloGameRepresentation();
             othellogame.Id = Guid.NewGuid().ToString();
             othellogame.CreatedTimestamp = DateTime.Now;
             othellogame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
@@ -205,22 +194,14 @@ namespace OthelloAWSServerless
             ThrowExceptionIfNull(request);
             ThrowExceptionIfNull(context);
 
-            string gameId = null;
-            if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
-                gameId = request.PathParameters[IdQueryStringName];
-            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
-                gameId = request.QueryStringParameters[IdQueryStringName];
+            var gameId = SetGameId(request);
 
             if (string.IsNullOrEmpty(gameId))
             {
-                return new APIGatewayProxyResponse
-                {
-                    StatusCode = (int)HttpStatusCode.BadRequest,
-                    Body = $"Missing required parameter {IdQueryStringName}"
-                };
+                return ApiGatewayProxyResponseMissingGameId();
             }
-
             context.Logger.LogLine($"Deleting game with id {gameId}");
+
             await this.DDBContext.DeleteAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
 
             return new APIGatewayProxyResponse
@@ -229,27 +210,25 @@ namespace OthelloAWSServerless
             };
         }
 
+        /// <summary>
+        /// A lambda function that get the current player identifier for a given game.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task<APIGatewayProxyResponse> GetGameCurrentPlayerAsync(APIGatewayProxyRequest request, ILambdaContext context)
         {
             ThrowExceptionIfNull(request);
             ThrowExceptionIfNull(context);
 
-            string gameId = null;
-            if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
-                gameId = request.PathParameters[IdQueryStringName];
-            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
-                gameId = request.QueryStringParameters[IdQueryStringName];
+            var gameId = SetGameId(request);
 
             if (string.IsNullOrEmpty(gameId))
             {
-                return new APIGatewayProxyResponse
-                {
-                    StatusCode = (int)HttpStatusCode.BadRequest,
-                    Body = $"Missing required parameter {IdQueryStringName}"
-                };
+                return ApiGatewayProxyResponseMissingGameId();
             }
-
             context.Logger.LogLine($"Getting game: {gameId}");
+
             var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
             context.Logger.LogLine($"Found game: {game != null}");
 
@@ -267,6 +246,99 @@ namespace OthelloAWSServerless
                 Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
             };
             return response;
+        }
+
+        /// <summary>
+        /// A lambda function that makes a move for a given player specified for a given game. 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public async Task<APIGatewayProxyResponse> MakeGameMoveAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            ThrowExceptionIfNull(request);
+            ThrowExceptionIfNull(context);
+
+            var gameId = SetGameId(request);
+
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return ApiGatewayProxyResponseMissingGameId();
+            }
+            context.Logger.LogLine($"Getting game: {gameId}");
+
+            var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
+            context.Logger.LogLine($"Found game: {game != null}");
+
+            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
+            var player = othelloGameAdapter.GameUpdatePlayer();
+
+            var movedata = JsonConvert.DeserializeObject<OthelloServerlessMakeMove>(request?.Body);
+            var playerkind = OthelloPlayerKind(movedata.CurrentPlayer);
+
+            if (playerkind != player.PlayerKind)
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = $"Wrong current player type. Requested: {playerkind.ToString()} but expected: {player.PlayerKind.ToString()}"
+                };
+            }
+
+            bool isInvalidMove = true;
+            othelloGameAdapter.GameMakeMove(movedata.GameX, movedata.GameY, player, out isInvalidMove);
+
+            if (isInvalidMove)
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Body = $"Invalid Move: GameX: {movedata.GameX}, GameY: {movedata.GameY}"
+                };
+            }
+            else
+            {
+                var othellogame = new OthelloGameRepresentation();
+                othellogame.Id = gameId;
+                othellogame.CreatedTimestamp = DateTime.Now;
+                othellogame.OthelloGameStrRepresentation = othelloGameAdapter.GetGameJSON();
+
+                context.Logger.LogLine($"Saving game with id {gameId}");
+                await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+            }
+
+            var response = new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = JsonConvert.SerializeObject($"Valid Move: GameX: {movedata.GameX}, GameY: {movedata.GameY}"),
+                Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+            };
+            return response;
+        }
+        private static OthelloPlayerKind OthelloPlayerKind(string parsesource)
+        {
+            OthelloPlayerKind playerkind;
+            if (!Enum.TryParse(parsesource, out playerkind))
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "failed enum parse"));
+            return playerkind;
+        }
+        private static APIGatewayProxyResponse ApiGatewayProxyResponseMissingGameId()
+        {
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.BadRequest,
+                Body = $"Missing required parameter {IdQueryStringName}"
+            };
+        }
+        private static string SetGameId(APIGatewayProxyRequest request)
+        {
+            string gameId = null;
+            if (request.PathParameters != null && request.PathParameters.ContainsKey(IdQueryStringName))
+                gameId = request.PathParameters[IdQueryStringName];
+            else if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(IdQueryStringName))
+                gameId = request.QueryStringParameters[IdQueryStringName];
+            return gameId;
         }
         private static void ThrowExceptionIfNull(Object target)
         {
