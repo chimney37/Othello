@@ -34,7 +34,42 @@ namespace OthelloAWSServerless.Tests
         }
 
         [Fact]
-        public async Task GameTestAsync()
+        public async Task GameListTestAsync()
+        {
+            TestLambdaContext context;
+            APIGatewayProxyRequest request;
+            APIGatewayProxyResponse response;
+
+            Functions functions = new Functions(this.DDBClient, this.TableName);
+
+            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            request = new APIGatewayProxyRequest
+            {
+                Body = JsonConvert.SerializeObject(myPlayers)
+            };
+
+            context = new TestLambdaContext();
+            response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            var gameId = response.Body;
+
+            // List the games
+            request = new APIGatewayProxyRequest
+            {
+            };
+            context = new TestLambdaContext();
+            response = await functions.GetGamesAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            OthelloGameRepresentation[] gamePosts = JsonConvert.DeserializeObject<OthelloGameRepresentation[]>(response.Body);
+            Assert.Single(gamePosts);
+            Assert.Equal(gameId, gamePosts[0].Id);
+            Assert.Equal(myGame.OthelloGameStrRepresentation, gamePosts[0].OthelloGameStrRepresentation);
+        }
+
+        [Fact]
+        public async Task GameGetGameTestAsync()
         {
             TestLambdaContext context;
             APIGatewayProxyRequest request;
@@ -43,22 +78,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Add a new game using player parameters
-            OthelloGameRepresentation myGame = new OthelloGameRepresentation();
-            OthelloServerlessPlayers myPlayers = new OthelloServerlessPlayers();
-            myPlayers.PlayerNameWhite = "PlayerA";
-            myPlayers.PlayerNameBlack = "PlayerB";
-            myPlayers.FirstPlayer = "White";
-            var playerkind = (OthelloPlayerKind)Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
-
-            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
-            OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind, false);
-            var currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
-            var currentPlayerKind = currentPlayer.PlayerKind.ToString();
-
-            myGame.CreatedTimestamp = DateTime.Now;
-            myGame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
-
-            Trace.WriteLine(JsonConvert.SerializeObject(myPlayers));
+            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -68,10 +88,10 @@ namespace OthelloAWSServerless.Tests
             context = new TestLambdaContext();
             response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
+
             var gameId = response.Body;
 
-
-            // Confirm we can get the game back out
+            // get the game back out
             request = new APIGatewayProxyRequest
             {
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
@@ -84,32 +104,30 @@ namespace OthelloAWSServerless.Tests
             Assert.Equal(gameId, readGame.Id);
             Assert.Equal(myGame.OthelloGameStrRepresentation, readGame.OthelloGameStrRepresentation);
 
+        }
 
-            //Confirm we can get the game's current player
+        [Fact]
+        public async Task GameTestDeleteAsync()
+        {
+            TestLambdaContext context;
+            APIGatewayProxyRequest request;
+            APIGatewayProxyResponse response;
+
+            Functions functions = new Functions(this.DDBClient, this.TableName);
+
+            // Test adding a new game using player parameters
+            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+
             request = new APIGatewayProxyRequest
             {
-                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
+                Body = JsonConvert.SerializeObject(myPlayers)
             };
+
             context = new TestLambdaContext();
-            response = await functions.GetGameCurrentPlayerAsync(request, context).ConfigureAwait(false);
+            response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
             Assert.Equal(200, response.StatusCode);
 
-            OthelloServerlessCurrentPlayer getcurrentPlayer = JsonConvert.DeserializeObject<OthelloServerlessCurrentPlayer>(response.Body);
-            Assert.Equal(currentPlayer.ToString(), getcurrentPlayer.CurrentPlayer);
-
-            // List the games
-            request = new APIGatewayProxyRequest
-            {
-            };
-            context = new TestLambdaContext();
-            response = await functions.GetGamesAsync(request, context).ConfigureAwait(false);
-            Assert.Equal(200, response.StatusCode);
-
-            OthelloGameRepresentation[] gamePosts = JsonConvert.DeserializeObject<OthelloGameRepresentation[]>(response.Body);
-			Assert.Single(gamePosts);
-            Assert.Equal(gameId, gamePosts[0].Id);
-            Assert.Equal(myGame.OthelloGameStrRepresentation, gamePosts[0].OthelloGameStrRepresentation);
-
+            var gameId = response.Body;
 
             // Delete the game
             request = new APIGatewayProxyRequest
@@ -130,6 +148,102 @@ namespace OthelloAWSServerless.Tests
             Assert.Equal((int)HttpStatusCode.NotFound, response.StatusCode);
         }
 
+        [Fact]
+        public async Task GameTestGetCurrentPlayerAsync()
+        {
+            TestLambdaContext context;
+            APIGatewayProxyRequest request;
+            APIGatewayProxyResponse response;
+
+            Functions functions = new Functions(this.DDBClient, this.TableName);
+
+            // Add a new game using player parameters
+            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+
+            request = new APIGatewayProxyRequest
+            {
+                Body = JsonConvert.SerializeObject(myPlayers)
+            };
+
+            context = new TestLambdaContext();
+            response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+            var gameId = response.Body;
+
+            //Test we can get the game's current player
+            request = new APIGatewayProxyRequest
+            {
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
+            };
+            context = new TestLambdaContext();
+            response = await functions.GetGameCurrentPlayerAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            OthelloServerlessCurrentPlayer getcurrentPlayer = JsonConvert.DeserializeObject<OthelloServerlessCurrentPlayer>(response.Body);
+            Assert.Equal(currentPlayer.ToString(), getcurrentPlayer.CurrentPlayer);
+        }
+
+        [Fact]
+        public async Task GameTestMakeMoveAsync()
+        {
+            TestLambdaContext context;
+            APIGatewayProxyRequest request;
+            APIGatewayProxyResponse response;
+
+            Functions functions = new Functions(this.DDBClient, this.TableName);
+
+            // Add a new game using player parameters
+            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+
+            request = new APIGatewayProxyRequest
+            {
+                Body = JsonConvert.SerializeObject(myPlayers)
+            };
+
+            context = new TestLambdaContext();
+            response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            var gameId = response.Body;
+
+            // Test we can get an valid move response
+            OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
+            myMoves.GameX = 3;
+            myMoves.GameY = 2;
+            myMoves.CurrentPlayer = "White";
+
+            request = new APIGatewayProxyRequest
+            {
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } },
+                Body = JsonConvert.SerializeObject(myMoves)
+            };
+
+            context = new TestLambdaContext();
+            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+        }
+
+        private static OthelloGameRepresentation CreateNewOthelloGame(out OthelloServerlessPlayers myPlayers,
+            out OthelloGamePlayer currentPlayer)
+        {
+            OthelloGameRepresentation myGame = new OthelloGameRepresentation();
+            myPlayers = new OthelloServerlessPlayers();
+            myPlayers.PlayerNameWhite = "PlayerA";
+            myPlayers.PlayerNameBlack = "PlayerB";
+            myPlayers.FirstPlayer = "White";
+            var playerkind = (OthelloPlayerKind) Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
+
+            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind,
+                false);
+            currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
+            var currentPlayerKind = currentPlayer.PlayerKind.ToString();
+
+            myGame.CreatedTimestamp = DateTime.Now;
+            myGame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
+
+            return myGame;
+        }
 
 
         /// <summary>
