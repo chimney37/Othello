@@ -198,11 +198,11 @@ namespace OthelloWPF
 
             if (IsHumanWhiteChecked)
             {
-                OthelloGameAdapter.GameCreateNewHumanVSAI(playerHumanName, playerAIName, OthelloPlayerKind.White,IsHumanWhiteChecked, false, DifficultyMode);
+                OthelloGameAdapter.GameCreateNewHumanVSAI(playerHumanName, playerAIName, IsHumanWhiteChecked, false, DifficultyMode);
             }
             else
             {
-                OthelloGameAdapter.GameCreateNewHumanVSAI(playerAIName, playerHumanName, OthelloPlayerKind.Black,IsHumanWhiteChecked, false, DifficultyMode);
+                OthelloGameAdapter.GameCreateNewHumanVSAI(playerAIName, playerHumanName, IsHumanWhiteChecked, false, DifficultyMode);
             }
   
             //TODO: possible to redirect messages from Trace to here?

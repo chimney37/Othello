@@ -6,7 +6,7 @@ namespace OthelloAdapters
     public abstract class OthelloAdapterBase
     {
         public abstract void GameCreateNewHumanVSHuman(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsAlternate = false);
-        public abstract void GameCreateNewHumanVSAI(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsHumanWhite = true, bool IsAlternate = false, GameDifficultyMode mode = GameDifficultyMode.Easy);
+        public abstract void GameCreateNewHumanVSAI(string playerWhiteName, string playerBlackName, bool IsHumanWhite = true, bool IsAlternate = false, GameDifficultyMode mode = GameDifficultyMode.Easy);
         public abstract void GameLoad();
         public abstract void GameSave();
         public abstract void GameUndo();

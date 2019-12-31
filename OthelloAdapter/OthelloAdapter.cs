@@ -40,7 +40,7 @@ namespace OthelloAdapters
             _oGame = new OthelloGame(oPlayerA, oPlayerB, oPlayerFirst, false);
         }
 
-        public override void GameCreateNewHumanVSAI(string playerWhiteName, string playerBlackName, OthelloPlayerKind firstPlayerKind, bool IsHumanWhite= true, bool IsAlternate = false, GameDifficultyMode DifficultyMode = GameDifficultyMode.Easy)
+        public override void GameCreateNewHumanVSAI(string playerWhiteName, string playerBlackName, bool IsHumanWhite= true, bool IsAlternate = false, GameDifficultyMode DifficultyMode = GameDifficultyMode.Easy)
         {
             if (IsHumanWhite)
             {

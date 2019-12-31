@@ -391,7 +391,7 @@ namespace OthelloAWSServerless.Tests
 
             var playerkind = (OthelloPlayerKind) Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
 
-            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind,
                 false);
             currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
@@ -414,10 +414,8 @@ namespace OthelloAWSServerless.Tests
             myPlayers.IsHumanWhite = false;
             myPlayers.Difficulty = GameDifficultyMode.Default;
 
-            var playerkind = (OthelloPlayerKind)Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
-
-            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
-            OthelloGameAdapter.GameCreateNewHumanVSAI(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind,
+            OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloGameAdapter.GameCreateNewHumanVSAI(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack,
                 false, false, myPlayers.Difficulty);
             currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
 

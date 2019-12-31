@@ -29,7 +29,7 @@ namespace OthelloAdapters
         public static void TestJSONDeserializeInstantiateOthelloAIGame()
         {
             var target = new OthelloAdapter();
-            target.GameCreateNewHumanVSAI(playerAName, playerBName, OthelloPlayerKind.White);
+            target.GameCreateNewHumanVSAI(playerAName, playerBName);
             string json = target.GetGameJSON();
             target.GetGameFromJSON(json);
             var player = target.GameUpdatePlayer();
@@ -42,7 +42,7 @@ namespace OthelloAdapters
         public static void TestSaveAndLoadGameInstantiateOthelloGame()
         {
             var savetarget = new OthelloAdapter();
-            savetarget.GameCreateNewHumanVSAI(playerAName, playerBName, OthelloPlayerKind.White);
+            savetarget.GameCreateNewHumanVSAI(playerAName, playerBName);
             savetarget.GameSave();
 
             var loadtarget = new OthelloAdapter();
@@ -64,7 +64,7 @@ namespace OthelloAdapters
         public static void CheckAISaveLoadGame()
         {
             var savetarget = new OthelloAdapter();
-            savetarget.GameCreateNewHumanVSAI(playerAName, playerBName, OthelloPlayerKind.White);
+            savetarget.GameCreateNewHumanVSAI(playerAName, playerBName);
             savetarget.GameSetDifficultyMode(GameDifficultyMode.Hard);
             savetarget.GameSave();
 

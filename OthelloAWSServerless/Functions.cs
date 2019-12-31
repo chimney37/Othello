@@ -161,7 +161,7 @@ namespace OthelloAWSServerless
 
             if (IsUseAI.GetValueOrDefault(false))
             {
-                OthelloGameAdapter.GameCreateNewHumanVSAI(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, firstPlayerKind,
+                OthelloGameAdapter.GameCreateNewHumanVSAI(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
                     isHumanWhite.GetValueOrDefault(false), false, difficulty.GetValueOrDefault(GameDifficultyMode.Default));
             }
             else
