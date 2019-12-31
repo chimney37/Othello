@@ -153,9 +153,22 @@ namespace OthelloAWSServerless
 
             var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
             OthelloPlayerKind playerkind = OthelloPlayerKind(playerdata.FirstPlayer);
+            bool? IsUseAI = playerdata.UseAI;
+            Othello.GameDifficultyMode? difficulty = playerdata.difficulty;
+            bool? IsFirstPlayerWhite = playerdata.IsHumanWhite;
 
             OthelloAdapter OthelloGameAdapter = new OthelloAdapter();
-            OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, playerkind, false);
+
+            if (IsUseAI.GetValueOrDefault(false))
+            {
+                OthelloGameAdapter.GameCreateNewHumanVSAI(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, playerkind,
+                    IsFirstPlayerWhite.GetValueOrDefault(false), false, difficulty.GetValueOrDefault(GameDifficultyMode.Default));
+            }
+            else
+            {
+                OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
+                    playerkind, false);
+            }
 
             var othellogame = new OthelloGameRepresentation();
             othellogame.Id = Guid.NewGuid().ToString();

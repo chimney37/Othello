@@ -41,7 +41,7 @@ namespace OthelloAWSServerless.Tests
 
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
             request = new APIGatewayProxyRequest
             {
                 Body = JsonConvert.SerializeObject(myPlayers)
@@ -68,7 +68,7 @@ namespace OthelloAWSServerless.Tests
         }
 
         [Fact]
-        public async Task GameAddAndGetGameTestAsync()
+        public async Task GameAddHumanVsHumanAndGetGameTestAsync()
         {
             TestLambdaContext context;
             APIGatewayProxyRequest request;
@@ -77,7 +77,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Test adding a new game using player parameters
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -115,7 +115,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Test adding a new game using player parameters
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -157,7 +157,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Add a new game using player parameters
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -192,7 +192,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Add a new game using player parameters
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -236,7 +236,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Add a new game using player parameters
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -280,7 +280,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Add a new game using player parameters
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -324,7 +324,7 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             // Add a new game using player parameters
-            var myGame = CreateNewOthelloGame(out var myPlayers, out var currentPlayer);
+            var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
 
             request = new APIGatewayProxyRequest
             {
@@ -358,7 +358,45 @@ namespace OthelloAWSServerless.Tests
             Assert.Equal(0x3, makemoveresponse.Reason);
         }
 
-        private static OthelloGameRepresentation CreateNewOthelloGame(out OthelloServerlessPlayers myPlayers,
+        [Fact]
+        public async Task GameAddAIVsHumanAndGetGameAsync()
+        {
+            TestLambdaContext context;
+            APIGatewayProxyRequest request;
+            APIGatewayProxyResponse response;
+
+            Functions functions = new Functions(this.DDBClient, this.TableName);
+
+            // Test adding a new game using player parameters
+            var myGame = CreateNewOthelloAIVSHumanGame(out var myPlayers, out var currentPlayer);
+
+            request = new APIGatewayProxyRequest
+            {
+                Body = JsonConvert.SerializeObject(myPlayers)
+            };
+
+            context = new TestLambdaContext();
+            response = await functions.AddGameAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            var gameId = response.Body;
+
+            // Test getting the game back out
+            request = new APIGatewayProxyRequest
+            {
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, gameId } }
+            };
+            context = new TestLambdaContext();
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
+            Assert.Equal(gameId, readGame.Id);
+            Assert.Equal(myGame.OthelloGameStrRepresentation, readGame.OthelloGameStrRepresentation);
+        }
+
+
+        private static OthelloGameRepresentation CreateNewOthelloHumanVSHumanGame(out OthelloServerlessPlayers myPlayers,
             out OthelloGamePlayer currentPlayer)
         {
             OthelloGameRepresentation myGame = new OthelloGameRepresentation();
@@ -366,13 +404,38 @@ namespace OthelloAWSServerless.Tests
             myPlayers.PlayerNameWhite = "PlayerA";
             myPlayers.PlayerNameBlack = "PlayerB";
             myPlayers.FirstPlayer = "White";
+
             var playerkind = (OthelloPlayerKind) Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
 
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind,
                 false);
             currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
-            var currentPlayerKind = currentPlayer.PlayerKind.ToString();
+
+            myGame.CreatedTimestamp = DateTime.Now;
+            myGame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
+
+            return myGame;
+        }
+
+        private static OthelloGameRepresentation CreateNewOthelloAIVSHumanGame(out OthelloServerlessPlayers myPlayers,
+            out OthelloGamePlayer currentPlayer)
+        {
+            OthelloGameRepresentation myGame = new OthelloGameRepresentation();
+            myPlayers = new OthelloServerlessPlayers();
+            myPlayers.PlayerNameWhite = "PlayerA";
+            myPlayers.PlayerNameBlack = "PlayerB";
+            myPlayers.FirstPlayer = "White";
+            myPlayers.UseAI = true;
+            myPlayers.IsHumanWhite = false;
+            myPlayers.difficulty = GameDifficultyMode.Default;
+
+            var playerkind = (OthelloPlayerKind)Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
+
+            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloGameAdapter.GameCreateNewHumanVSAI(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind,
+                false, false, myPlayers.difficulty);
+            currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
 
             myGame.CreatedTimestamp = DateTime.Now;
             myGame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
