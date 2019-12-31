@@ -12,6 +12,7 @@ namespace OthelloAWSServerless
 
     public class OthelloServerlessMakeMoveFliplist
     {
+        public string Id { get; set; }
         public bool IsValid { get;set;}
         public int Reason { get; set; }
         public OthelloServerlessMakeMove Move { get; set; }

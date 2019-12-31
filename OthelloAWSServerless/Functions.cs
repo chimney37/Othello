@@ -141,7 +141,7 @@ namespace OthelloAWSServerless
 
 
         /// <summary>
-        /// A Lambda function that adds (creates) a Human vs Human Othello Game.
+        /// A Lambda function that adds (creates) a Othello game.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="context"></param>
@@ -152,36 +152,30 @@ namespace OthelloAWSServerless
             ThrowExceptionIfNull(request);
 
             var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
-            OthelloPlayerKind playerkind = OthelloPlayerKind(playerdata.FirstPlayer);
+            OthelloPlayerKind firstPlayerKind = OthelloPlayerKind(playerdata.FirstPlayer);
             bool? IsUseAI = playerdata.UseAI;
             Othello.GameDifficultyMode? difficulty = playerdata.Difficulty;
-            bool? IsFirstPlayerWhite = playerdata.IsHumanWhite;
+            bool? isHumanWhite = playerdata.IsHumanWhite;
 
             OthelloAdapter OthelloGameAdapter = new OthelloAdapter();
 
             if (IsUseAI.GetValueOrDefault(false))
             {
-                OthelloGameAdapter.GameCreateNewHumanVSAI(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, playerkind,
-                    IsFirstPlayerWhite.GetValueOrDefault(false), false, difficulty.GetValueOrDefault(GameDifficultyMode.Default));
+                OthelloGameAdapter.GameCreateNewHumanVSAI(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, firstPlayerKind,
+                    isHumanWhite.GetValueOrDefault(false), false, difficulty.GetValueOrDefault(GameDifficultyMode.Default));
             }
             else
             {
                 OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
-                    playerkind, false);
+                    firstPlayerKind, false);
             }
 
-            var othellogame = new OthelloGameRepresentation();
-            othellogame.Id = Guid.NewGuid().ToString();
-            othellogame.CreatedTimestamp = DateTime.Now;
-            othellogame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
-
-            context.Logger.LogLine($"Saving game with id {othellogame.Id}");
-            await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+            var othellogame = await WriteOthelloGameRepresentationToDdb(context, OthelloGameAdapter).ConfigureAwait(false);
 
             var response = new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.OK,
-                Body = othellogame.Id.ToString(CultureInfo.InvariantCulture),
+                Body = JsonConvert.SerializeObject(othellogame),
                 Headers = new Dictionary<string, string> { { "Content-Type", "text/plain" } }
             };
             return response;
@@ -299,17 +293,12 @@ namespace OthelloAWSServerless
             moveresponse.Reason |= (playerkind == exepectedPlayer.PlayerKind) ? 0 : 0x1;
             moveresponse.Reason |= (!isInvalidMove) ? 0 : 0x2;
             moveresponse.IsValid = moveresponse.Reason == 0;
+            moveresponse.Id = game.Id;
 
             //update DDB with new game state if valid
             if (moveresponse.IsValid)
             {
-                var othellogame = new OthelloGameRepresentation();
-                othellogame.Id = gameId;
-                othellogame.CreatedTimestamp = DateTime.Now;
-                othellogame.OthelloGameStrRepresentation = othelloGameAdapter.GetGameJSON();
-
-                context.Logger.LogLine($"Saving game with id {gameId}");
-                await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+                await WriteOthelloGameRepresentationToDdb(context, othelloGameAdapter).ConfigureAwait(false);
             }
 
             var response = new APIGatewayProxyResponse
@@ -320,6 +309,66 @@ namespace OthelloAWSServerless
             };
             return response;
         }
+
+        /// <summary>
+        /// A lambda function that makes an AI move for a given game 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public async Task<APIGatewayProxyResponse> MakeGameAIMoveAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            ThrowExceptionIfNull(request);
+            ThrowExceptionIfNull(context);
+
+            var gameId = SetGameId(request);
+
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return ApiGatewayProxyResponseMissingGameId();
+            }
+            context.Logger.LogLine($"Getting game: {gameId}");
+
+            var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
+            context.Logger.LogLine($"Found game: {game != null}");
+
+            if (game == null)
+            {
+                return ApiGatewayProxyResponseGameIdNotFound();
+            }
+
+            OthelloAdapter othelloGameAdapter = new OthelloAdapter();
+            othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
+            var expectedPlayer = othelloGameAdapter.GameUpdatePlayer();
+
+            var movedata = JsonConvert.DeserializeObject<OthelloServerlessMakeMove>(request?.Body);
+            var playerkind = OthelloPlayerKind(movedata.CurrentPlayer);
+            var fliplist = othelloGameAdapter.GameAIMakeMove();
+            var expectedAIPlayer = othelloGameAdapter.GameGetAiPlayer().AiPlayer;
+
+            var moveresponse = new OthelloServerlessMakeMoveFliplist();
+            moveresponse.Move = null;
+            moveresponse.Fliplist = fliplist;
+            moveresponse.Reason |= (playerkind == expectedAIPlayer.PlayerKind) ? 0 : 0x1;
+            moveresponse.IsValid = (moveresponse.Reason == 0) ? true: false;
+
+            //update DDB with new game state if valid
+            if (moveresponse.IsValid)
+            {
+                var othellogame = await WriteOthelloGameRepresentationToDdb(context, othelloGameAdapter).ConfigureAwait(false);
+                moveresponse.Id = othellogame.Id;
+            }
+
+            //generate final response body
+            var response = new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = JsonConvert.SerializeObject(moveresponse),
+                Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+            };
+            return response;
+        }
+
 
         /// <summary>
         /// A lambda function that gets the data of the game board
@@ -381,6 +430,17 @@ namespace OthelloAWSServerless
             {
                 StatusCode = (int)HttpStatusCode.NotFound
             };
+        }
+        private async Task<OthelloGameRepresentation> WriteOthelloGameRepresentationToDdb(ILambdaContext context, OthelloAdapter OthelloGameAdapter)
+        {
+            var othellogame = new OthelloGameRepresentation();
+            othellogame.Id = Guid.NewGuid().ToString();
+            othellogame.CreatedTimestamp = DateTime.Now;
+            othellogame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
+
+            context.Logger.LogLine($"Saving game with id {othellogame.Id}");
+            await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+            return othellogame;
         }
         private static string SetGameId(APIGatewayProxyRequest request)
         {
