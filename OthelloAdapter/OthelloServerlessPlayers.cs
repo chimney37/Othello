@@ -11,6 +11,6 @@ namespace OthelloAWSServerless
         public string FirstPlayer { get; set; }
         public bool UseAI { get; set; }
         public bool IsHumanWhite { get; set; }
-        public GameDifficultyMode difficulty { get; set; }
+        public GameDifficultyMode Difficulty { get; set; }
     }
 }

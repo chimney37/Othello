@@ -154,7 +154,7 @@ namespace OthelloAWSServerless
             var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
             OthelloPlayerKind playerkind = OthelloPlayerKind(playerdata.FirstPlayer);
             bool? IsUseAI = playerdata.UseAI;
-            Othello.GameDifficultyMode? difficulty = playerdata.difficulty;
+            Othello.GameDifficultyMode? difficulty = playerdata.Difficulty;
             bool? IsFirstPlayerWhite = playerdata.IsHumanWhite;
 
             OthelloAdapter OthelloGameAdapter = new OthelloAdapter();

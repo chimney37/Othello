@@ -428,13 +428,13 @@ namespace OthelloAWSServerless.Tests
             myPlayers.FirstPlayer = "White";
             myPlayers.UseAI = true;
             myPlayers.IsHumanWhite = false;
-            myPlayers.difficulty = GameDifficultyMode.Default;
+            myPlayers.Difficulty = GameDifficultyMode.Default;
 
             var playerkind = (OthelloPlayerKind)Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
 
             OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSAI(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind,
-                false, false, myPlayers.difficulty);
+                false, false, myPlayers.Difficulty);
             currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
 
             myGame.CreatedTimestamp = DateTime.Now;
