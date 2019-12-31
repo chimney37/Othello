@@ -39,6 +39,21 @@ namespace OthelloAdapters
         }
 
         [TestCase]
+        public static void TestJSONDeserializeInstantiateAndMakeMoveOthelloAIGame()
+        {
+            var target = new OthelloAdapter();
+            target.GameCreateNewHumanVSAI(playerAName, playerBName);
+            var player = target.GameUpdatePlayer();
+            target.GameMakeMove(3,2, player, out bool IsInvalid);
+            var expectedboard = target.GameDebugGetBoardInString();
+            string json = target.GetGameJSON();
+            var actual = new OthelloAdapter();
+            actual.GetGameFromJSON(json);
+            var actualboard = target.GameDebugGetBoardInString();
+            Assert.AreEqual(expectedboard, actualboard);
+        }
+
+        [TestCase]
         public static void TestSaveAndLoadGameInstantiateOthelloGame()
         {
             var savetarget = new OthelloAdapter();

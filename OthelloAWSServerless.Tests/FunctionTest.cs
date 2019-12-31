@@ -362,6 +362,69 @@ namespace OthelloAWSServerless.Tests
             Assert.Equal(0, makemoveresponse.Reason);
         }
 
+        [Fact]
+        public async Task GameAddAIVsHumanAndMoveAIGetBoardAsync()
+        {
+            TestLambdaContext context;
+            APIGatewayProxyRequest request;
+            APIGatewayProxyResponse response;
+
+            Functions functions = new Functions(this.DDBClient, this.TableName);
+
+            // Test adding a new game using player parameters
+            var myGame = CreateNewOthelloAIVSHumanGame(out var myPlayers, out var currentPlayer);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+
+
+            // Test getting the game back out
+            request = new APIGatewayProxyRequest
+            {
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
+            };
+            context = new TestLambdaContext();
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
+            Assert.Equal(200, response.StatusCode);
+
+            OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
+            Assert.Equal(game.Id, readGame.Id);
+            Assert.Equal(myGame.OthelloGameStrRepresentation, readGame.OthelloGameStrRepresentation);
+
+            OthelloAdapter adapter = new OthelloAdapter();
+            adapter.GetGameFromJSON(readGame.OthelloGameStrRepresentation);
+            var initialboard = adapter.GameDebugGetBoardInString();
+
+            // Test AI Move
+            // Test we can get an valid move response
+            OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
+            myMoves.CurrentPlayer = "White";
+
+            request = new APIGatewayProxyRequest
+            {
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } },
+                Body = JsonConvert.SerializeObject(myMoves)
+            };
+            context = new TestLambdaContext();
+            response = await functions.MakeGameAIMoveAsync(request, context).ConfigureAwait(false);
+            var makemoveresponse = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response?.Body);
+
+            Assert.Equal(200, response.StatusCode);
+            Assert.True(makemoveresponse.IsValid);
+            Assert.Equal(0, makemoveresponse.Reason);
+
+            //Get Board Data
+            request = new APIGatewayProxyRequest
+            {
+                PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } },
+                QueryStringParameters = new Dictionary<string, string> { { Functions.DebugStringName, "true" } }
+            };
+            context = new TestLambdaContext();
+            response = await functions.GetGameBoardDataAsync(request, context).ConfigureAwait(false);
+            var board = JsonConvert.DeserializeObject<string>(response?.Body);
+            Assert.Equal(200, response.StatusCode);
+            Assert.NotEqual(initialboard, board);
+        }
+
+
         private static async Task<OthelloGameRepresentation> AddOthelloGameRepresentation(OthelloServerlessPlayers myPlayers,
             Functions functions)
         {

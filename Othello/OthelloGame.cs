@@ -757,7 +757,7 @@ namespace Othello
         {
             this.CurrentOthelloState.DebugState();
         }
-        public void DebugGameBoard(bool IsCreateAxis = true)
+        public string DebugGameBoard(bool IsCreateAxis = true)
         {
             StringBuilder sb = new StringBuilder();
             OthelloToken[,] oBoard = (OthelloToken[,])this.GameGetBoardData(OthelloBoardType.TokenMatrix);
@@ -804,6 +804,7 @@ namespace Othello
 
             Console.WriteLine(sb.ToString());
             Trace.WriteLine(sb.ToString());
+            return sb.ToString();
         }
         public void DebugGameInformation()
         {

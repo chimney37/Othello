@@ -165,5 +165,10 @@ namespace OthelloAdapters
         {
             _oGame.GameGetGameFromJSON(json);
         }
+
+        public string GameDebugGetBoardInString()
+        {
+            return _oGame.DebugGameBoard(true);
+        }
     }
 }
