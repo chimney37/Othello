@@ -13,6 +13,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Newtonsoft.Json;
 
 using Othello;
+using OthelloAdapters;
 using System.Globalization;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -27,13 +28,6 @@ namespace OthelloAWSServerless
         const string TableNameEnvironmentVariableLookup = "OthelloGameTable";
 
         public const string IdQueryStringName = "Id";
-        public const string FirstPlayer = "FirstPlayer";
-        public const string PlayerNameWhite = "PlayerNameWhite";
-        public const string PlayerNameBlack = "PlayerNameBlack";
-
-        public const string GameX = "GameX";
-        public const string GameY = "GameY";
-        public const string CurrentPlayer = "CurrentPlayer";
 
         IDynamoDBContext DDBContext { get; set; }
         AmazonDynamoDBClient DDBClient { get; set; }
@@ -128,7 +122,7 @@ namespace OthelloAWSServerless
 
             context.Logger.LogLine($"Loading game with representation: {game.OthelloGameStrRepresentation}");
 
-            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloAdapter othelloGameAdapter = new OthelloAdapter();
             othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
             var player = othelloGameAdapter.GameUpdatePlayer();
             var gameMode = othelloGameAdapter.GameGetMode();
@@ -160,7 +154,7 @@ namespace OthelloAWSServerless
             var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
             OthelloPlayerKind playerkind = OthelloPlayerKind(playerdata.FirstPlayer);
 
-            OthelloAdapters.OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloAdapter OthelloGameAdapter = new OthelloAdapter();
             OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack, playerkind, false);
 
             var othellogame = new OthelloGameRepresentation();
@@ -234,7 +228,7 @@ namespace OthelloAWSServerless
                 return ApiGatewayProxyResponseGameIdNotFound();
             }
 
-            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloAdapter othelloGameAdapter = new OthelloAdapter();
             othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
             var player = othelloGameAdapter.GameUpdatePlayer();
 
@@ -277,7 +271,7 @@ namespace OthelloAWSServerless
                 return ApiGatewayProxyResponseGameIdNotFound();
             }
 
-            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloAdapter othelloGameAdapter = new OthelloAdapter();
             othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
             var exepectedPlayer = othelloGameAdapter.GameUpdatePlayer();
 
@@ -341,7 +335,7 @@ namespace OthelloAWSServerless
                 return ApiGatewayProxyResponseGameIdNotFound();
             }
 
-            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            OthelloAdapter othelloGameAdapter = new OthelloAdapter();
             othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
             var boarddata = othelloGameAdapter.GameGetBoardData();
 

@@ -4,3 +4,6 @@ OthelloAdapter allows a layer of abstraction between different version clients o
 of Othello library. This allows re-use of the Othello library without further testing (only the adapter is solely responsible for breaks)
 
 In the future, we can just use an adapter to deal with different version clients without having to re-test the Othello library without it.
+
+The latest version of the adapter contains Data Transfer Objects (DTO) classes for a RESTAPI used in a serverless version of Othello implemented using AWS Lambda and DynamoDB.
+Future versions can implement an adapter using the DTO classes.
