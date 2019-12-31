@@ -55,6 +55,10 @@
     <Compile Include="OthelloAdapter.cs" />
     <Compile Include="OthelloAdapterBase.cs" />
     <Compile Include="OthelloAdapterTest.cs" />
+    <Compile Include="OthelloServerless.cs" />
+    <Compile Include="OthelloServerlessCurrentPlayer.cs" />
+    <Compile Include="OthelloServerlessMakeMove.cs" />
+    <Compile Include="OthelloServerlessPlayers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

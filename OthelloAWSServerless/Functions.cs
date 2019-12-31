@@ -43,8 +43,7 @@ namespace OthelloAWSServerless
         /// </summary>
         public Functions()
         {
-            // Check to see if a table name was passed in through environment variables and if so 
-            // add the table mapping.
+            // Check to see if a table name was passed in through environment variables and if so add the table mapping
             var tableName = System.Environment.GetEnvironmentVariable(TableNameEnvironmentVariableLookup);
             if(!string.IsNullOrEmpty(tableName))
             {
@@ -54,11 +53,6 @@ namespace OthelloAWSServerless
             var config = new DynamoDBContextConfig { Conversion = DynamoDBEntryConversion.V2 };
             this.DDBClient = new AmazonDynamoDBClient();
             this.DDBContext = new DynamoDBContext(DDBClient, config);
-        }
-
-        ~Functions()
-        {
-            DDBClient.Dispose();
         }
 
         /// <summary>
@@ -129,10 +123,7 @@ namespace OthelloAWSServerless
 
             if (game == null)
             {
-                return new APIGatewayProxyResponse
-                {
-                    StatusCode = (int) HttpStatusCode.NotFound
-                };
+                return ApiGatewayProxyResponseGameIdNotFound();
             }
 
             context.Logger.LogLine($"Loading game with representation: {game.OthelloGameStrRepresentation}");
@@ -153,6 +144,7 @@ namespace OthelloAWSServerless
             };
             return response;
         }
+
 
         /// <summary>
         /// A Lambda function that adds (creates) a Human vs Human Othello Game.
@@ -237,6 +229,11 @@ namespace OthelloAWSServerless
             var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
             context.Logger.LogLine($"Found game: {game != null}");
 
+            if (game == null)
+            {
+                return ApiGatewayProxyResponseGameIdNotFound();
+            }
+
             OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
             var player = othelloGameAdapter.GameUpdatePlayer();
@@ -275,34 +272,29 @@ namespace OthelloAWSServerless
             var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
             context.Logger.LogLine($"Found game: {game != null}");
 
+            if (game == null)
+            {
+                return ApiGatewayProxyResponseGameIdNotFound();
+            }
+
             OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
             othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
-            var player = othelloGameAdapter.GameUpdatePlayer();
+            var exepectedPlayer = othelloGameAdapter.GameUpdatePlayer();
 
             var movedata = JsonConvert.DeserializeObject<OthelloServerlessMakeMove>(request?.Body);
             var playerkind = OthelloPlayerKind(movedata.CurrentPlayer);
+            var fliplist = othelloGameAdapter.GameMakeMove(movedata.GameX, movedata.GameY, exepectedPlayer, out var isInvalidMove);
 
-            if (playerkind != player.PlayerKind)
-            {
-                return new APIGatewayProxyResponse
-                {
-                    StatusCode = (int)HttpStatusCode.BadRequest,
-                    Body = $"Wrong current player type. Requested: {playerkind.ToString()} but expected: {player.PlayerKind.ToString()}"
-                };
-            }
+            //generate final response body
+            var moveresponse = new OthelloServerlessMakeMoveFliplist();
+            moveresponse.Move = movedata;
+            moveresponse.Fliplist = fliplist;
+            moveresponse.Reason |= (playerkind == exepectedPlayer.PlayerKind) ? 0 : 0x1;
+            moveresponse.Reason |= (!isInvalidMove) ? 0 : 0x2;
+            moveresponse.IsValid = moveresponse.Reason == 0;
 
-            bool isInvalidMove = true;
-            othelloGameAdapter.GameMakeMove(movedata.GameX, movedata.GameY, player, out isInvalidMove);
-
-            if (isInvalidMove)
-            {
-                return new APIGatewayProxyResponse
-                {
-                    StatusCode = (int)HttpStatusCode.BadRequest,
-                    Body = $"Invalid Move: GameX: {movedata.GameX}, GameY: {movedata.GameY}"
-                };
-            }
-            else
+            //update DDB with new game state if valid
+            if (moveresponse.IsValid)
             {
                 var othellogame = new OthelloGameRepresentation();
                 othellogame.Id = gameId;
@@ -316,7 +308,47 @@ namespace OthelloAWSServerless
             var response = new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.OK,
-                Body = JsonConvert.SerializeObject($"Valid Move: GameX: {movedata.GameX}, GameY: {movedata.GameY}"),
+                Body = JsonConvert.SerializeObject(moveresponse),
+                Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+            };
+            return response;
+        }
+
+        /// <summary>
+        /// A lambda function that gets the data of the game board
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public async Task<APIGatewayProxyResponse> GetGameBoardDataAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            ThrowExceptionIfNull(request);
+            ThrowExceptionIfNull(context);
+
+            var gameId = SetGameId(request);
+
+            if (string.IsNullOrEmpty(gameId))
+            {
+                return ApiGatewayProxyResponseMissingGameId();
+            }
+            context.Logger.LogLine($"Getting game: {gameId}");
+
+            var game = await DDBContext.LoadAsync<OthelloGameRepresentation>(gameId).ConfigureAwait(false);
+            context.Logger.LogLine($"Found game: {game != null}");
+
+            if (game == null)
+            {
+                return ApiGatewayProxyResponseGameIdNotFound();
+            }
+
+            OthelloAdapters.OthelloAdapter othelloGameAdapter = new OthelloAdapters.OthelloAdapter();
+            othelloGameAdapter.GetGameFromJSON(game.OthelloGameStrRepresentation);
+            var boarddata = othelloGameAdapter.GameGetBoardData();
+
+            var response = new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = JsonConvert.SerializeObject(boarddata),
                 Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
             };
             return response;
@@ -333,7 +365,14 @@ namespace OthelloAWSServerless
             return new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.BadRequest,
-                Body = $"Missing required parameter {IdQueryStringName}"
+                Body = $"Missing/Bad required parameter {IdQueryStringName}"
+            };
+        }
+        private static APIGatewayProxyResponse ApiGatewayProxyResponseGameIdNotFound()
+        {
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.NotFound
             };
         }
         private static string SetGameId(APIGatewayProxyRequest request)

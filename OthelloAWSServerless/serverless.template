@@ -202,6 +202,34 @@
       }
     },
 
+    "GetGameBoardData" : {
+      "Type" : "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::GetGameBoardDataAsync",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Description": "Function that gets the data of the game board for a given game id. ",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Role": null,
+        "Policies": [ "AWSLambdaFullAccess" ],
+        "Environment" : {
+          "Variables" : {
+            "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
+          }
+        },
+        "Events": {
+          "PutResource": {
+            "Type": "Api",
+            "Properties": {
+              "Path": "/board/{Id}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+
     "OthelloGameTable" : {
         "Type" : "AWS::DynamoDB::Table",
         "Condition" : "CreateGameTable",

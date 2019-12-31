@@ -2,3 +2,6 @@
 
 # CA1814: 複数次元の配列ではなくジャグ配列を使用します
 dotnet_diagnostic.CA1814.severity = silent
+
+# CA2227: コレクション プロパティは読み取り専用でなければなりません
+dotnet_diagnostic.CA2227.severity = suggestion
