@@ -20,6 +20,8 @@ namespace Othello
     [Serializable]
     public class OthelloState : IOthelloPrototypeState
     {
+        private const int DefaultMovesListCapacity = 16;
+
         #region PROPERTIES AND FIELDS
         public int ScoreW { get; set; }
         public int ScoreB { get; set; }
@@ -306,7 +308,7 @@ namespace Othello
         /// <returns></returns>
         public List<OthelloToken> GetAllowedMoves(OthelloGamePlayer player)
         {
-            List<OthelloToken> moves = new List<OthelloToken>();
+            List<OthelloToken> moves = new List<OthelloToken>(DefaultMovesListCapacity);
 
             //new routine to use iterator instead of traditional for loop
             OthelloBoardIterator oIter = BoardData.CreateIterator();
@@ -359,7 +361,7 @@ namespace Othello
         /// <returns></returns>
         protected List<List<OthelloToken>> GetAllDirectionalPaths(OthelloToken ob)
         {
-            List<List<OthelloToken>> paths = new List<List<OthelloToken>>();
+            List<List<OthelloToken>> paths = new List<List<OthelloToken>>(8);
 
             paths.Add(GetPath(ob, OthelloDirection.Deg0));
             paths.Add(GetPath(ob, OthelloDirection.Deg45));
