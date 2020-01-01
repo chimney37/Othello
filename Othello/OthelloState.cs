@@ -483,59 +483,6 @@ namespace Othello
             
             return false;
         }
-
-        #region UNUSED
-
-        /*
-        //check if path is an invalid path
-        protected static bool IsPathInvalid(OthelloToken originBit, List<OthelloToken> path)
-        {
-            if (path.Count > 1 &&
-                (path[1].Token == originBit.Token ||
-                path[1].Token == OthelloBitType.Empty ||
-                path[1].Token == OthelloBitType.OOB))
-            {
-                return true;
-            }
-
-            return false;
-        }
-        */
-
-        /*
-        //checks all adjacent cases for empty or Out of Bounds  
-        protected bool IsAllAdjacentEmptyOrOOB(int x, int y)
-        {
-     
-            List<OthelloToken> adjlist = new List<OthelloToken>();
-
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg0));
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg45));
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg90));
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg135));
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg180));
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg225));
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg270));
-            adjlist.Add(this.BoardData.GetAdjacentCell(x, y, OthelloDirection.Deg315));
-
-            int IsEmptyCount = 0;
-            foreach (OthelloToken otb in adjlist)
-            {
-                IsEmptyCount += (otb.Token == OthelloBitType.OOB ||
-                    otb.Token == OthelloBitType.Empty) ? 1 : 0;
-            }
-
-            if (IsEmptyCount == 8)
-            {
-                return true;
-            }
-
-            return false;
-        }
-         * */
-
-        #endregion
-
         #endregion
 
         #region DEBUG OUTPUT

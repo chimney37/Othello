@@ -52,13 +52,12 @@ namespace Othello
     public class OthelloBoard : IOthelloAbstractBoardCollection, ICloneable
     {
         #region PROPERTIES AND FIELDS
-        public readonly static int BoardSize = 8;
         public string HashID { get; set; }
+        public static readonly int BoardSize = 8;
+        protected static readonly int BoardDataLength = 16;
+        protected static readonly int[] ShiftMask = { 0xfc, 0xf3, 0xcf, 0x3f };    //masking table: e.g. "11111100" -> 0xfc. Masks out first 2 bits
         private static int[] Shifter;     //precomputed values of shiters for speed up
         private static int[,] Indexer;     //precomputed values of indexers or speed up
-        protected readonly static int BoardDataLength = 16;
-        protected readonly static int[] ShiftMask = { 0xfc, 0xf3, 0xcf, 0x3f };    //masking table: e.g. "11111100" -> 0xfc. Masks out first 2 bits
-
 #if BITBOARD
         private byte[] boardData;
 #else
@@ -435,9 +434,6 @@ namespace Othello
                     break;
             }
 #endif
-            //perf improvement: we don't need to set this for each time a cell is set
-            //This increased performance from ~7100msec to about ~1900msec (26.7% of original time, or ~370%)
-            //this.HashID = ComputeHashID();
         }
 
 
@@ -726,56 +722,6 @@ namespace Othello
             return new OthelloBoardIterator(this);
         }
 
-        #endregion
-
-        #region UNUSED
-        /*
-        protected static string ConvertCharToStringBoard(char[,] charboard)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < BoardSize; i++)
-                for (int j = 0; j < BoardSize; j++)
-                    switch (charboard[j, i])
-                    {
-                        case cEmpty:
-                            sb.Append(cEmpty);
-                            break;
-                        case cBlack:
-                            sb.Append(cBlack);
-                            break;
-                        case cWhite:
-                            sb.Append(cWhite);
-                            break;
-                        default:
-                            throw new Exception("OthelloBoard [Corrupt Char Data]");
-                    }
-
-            return sb.ToString();
-        }
-
-        protected static OthelloToken[,] ConvertCharToOthelloTokenBoard(char[,] charboard)
-        {
-            OthelloToken[,] tokenBoard = new OthelloToken[BoardSize, BoardSize];
-
-            for (int i = 0; i < BoardSize; i++)
-                for (int j = 0; j < BoardSize; j++)
-                    switch (charboard[i, j])
-                    {
-                        case cEmpty:
-                            tokenBoard[i, j] = new OthelloToken(i, j, OthelloBitType.Empty);
-                            break;
-                        case cBlack:
-                            tokenBoard[i, j] = new OthelloToken(i, j, OthelloBitType.Black);
-                            break;
-                        case cWhite:
-                            tokenBoard[i, j] = new OthelloToken(i, j, OthelloBitType.White);
-                            break;
-                        default:
-                            throw new Exception("OthelloBoard [Corrupt Char Data]");
-                    }
-            return tokenBoard;
-        }
-        */
         #endregion
 
         #region DEBUG OUTS FOR TESTING

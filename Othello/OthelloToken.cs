@@ -89,7 +89,6 @@ namespace Othello
             return false;
         }
 
-        #region UNUSED
         /// <summary>
         /// Get a hashcode of a token. Assumed Unique given a token type, x and y
         /// </summary>
@@ -102,6 +101,5 @@ namespace Othello
             int hCode = (int)oToken.Token ^ oToken.X ^ oToken.Y;
             return hCode.GetHashCode();
         }
-        #endregion
     }
 }

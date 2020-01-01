@@ -17,6 +17,13 @@ namespace Othello
     [Serializable]
     public class OthelloGameAiSystem : OthelloGameAISystemProduct
     {
+        private const int endGameTurn = 61;
+        private const double endGameGoodScoreThreshold = 0.5;
+        private const float endGameScoreModifier = 10.0f;
+        private const float maxPivotScoreModifier = 2.009f;
+        private const float majorPivotScoreModifier = 1.004f;
+        private const int milliSecTimeLimitDefault = 1000;
+
         #region PROPERTIES AND FIELDS
         OthelloState _currentState;
         public OthelloGamePlayer HumanPlayer {get;set;}
@@ -47,10 +54,10 @@ namespace Othello
         /// <param name="humanPlayer"></param>
         internal OthelloGameAiSystem(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer)
         {
-            Initialize(oGame, aIplayer, humanPlayer, 1000);
+            Initialize(oGame, aIplayer, humanPlayer, milliSecTimeLimitDefault);
         }
 
-        public void Initialize(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer, int milliSecTimeLimit = 1000)
+        public void Initialize(OthelloGame oGame, OthelloGamePlayer aIplayer, OthelloGamePlayer humanPlayer, int milliSecTimeLimit = milliSecTimeLimitDefault)
         {
             if (oGame == null)
                 throw new ArgumentNullException(nameof(oGame));
@@ -284,13 +291,13 @@ namespace Othello
             float score = oState.GetBoardCount(AiPlayer.GetPlayerOthelloToken()) / (float)oState.Turn;
 
             //if this is end game, boost or negate scores accordingly
-            if(oState.Turn == 61)
+            if(oState.Turn == endGameTurn)
             {
                 if (oState.CurrentPlayer.PlayerKind == AiPlayer.PlayerKind &&
-                    score > 0.5)
-                    score += 10.0f;
+                    score > endGameGoodScoreThreshold)
+                    score += endGameScoreModifier;
                 else
-                    score -= 10.0f;
+                    score -= endGameScoreModifier;
             }
 
             return score + GetHeuristicScore(oState);
@@ -305,15 +312,15 @@ namespace Othello
             foreach (OthelloToken t in _maxPivotHeuristics)
             {
                 if (oState.GetBoardData().GetCell(t.X, t.Y).Token == AiPlayer.GetPlayerOthelloToken())
-                    score += 2.009f;
+                    score += maxPivotScoreModifier;
                 else if (oState.GetBoardData().GetCell(t.X, t.Y).Token == HumanPlayer.GetPlayerOthelloToken())
-                    score += -2.009f;
+                    score += -maxPivotScoreModifier;
             }
 
             foreach (OthelloToken t in _majorPivotsHeuristics)
             {
                 if (oState.GetBoardData().GetCell(t.X, t.Y).Token == AiPlayer.GetPlayerOthelloToken())
-                    score += -1.004f;
+                    score += -majorPivotScoreModifier;
             }
 
             return score;

@@ -31,6 +31,10 @@ namespace Othello
         private const string defaultSaveDirectoryName = "OthelloSaves";
         private const string defaultFileName = "Save" + "Game" + ".dat";
         private const string defaultFileNameAIConfig = "AIConfig.txt";
+        private const int defaultMilliSecondsTimeLimit = 10000;
+        private const string othelloEmptyChar = "x";
+        private const string othelloBlackChar = "b";
+        private const string othelloWhiteChar = "w";
 
         public string SaveFileName {get;set;}
         public string DefaultSaveDir { get; set; }
@@ -158,7 +162,7 @@ namespace Othello
         /// make an AI move given an AI player mode
         /// </summary>
         /// <returns></returns>
-        public List<OthelloToken> GameAIMakeMove(int MilliSecondsTimeLimit = 10000)
+        public List<OthelloToken> GameAIMakeMove(int MilliSecondsTimeLimit = defaultMilliSecondsTimeLimit)
         {
             int? depth = null;
             float? alpha = null;
@@ -787,13 +791,13 @@ namespace Othello
                     switch ((int)oBoard[j, i].Token)
                     {
                         case ((int)OthelloBitType.Empty):
-                            sb.Append("x");
+                            sb.Append(othelloEmptyChar);
                             break;
                         case ((int)OthelloBitType.Black):
-                            sb.Append("b");
+                            sb.Append(othelloBlackChar);
                             break;
                         case ((int)OthelloBitType.White):
-                            sb.Append("w");
+                            sb.Append(othelloWhiteChar);
                             break;
                         default:
                             break;
