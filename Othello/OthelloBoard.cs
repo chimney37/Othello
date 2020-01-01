@@ -697,9 +697,8 @@ namespace Othello
             sha.Clear();
 
             StringBuilder sb = new StringBuilder();
-            for (var index = 0; index < hashID.Length; index++)
+            foreach (byte b in hashID)
             {
-                byte b = hashID[index];
                 sb.Append(b.ToString("x2", CultureInfo.InvariantCulture));
             }
 

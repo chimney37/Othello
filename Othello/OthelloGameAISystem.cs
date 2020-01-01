@@ -76,12 +76,8 @@ namespace Othello
 
         private static void AddHeuristics(List<OthelloToken> list, string[] values)
         {
-            for (var index = 0; index < values.Length; index++)
-            {
-                string s = values[index];
-                list.Add(new OthelloToken(Convert.ToInt32(s.Split(',')[0], CultureInfo.InvariantCulture),
-                    Convert.ToInt32(s.Split(',')[1], CultureInfo.InvariantCulture), OthelloBitType.White));
-            }
+            foreach (string s in values)
+                list.Add(new OthelloToken(Convert.ToInt32(s.Split(',')[0], CultureInfo.InvariantCulture), Convert.ToInt32(s.Split(',')[1], CultureInfo.InvariantCulture), OthelloBitType.White));
         }
         #endregion
 
@@ -123,12 +119,10 @@ namespace Othello
             float maxScore = calculatedMoves[0].Item2;
 
             //debug each score
-            for (var i = 0; i < calculatedMoves.Count; i++)
+            foreach (Tuple<OthelloToken, float> t in calculatedMoves)
             {
-                Tuple<OthelloToken, float> t = calculatedMoves[i];
 #if TRACE
-                Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "[GetBestMove]({0},{1}),S={2}", t.Item1.X,
-                    t.Item1.Y, t.Item2));
+                Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "[GetBestMove]({0},{1}),S={2}", t.Item1.X, t.Item1.Y, t.Item2));
 #endif
             }
 
@@ -251,15 +245,12 @@ namespace Othello
             //MAX : maximizing the current player (A>I.)
             if (currentPlayer == AiPlayer)
             {
-                for (var index = 0; index < allowedMoves.Count; index++)
+                foreach (OthelloToken t in allowedMoves)
                 {
-                    OthelloToken t = allowedMoves[index];
                     OthelloState oNextState = GetNextState(t, currentState, currentPlayer);
-                    a = Math.Max(a,
-                        AlphaBeta(oNextState.CurrentPlayer, oNextState, a, b, remainDepth - 1, ref totalmoves,
-                            ref stopWatch));
-                    if (b <= a || stopWatch.ElapsedMilliseconds > MillisecondsTimeLimit)
-                        break;
+                    a = Math.Max(a, AlphaBeta(oNextState.CurrentPlayer, oNextState,a,b, remainDepth - 1, ref totalmoves, ref stopWatch));
+                    if( b <= a || stopWatch.ElapsedMilliseconds > MillisecondsTimeLimit)
+                        break;                
                 }
 
                 return a;
@@ -267,15 +258,12 @@ namespace Othello
             // MIN player (the human)
             else
             {
-                for (var index = 0; index < allowedMoves.Count; index++)
+                foreach (OthelloToken t in allowedMoves)
                 {
-                    OthelloToken t = allowedMoves[index];
                     OthelloState oNextState = GetNextState(t, currentState, currentPlayer);
-                    b = Math.Min(b,
-                        AlphaBeta(oNextState.CurrentPlayer, oNextState, a, b, remainDepth - 1, ref totalmoves,
-                            ref stopWatch));
+                    b = Math.Min(b, AlphaBeta(oNextState.CurrentPlayer, oNextState, a, b, remainDepth - 1, ref totalmoves, ref stopWatch));
                     if (b <= a || stopWatch.ElapsedMilliseconds > MillisecondsTimeLimit)
-                        break;
+                        break;                  
                 }
 
                 return b;
@@ -320,18 +308,16 @@ namespace Othello
             float score = 0.0f;
 
             //adjust score on max pivots. These change the flow of game alot
-            for (var index = 0; index < _maxPivotHeuristics.Count; index++)
+            foreach (OthelloToken t in _maxPivotHeuristics)
             {
-                OthelloToken t = _maxPivotHeuristics[index];
                 if (oState.GetBoardData().GetCell(t.X, t.Y).Token == AiPlayer.GetPlayerOthelloToken())
                     score += maxPivotScoreModifier;
                 else if (oState.GetBoardData().GetCell(t.X, t.Y).Token == HumanPlayer.GetPlayerOthelloToken())
                     score += -maxPivotScoreModifier;
             }
 
-            for (var index = 0; index < _majorPivotsHeuristics.Count; index++)
+            foreach (OthelloToken t in _majorPivotsHeuristics)
             {
-                OthelloToken t = _majorPivotsHeuristics[index];
                 if (oState.GetBoardData().GetCell(t.X, t.Y).Token == AiPlayer.GetPlayerOthelloToken())
                     score += -majorPivotScoreModifier;
             }
@@ -355,11 +341,8 @@ namespace Othello
             oNextState.GetBoardData().SetCell(bt, t.X, t.Y);
 
             //Set the cells for all cell tokens that need flipping
-            for (var index = 0; index < fliplist.Count; index++)
-            {
-                OthelloToken token = fliplist[index];
+            foreach (OthelloToken token in fliplist)
                 oNextState.GetBoardData().SetCell(bt, token.X, token.Y);
-            }
 
             //validate and switch players
             oNextState.CurrentPlayer = UpdatePlayer(oNextState, HumanPlayer, player, AiPlayer);
