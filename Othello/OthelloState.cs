@@ -247,7 +247,7 @@ namespace Othello
             OthelloToken ob = new OthelloToken(x, y, player.GetPlayerOthelloToken());
             OthelloToken obOpposition = OthelloToken.GetInverse(ob);
 
-            List<OthelloToken> FlipTokens = new List<OthelloToken>();
+            List<OthelloToken> flipTokens = new List<OthelloToken>();
 
             List<List<OthelloToken>> paths = GetAllDirectionalPaths(ob);
             paths = GetValidPaths(ob, obOpposition, paths);
@@ -255,10 +255,10 @@ namespace Othello
             //Get opposing bits in each path and reverse
             foreach (List<OthelloToken> path in paths)
             {
-                FlipTokens.AddRange(GetFlipTokenFromPath(ob, path));
+                flipTokens.AddRange(GetFlipTokenFromPath(ob, path));
             }
 
-            return FlipTokens;
+            return flipTokens;
         }
 
         /// <summary>
@@ -274,27 +274,27 @@ namespace Othello
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            List<OthelloToken> FlipTokens = new List<OthelloToken>();
+            List<OthelloToken> flipTokens = new List<OthelloToken>();
 
             //search start index is always 0 (by design)
             //get index of any empty that is bigger than the startindex
-            int indexmidEmpty = path.FindIndex(1, a => a.Token == OthelloBitType.Empty);
+            int indexMidEmpty = path.FindIndex(1, a => a.Token == OthelloBitType.Empty);
 
             //get end index (of the same token type) as the one at origin along path
-            int indexendOb = path.FindIndex(1, a => a.Token == ob.Token);
+            int indexEndOb = path.FindIndex(1, a => a.Token == ob.Token);
 
             //Check: if any empty token index that is in between start and end index            
-            if (indexmidEmpty > 0 && indexmidEmpty < indexendOb)
+            if (indexMidEmpty > 0 && indexMidEmpty < indexEndOb)
             {
-                return FlipTokens;
+                return flipTokens;
             }
 
             //check end index is 2 or bigger
-            if (indexendOb > 1)
+            if (indexEndOb > 1)
             {
-                FlipTokens = path.GetRange(1, indexendOb - 1);
+                flipTokens = path.GetRange(1, indexEndOb - 1);
             }
-            return FlipTokens;
+            return flipTokens;
         }
 
         /// <summary>
