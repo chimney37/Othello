@@ -28,7 +28,7 @@ namespace OthelloAWSServerless.Tests
         public FunctionTest()
         {
             this.TableName = "OthelloAWSServerless-OthelloGame-" + DateTime.Now.Ticks;
-            this.DDBClient = new AmazonDynamoDBClient(RegionEndpoint.USWest2);
+            this.DDBClient = new AmazonDynamoDBClient(RegionEndpoint.APNortheast1);
 
             SetupTableAsync().Wait();
         }

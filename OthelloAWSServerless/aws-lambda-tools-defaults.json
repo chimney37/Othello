@@ -7,12 +7,12 @@
         "All the command line options for the Lambda command can be specified in this file."
     ],
     "profile"     : "default",
-    "region"      : "us-west-2",
+    "region"      : "ap-northeast-1",
     "configuration" : "Release",
     "framework"     : "netcoreapp2.1",
     "s3-prefix"     : "OthelloAWSServerless/",
     "template"      : "serverless.template",
     "template-parameters" : "\"ShouldCreateTable\"=\"true\";\"TableName\"=\"\";\"ReadCapacity\"=\"100\";\"WriteCapacity\"=\"100\"",
-    "s3-bucket"           : "othello-games",
+    "s3-bucket"           : "othello-games-ap",
     "stack-name"          : "OthelloGamesStack"
 }
