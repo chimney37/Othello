@@ -253,15 +253,12 @@ namespace Othello
             paths = GetValidPaths(ob, obOpposition, paths);
 
             //Get opposing bits in each path and reverse
-            foreach (List<OthelloToken> path in paths)
+            for (var index = 0; index < paths.Count; index++)
             {
-                //Trace.WriteLine("GetFlipsTokenList: (EvaluationPath)" + DebugPath(path)); 
+                List<OthelloToken> path = paths[index];
 
                 //note: changed Concat to AddRange for better performance
                 FlipTokens.AddRange(GetFlipTokenFromPath(ob, path));
-                //FlipTokens = FlipTokens.Concat(GetFlipTokenFromPath(ob, path)).ToList();
-
-                //Trace.WriteLine("GetFlipsTokenList: (ConcatFlipTokens)" + DebugPath(FlipTokens));
             }
 
             return FlipTokens;

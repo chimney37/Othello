@@ -498,8 +498,11 @@ namespace Othello
             oNextState.GetBoardData().SetCell(bt, x, y);
 
             //Set the cells for all cell tokens that need flipping
-            foreach (OthelloToken token in fliplist)
+            for (var index = 0; index < fliplist.Count; index++)
+            {
+                OthelloToken token = fliplist[index];
                 oNextState.GetBoardData().SetCell(bt, token.X, token.Y);
+            }
 
             //go to next turn
             oNextState.Turn++;
