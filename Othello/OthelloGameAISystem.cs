@@ -22,6 +22,8 @@ namespace Othello
         private const float maxPivotScoreModifier = 2.009f;
         private const float majorPivotScoreModifier = 1.004f;
         private const int milliSecTimeLimitDefault = 1000;
+        private const float betaDefault = 0.51f;
+        private const float alphaDefault = 0f;
 
         #region PROPERTIES AND FIELDS
         OthelloState _currentState;
@@ -101,7 +103,7 @@ namespace Othello
         /// <param name="alpha"></param>
         /// <param name="beta"></param>
         /// <returns></returns>
-        public override OthelloToken GetBestMove(OthelloGamePlayer currentPlayer, int remainDepth, float alpha = 0f, float beta = 0.51f)
+        public override OthelloToken GetBestMove(OthelloGamePlayer currentPlayer, int remainDepth, float alpha = alphaDefault, float beta = betaDefault)
         {
 
             //get a list of moves
@@ -160,7 +162,7 @@ namespace Othello
         /// 
         /// TODO: optimize using Iterative Deepening Depth-First-Search (IDDFS) as part of AlphaBeta.
         /// TODO: implement compare current state to see if this can be loaded from a previous computation
-        private List<Tuple<OthelloToken, float>> GetMoves(OthelloGamePlayer currentPlayer, int remainDepth, float alpha =0f, float beta = 0.51f)
+        private List<Tuple<OthelloToken, float>> GetMoves(OthelloGamePlayer currentPlayer, int remainDepth, float alpha =alphaDefault, float beta = betaDefault)
         {
             int totalmoves = 0;
             List<OthelloToken> allowedMoves = _currentState.GetAllowedMoves(currentPlayer); 
