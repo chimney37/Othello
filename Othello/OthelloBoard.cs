@@ -3,7 +3,6 @@
 using System;
 using System.Text;
 using System.Diagnostics;
-using System.Security.Cryptography;
 using System.Globalization;
 
 namespace Othello
@@ -59,12 +58,7 @@ namespace Othello
         protected static readonly int[] ShiftMask = { 0xfc, 0xf3, 0xcf, 0x3f };    //masking table: e.g. "11111100" -> 0xfc. Masks out first 2 bits
         private static int[] Shifter;     //precomputed values of shifters
         private static int[,] Indexer;     //precomputed values of indexers
-#if BITBOARD
         private byte[] boardData;
-#else
-        protected char[,] boardCharData;
-
-#endif
 
         private const char cEmpty = 'x';
         private const char cWhite = 'w';
@@ -84,11 +78,7 @@ namespace Othello
             //precomputes shifters and indexers
             Precomputes();
 
-#if BITBOARD
             boardData = new byte[BoardDataLength];
-#else
-            boardCharData = new char[BoardSize, BoardSize];
-#endif
 
             InitializeBoard(alternate);
         }
@@ -119,17 +109,9 @@ namespace Othello
         {
             OthelloExceptions.ThrowExceptionIfNull(prevBoard);
 
-#if BITBOARD
             this.boardData = new byte[BoardDataLength];
             for(int i=0; i < boardData.Length; i++)
                 this.boardData[i] = prevBoard.boardData[i];
-
-#else
-            this.boardCharData = new char[BoardSize,BoardSize];
-            for (int i = 0; i < BoardSize; i++)
-                for (int j = 0; j < BoardSize; j++)
-                    this.boardCharData[i, j] = prevBoard.boardCharData[i, j];
-#endif
         }
        
         /// <summary>
@@ -138,11 +120,6 @@ namespace Othello
         /// <param name="alternate"></param>
         protected void InitializeBoard(bool alternate = false)
         {
-#if !BITBOARD
-            for (int i = 0; i < BoardSize; i++)
-                for (int j = 0; j < BoardSize; j++)
-                    SetCell(OthelloBitType.Empty, i, j);
-#endif
             if (alternate)
             {
                 SetCell(OthelloBitType.White, 4, 4);
@@ -373,11 +350,7 @@ namespace Othello
         /// <param name="charBoard"></param>
         public void SetBoardData(char[,] charBoard)
         {
-#if BITBOARD
             this.boardData = OthelloBoard.ConvertCharToBitBoard(charBoard);
-#else
-            this.boardCharData = charBoard;
-#endif
         }
 
         /// <summary>
@@ -386,11 +359,7 @@ namespace Othello
         /// <param name="stringBoard"></param>
         public void SetBoardData(string stringBoard)
         {
-#if BITBOARD
             this.boardData = OthelloBoard.ConvertStringToBitBoard(stringBoard);
-#else
-            this.boardCharData = OthelloBoard.ConvertStringToCharBoard(stringBoard);
-#endif
         }
 
         /// <summary>
@@ -399,11 +368,7 @@ namespace Othello
         /// <param name="tokenBoard"></param>
         public void SetBoardData(OthelloToken[,] tokenBoard)
         {
-#if BITBOARD
             this.boardData = OthelloBoard.ConvertOthelloTokenToBitBoard(tokenBoard);
-#else
-            this.boardCharData = OthelloBoard.ConvertBitToCharBoard(OthelloBoard.ConvertOthelloTokenToBitBoard(tokenBoard));
-#endif
         }
 
         /// <summary>
@@ -416,26 +381,8 @@ namespace Othello
         {
             if (x < 0 || y < 0 || x >= BoardSize || y >= BoardSize)
                 throw new Exception(string.Format(CultureInfo.InvariantCulture, "trying to set invalid cell."));
- 
-#if BITBOARD
-            ComputeByteIndexShiftsSubHelper(boardData, x, y, oTokenType);
-#else
 
-            switch(oTokenType)
-            {
-                case OthelloBitType.Empty:
-                    boardCharData[x, y] = cEmpty;
-                    break;
-                case OthelloBitType.Black:
-                    boardCharData[x, y] = cBlack;
-                    break;
-                case OthelloBitType.White:
-                    boardCharData[x, y] = cWhite;
-                    break;
-                default:
-                    break;
-            }
-#endif
+            ComputeByteIndexShiftsSubHelper(boardData, x, y, oTokenType);
         }
 
 
@@ -454,7 +401,6 @@ namespace Othello
             if(x < 0 || y < 0 || x >= BoardSize || y >= BoardSize)
                 return new OthelloToken(-1,-1,OthelloBitType.OOB);
             
-#if BITBOARD
             //1# get byte on index of x and y to correspond to the right byte
             //right shift 1# depending on the value of x
             //note: high order bits are zero filled ()
@@ -470,19 +416,6 @@ namespace Othello
                 default:
                     throw new Exception(string.Format(CultureInfo.InvariantCulture, "binary data format is incorrect."));
             }
-#else
-            switch(boardCharData[x,y])
-            {
-                case cEmpty:
-                    return new OthelloToken(x, y, OthelloBitType.Empty);
-                case cBlack:
-                    return new OthelloToken(x, y, OthelloBitType.Black);
-                case cWhite:
-                    return new OthelloToken(x, y, OthelloBitType.White);
-                default:
-                    throw new Exception("char data format is incorrect."); 
-            }
-#endif
         }
  
         /// <summary>
@@ -528,36 +461,12 @@ namespace Othello
             //with this code it takes 200ms. (435% faster)
 
             int wCount = 0;
-
-#if BITBOARD
             for (int i = 0; i < BoardDataLength; i++)
                 for (int j = 0; j < 4; j++)
                 {
                     int shift = j * 2;
                     wCount += (int)((boardData[i] >> shift) & bitsmask) == (int)obitType ? 1 : 0;
                 }
-            
-#else
-
-            char? b = null;
-            switch (obitType)
-            {
-                case OthelloBitType.Empty:
-                    b = cEmpty;
-                    break;
-                case OthelloBitType.Black:
-                    b = cBlack;
-                    break;
-                case OthelloBitType.White:
-                    b = cWhite;
-                    break;
-            }
-
-            for (int i = 0; i < BoardSize; i++)
-                for (int j = 0; j < BoardSize; j++)
-                    wCount += boardCharData[i, j] == b ? 1 : 0;
-#endif
-
             return wCount;
         }
 
@@ -570,32 +479,37 @@ namespace Othello
         {
             switch(boardType)
             {
-#if BITBOARD
                 case OthelloBoardType.Bit:
                     return this.boardData;
-#endif
                 case OthelloBoardType.CharMatrix:
-#if BITBOARD
                     return OthelloBoard.ConvertBitToCharBoard(this.boardData);
-#else
-                    return this.boardCharData;
-#endif
                 case OthelloBoardType.StringSequence:
-#if BITBOARD
                     return OthelloBoard.ConvertBitToStringBoard(this.boardData);
-#else
-                    return OthelloBoard.ConvertCharToStringBoard(this.boardCharData);
-#endif
                 case OthelloBoardType.TokenMatrix:
-#if BITBOARD
                     return OthelloBoard.ConvertBitToOthelloTokenBoard(this.boardData);
-#else
-                    return OthelloBoard.ConvertCharToOthelloTokenBoard(this.boardCharData);
-#endif
                 default:
                     return null;
             }
+        }
 
+        public byte[] GetOthelloBoardBytes()
+        {
+            return boardData;
+        }
+
+        public char[,] GetOthelloBoardCharMatrix()
+        {
+            return ConvertBitToCharBoard(boardData);
+        }
+
+        public string GetOthelloBoardString()
+        {
+            return ConvertBitToStringBoard(boardData);
+        }
+
+        public OthelloToken[,] GetOthelloBoardTokenMatrix()
+        {
+            return ConvertBitToOthelloTokenBoard(boardData);
         }
 
         /// <summary>
@@ -604,11 +518,7 @@ namespace Othello
         /// <returns></returns>
         public override string ToString()
         {
-#if BITBOARD
             return OthelloBoard.ConvertBitToStringBoard(this.boardData);
-#else
-            return OthelloBoard.ConvertCharToStringBoard(this.boardCharData);
-#endif
         }
         #endregion
 
@@ -639,8 +549,6 @@ namespace Othello
                     break;
                 case OthelloBitType.White:
                     bData[index] |= (byte)((int)OthelloBitType.White << shift);
-                    break;
-                default:
                     break;
             }
         }
@@ -682,40 +590,6 @@ namespace Othello
         {
             return (row * 2) + (column) / 4;
         }
-
-        /// <summary>
-        /// Compute a hash ID of a board representation
-        /// </summary>
-        /// <returns></returns>
-        protected string ComputeHashID()
-        {
-            byte[] hashID;
-            SHA1CryptoServiceProvider sha = new SHA1CryptoServiceProvider();
-#if BITBOARD
-            hashID = sha.ComputeHash(this.boardData);
-#else
-            hashID = sha.ComputeHash(OthelloBoard.ConvertCharToBitBoard(this.boardCharData));
-#endif
-            sha.Clear();
-
-            StringBuilder sb = new StringBuilder();
-            foreach (byte b in hashID)
-            {
-                sb.Append(b.ToString("x2", CultureInfo.InvariantCulture));
-            }
-
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Get a unique hashcode for a board layout
-        /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         #endregion
 
         #region ITERATOR
@@ -728,7 +602,6 @@ namespace Othello
 
         #region DEBUG OUTS FOR TESTING
 
-#if BITBOARD
         public string DebugOutputBitBoard(bool outAxis=true, bool outConsole=true)
         {
             StringBuilder sb = new StringBuilder();
@@ -805,7 +678,6 @@ namespace Othello
             return sb.ToString();
         }
 
-#endif
         #endregion 
     }
 }

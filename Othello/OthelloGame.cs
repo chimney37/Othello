@@ -325,16 +325,18 @@ namespace Othello
         /// <returns></returns>
         public object GameGetBoardData(OthelloBoardType boardType)
         {
+            var boarddata = CurrentOthelloState.GetBoardData();
+
             switch (boardType)
             {
                 case OthelloBoardType.Bit:
-                    return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.Bit);
+                    return boarddata.GetOthelloBoardBytes();
                 case OthelloBoardType.CharMatrix:
-                    return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.CharMatrix);
+                    return boarddata.GetOthelloBoardCharMatrix();
                 case OthelloBoardType.TokenMatrix:
-                    return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.TokenMatrix);
+                    return boarddata.GetOthelloBoardTokenMatrix();
                 case OthelloBoardType.StringSequence:
-                    return this.CurrentOthelloState.GetBoardData().GetOthelloBoard(OthelloBoardType.StringSequence);
+                    return boarddata.GetOthelloBoardString();
                 default:
                     return null;
             }
