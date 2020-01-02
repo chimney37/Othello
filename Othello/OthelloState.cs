@@ -399,19 +399,17 @@ namespace Othello
             // w : invalid
             // w -> b -> b -> e -> w : invalid
 
-            for (int i = 0; i < paths.Count; i++)
-            {            
+            foreach (var t in paths)
+            {
                 //Case 1: Path length is 1 or less (meaning it's an alone token)
-                    //optmization: if either of this condition fufills, it's not valid, so continue the loop
-                    //using this continues improve IsValidMove from about 270ms down to about 248ms (9% faster)
-                    //we also don't need IsPathInvalid, as this is part of the sandwich test. further down to about 219ms (23% faster).
+                //optmization: if either of this condition fufills, it's not valid, so continue the loop
+                //using this continues improve IsValidMove from about 270ms down to about 248ms (9% faster)
+                //we also don't need IsPathInvalid, as this is part of the sandwich test. further down to about 219ms (23% faster).
                 //Case 2: Check for invalidity : a sandwitch is like "bwwb": true. "bw":false "bwe": false, "bweb": false
-                if (paths[i].Count <= 1 || 
-                    //IsPathInvalid(ob, paths[i]) ||
-                    IsNotValidSandwich(ob, obOpposition, paths[i]))
+                if (t.Count <= 1 || IsNotValidSandwich(ob, obOpposition, t))
                     continue;
 
-                validPaths.Add(paths[i]);
+                validPaths.Add(t);
             }
 
             return validPaths;
