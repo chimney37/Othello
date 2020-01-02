@@ -68,6 +68,7 @@ namespace Othello
         private const char cEmpty = 'x';
         private const char cWhite = 'w';
         private const char cBlack = 'b';
+        private const int bitsmask = 0x3;
 
         #endregion
 
@@ -236,7 +237,7 @@ namespace Othello
 
             for (int i = 0; i < BoardSize; i++)
                 for (int j = 0; j < BoardSize; j++)
-                    switch ((int)((bitboard[Indexer[i, j]] >> Shifter[j]) & 0x3))
+                    switch ((int)((bitboard[Indexer[i, j]] >> Shifter[j]) & bitsmask))
                     {
                         case (int)OthelloBitType.Empty:
                             tokenBoard[j, i] = new OthelloToken(i, j, OthelloBitType.Empty);
@@ -267,7 +268,7 @@ namespace Othello
 
             for (int i = 0; i < BoardSize; i++)
                 for (int j = 0; j < BoardSize; j++)
-                    switch ((int)((bitboard[Indexer[i, j]] >> Shifter[j]) & 0x3))
+                    switch ((int)((bitboard[Indexer[i, j]] >> Shifter[j]) & bitsmask))
                     {
                         case (int)OthelloBitType.Empty:
                             sb.Append(cEmpty);
@@ -457,7 +458,7 @@ namespace Othello
             //right shift 1# depending on the value of x
             //note: high order bits are zero filled ()
             //precompute a shift table so we can do a O(1) fetch. Gives about 6666 ms in PerfSpeedMakeMove (6688ms)
-            switch ((int)((boardData[Indexer[y, x]] >> Shifter[x]) & 0x3))
+            switch ((int)((boardData[Indexer[y, x]] >> Shifter[x]) & bitsmask))
             {
                 case (int)OthelloBitType.Empty:
                     return new OthelloToken(x, y, OthelloBitType.Empty);
@@ -522,7 +523,7 @@ namespace Othello
         /// <returns></returns>
         public int GetTokenCount(OthelloBitType obitType)
         {
-            //huge optimizations on using bit type comparerer rather than usign matrix kind. Original time on looping 100000 on GetToken count took 1070ms.
+            //huge optimizations on using bit type comparer rather than using matrix kind. Original time on looping 100000 on GetToken count took 1070ms.
             //with this code it takes 200ms. (435% faster)
 
             int wCount = 0;
@@ -532,7 +533,7 @@ namespace Othello
                 for (int j = 0; j < 4; j++)
                 {
                     int shift = j * 2;
-                    wCount += (int)((boardData[i] >> shift) & 0x3) == (int)obitType ? 1 : 0;
+                    wCount += (int)((boardData[i] >> shift) & bitsmask) == (int)obitType ? 1 : 0;
                 }
             
 #else
@@ -755,7 +756,7 @@ namespace Othello
                 {
                     int index = ComputeIndex(row, column);
                     int shift = ComputeShift(column);
-                    int Token = (int)((boardData[index] >> shift) & 0x3);
+                    int Token = (int)((boardData[index] >> shift) & bitsmask);
 
                     //Trace.WriteLine(string.Format("({0},{1}):{2},{3},{4:00000000}", row, column, index, shift, Convert.ToInt32(Convert.ToString(Token, 2))));
 
