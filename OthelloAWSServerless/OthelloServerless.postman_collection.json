@@ -45,7 +45,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"PlayerNameWhite\":\"Player A: piece\",\n    \"PlayerNameBlack\":\"Player B: man\",\n    \"FirstPlayer\":\"White\"\n}"
+					"raw": "{\n    \"PlayerNameWhite\":\"Player A: mem\",\n    \"PlayerNameBlack\":\"Player B: yum\",\n    \"FirstPlayer\":\"White\",\n    \"UseAI\": true,\n    \"IsHumanWhite\": false,\n    \"Difficulty\": 0\n}"
 				},
 				"url": {
 					"raw": "{{url}}",
@@ -168,6 +168,36 @@
 			"response": []
 		},
 		{
+			"name": "Othello request - GET boarddata using Id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"protocol": "https",
+					"host": [
+						"xez1ssog7c",
+						"execute-api",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"Prod",
+						"1fd6f562-cf0b-4fb0-9502-978cc843c46c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Othello request - GET current player using Id",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -199,6 +229,27 @@
 		},
 		{
 			"name": "Othello request - PUT move using Id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"host": [
+						"{{url}}1fd6f562-cf0b-4fb0-9502-978cc843c46c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Othello request - PUT movebyai using Id Copy",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},

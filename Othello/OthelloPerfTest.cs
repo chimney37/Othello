@@ -61,8 +61,8 @@ namespace Othello
 
             for (int i = 0; i < 100000; i++)
             {     
-                target.GameMakeMove(5, 3, oPlayerA);
                 target.GameMakeMove(5, 4, oPlayerA);
+                target.GameMakeMove(5, 3, oPlayerB);
                 target.GameUndo();
                 target.GameUndo();
             }
