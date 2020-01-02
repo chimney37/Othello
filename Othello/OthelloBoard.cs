@@ -9,10 +9,11 @@ using System.Globalization;
 namespace Othello
 {
     /// <summary>
-    /// A default Othelloboard internal data (bitBoard) is represented by 16 bytes. Rarther than using a typical matrix representation.
+    /// A default Othelloboard internal data (bitBoard) is represented by 16 bytes as opposed to a matrix representation.
+    /// In this representation, each byte stores 4 tokens.
     /// This saves memory requirements for a single board layout by 64 - 16 = 48 bytes (25% of original or 4 times more space efficient)
     ///  
-    /// Below is an example (x,y) followed by byte index.
+    /// Below is an example (x,y) token, followed by byte index indicating which byte the token belongs.
     /// 0,0 : byte 0
     /// 0,1 : byte 0
     /// 0,2 : byte 0
@@ -29,15 +30,15 @@ namespace Othello
     /// 01: b (black)
     /// 11: w (white)
     /// 
-    /// A byte can contain 4 tokens.
+    /// A byte contains 4 tokens placed side by side.
     /// Example: of a byte : 11110100 => wwbx
     /// 
-    /// Other supported convertable types of board representation is CharBoard, StringBoard and Token as defined by OtelloBoardType.
+    /// Other supported board representations are the CharBoard, StringBoard and Token as defined by OthelloBoardType.
     /// OthelloBoardType contains following definitions : TokenMatrix, CharMatrix, String, Bit
     /// 
     /// CharMatrix : each cell can be the following ('e':empty, 'b': black, 'w': white) 
     /// String : uses same definition as char board, except the whole board is represented using single string with no returns at end of each row
-    /// TokenMatrix : uses OthelloToken class reprsentation for each cell.
+    /// TokenMatrix : uses OthelloToken class representation for each cell.
     /// 
     /// Coordinate Systems
     /// Othello User view Coordinates has the coordinate system V(x,y) where 
@@ -56,8 +57,8 @@ namespace Othello
         public static readonly int BoardSize = 8;
         protected static readonly int BoardDataLength = 16;
         protected static readonly int[] ShiftMask = { 0xfc, 0xf3, 0xcf, 0x3f };    //masking table: e.g. "11111100" -> 0xfc. Masks out first 2 bits
-        private static int[] Shifter;     //precomputed values of shiters for speed up
-        private static int[,] Indexer;     //precomputed values of indexers or speed up
+        private static int[] Shifter;     //precomputed values of shifters
+        private static int[,] Indexer;     //precomputed values of indexers
 #if BITBOARD
         private byte[] boardData;
 #else
