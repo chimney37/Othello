@@ -158,25 +158,20 @@ namespace OthelloAWSServerless
             Othello.GameDifficultyMode? difficulty = playerdata.Difficulty;
             bool? isHumanWhite = playerdata.IsHumanWhite;
 
-            OthelloAdapter OthelloGameAdapter = new OthelloAdapter();
+            OthelloAdapter othelloGameAdapter = new OthelloAdapter();
 
             if (IsUseAI.GetValueOrDefault(false))
             {
-                OthelloGameAdapter.GameCreateNewHumanVSAI(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
+                othelloGameAdapter.GameCreateNewHumanVSAI(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
                     isHumanWhite.GetValueOrDefault(false), false, difficulty.GetValueOrDefault(GameDifficultyMode.Default));
             }
             else
             {
-                OthelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
+                othelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
                     firstPlayerKind, false);
             }
 
-            var othellogame = new OthelloGameRepresentation();
-            othellogame.Id = Guid.NewGuid().ToString();
-            othellogame.CreatedTimestamp = DateTime.Now;
-            othellogame.OthelloGameStrRepresentation = OthelloGameAdapter.GetGameJSON();
-            context.Logger.LogLine($"Saving game with id {othellogame.Id}");
-            await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+            var othellogame = await SaveGameRepresentationToDdb(context, Guid.NewGuid().ToString(), othelloGameAdapter).ConfigureAwait(false);
 
             var response = new APIGatewayProxyResponse
             {
@@ -304,12 +299,7 @@ namespace OthelloAWSServerless
             //update DDB with new game state if valid
             if (moveresponse.IsValid)
             {
-                var othellogame = new OthelloGameRepresentation();
-                othellogame.Id = gameId;
-                othellogame.CreatedTimestamp = DateTime.Now;
-                othellogame.OthelloGameStrRepresentation = othelloGameAdapter.GetGameJSON();
-                context.Logger.LogLine($"Saving game with id {othellogame.Id}");
-                await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+                await SaveGameRepresentationToDdb(context, gameId, othelloGameAdapter).ConfigureAwait(false);
             }
 
             var response = new APIGatewayProxyResponse
@@ -366,12 +356,7 @@ namespace OthelloAWSServerless
             //update DDB with new game state if valid
             if (moveresponse.IsValid)
             {
-                var othellogame = new OthelloGameRepresentation();
-                othellogame.Id = gameId;
-                othellogame.CreatedTimestamp = DateTime.Now;
-                othellogame.OthelloGameStrRepresentation = othelloGameAdapter.GetGameJSON();
-                context.Logger.LogLine($"Saving game with id {othellogame.Id}");
-                await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+                await SaveGameRepresentationToDdb(context, gameId, othelloGameAdapter).ConfigureAwait(false);
             }
 
             //generate final response body
@@ -431,6 +416,16 @@ namespace OthelloAWSServerless
             return response;
         }
 
+        private async Task<OthelloGameRepresentation> SaveGameRepresentationToDdb(ILambdaContext context, string gameId, OthelloAdapter othelloGameAdapter)
+        {
+            var othellogame = new OthelloGameRepresentation();
+            othellogame.Id = gameId;
+            othellogame.CreatedTimestamp = DateTime.Now;
+            othellogame.OthelloGameStrRepresentation = othelloGameAdapter.GetGameJSON();
+            context.Logger.LogLine($"Saving game with id {othellogame.Id}");
+            await DDBContext.SaveAsync<OthelloGameRepresentation>(othellogame).ConfigureAwait(false);
+            return othellogame;
+        }
         private static string GetDebugFlag(APIGatewayProxyRequest request)
         {
             string debugflag = null;
