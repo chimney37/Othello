@@ -41,6 +41,7 @@ namespace OthelloAdapters
 
         public override void GameCreateNewHumanVSAI(string playerWhiteName, string playerBlackName, bool IsHumanWhite= true, bool IsAlternate = false, GameDifficultyMode DifficultyMode = GameDifficultyMode.Easy)
         {
+            // by design: the first player is always human.
             if (IsHumanWhite)
             {
                 OthelloGamePlayer oPlayerA = new OthelloGamePlayer(OthelloPlayerKind.White, "Human");
@@ -119,6 +120,7 @@ namespace OthelloAdapters
             return _oGame.GameDifficultyMode;
         }
 
+        //TODO: introduce an interface to track an AI player's move along with the fliplist
         public override List<OthelloToken> GameAIMakeMove()
         {
             List<OthelloToken> oFlipList = _oGame.GameAIMakeMove();

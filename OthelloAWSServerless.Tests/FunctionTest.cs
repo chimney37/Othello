@@ -162,7 +162,7 @@ namespace OthelloAWSServerless.Tests
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
             myMoves.GameX = 3;
             myMoves.GameY = 2;
-            myMoves.CurrentPlayer = "White";
+            myMoves.CurrentPlayer = new OthelloGamePlayer(OthelloPlayerKind.White, "default-name-white");
 
             request = new APIGatewayProxyRequest
             {
@@ -197,7 +197,7 @@ namespace OthelloAWSServerless.Tests
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
             myMoves.GameX = 4;
             myMoves.GameY = 2;
-            myMoves.CurrentPlayer = "White";
+            myMoves.CurrentPlayer = new OthelloGamePlayer(OthelloPlayerKind.White, "");
 
             request = new APIGatewayProxyRequest
             {
@@ -231,7 +231,7 @@ namespace OthelloAWSServerless.Tests
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
             myMoves.GameX = 3;
             myMoves.GameY = 2;
-            myMoves.CurrentPlayer = "Black";
+            myMoves.CurrentPlayer = new OthelloGamePlayer(OthelloPlayerKind.Black, "default-name-black");
 
             request = new APIGatewayProxyRequest
             {
@@ -266,7 +266,7 @@ namespace OthelloAWSServerless.Tests
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
             myMoves.GameX = 5;
             myMoves.GameY = 2;
-            myMoves.CurrentPlayer = "Black";
+            myMoves.CurrentPlayer = new OthelloGamePlayer(OthelloPlayerKind.Black, "default-name-black");
 
             request = new APIGatewayProxyRequest
             {
@@ -346,7 +346,7 @@ namespace OthelloAWSServerless.Tests
             // Test AI Move
             // Test we can get an valid move response
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
-            myMoves.CurrentPlayer = "White";
+            myMoves.CurrentPlayer = new OthelloGamePlayer(OthelloPlayerKind.White, "default-name-white");
 
             request = new APIGatewayProxyRequest
             {
@@ -396,7 +396,7 @@ namespace OthelloAWSServerless.Tests
             // Test AI Move
             // Test we can get an valid move response
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
-            myMoves.CurrentPlayer = "White";
+            myMoves.CurrentPlayer = new OthelloGamePlayer(OthelloPlayerKind.White, "default-name-white");
 
             request = new APIGatewayProxyRequest
             {
@@ -450,12 +450,10 @@ namespace OthelloAWSServerless.Tests
             myPlayers = new OthelloServerlessPlayers();
             myPlayers.PlayerNameWhite = "PlayerA";
             myPlayers.PlayerNameBlack = "PlayerB";
-            myPlayers.FirstPlayer = "White";
-
-            var playerkind = (OthelloPlayerKind) Enum.Parse(typeof(OthelloPlayerKind), myPlayers.FirstPlayer);
+            myPlayers.FirstPlayerKind = OthelloPlayerKind.White;
 
             OthelloAdapterBase OthelloGameAdapter = new OthelloAdapters.OthelloAdapter();
-            OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, playerkind,
+            OthelloGameAdapter.GameCreateNewHumanVSHuman(myPlayers.PlayerNameWhite, myPlayers.PlayerNameBlack, myPlayers.FirstPlayerKind,
                 false);
             currentPlayer = OthelloGameAdapter.GameUpdatePlayer();
 
@@ -472,7 +470,7 @@ namespace OthelloAWSServerless.Tests
             myPlayers = new OthelloServerlessPlayers();
             myPlayers.PlayerNameWhite = "PlayerA";
             myPlayers.PlayerNameBlack = "PlayerB";
-            myPlayers.FirstPlayer = "White";
+            myPlayers.FirstPlayerKind = OthelloPlayerKind.White;
             myPlayers.UseAI = true;
             myPlayers.IsHumanWhite = false;
             myPlayers.Difficulty = GameDifficultyMode.Default;

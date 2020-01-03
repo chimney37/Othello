@@ -21,6 +21,11 @@ using System.Globalization;
 
 namespace OthelloAWSServerless
 {
+    /// <summary>
+    /// Class for invoking AWS lambda functions for Othello Serverless
+    ///
+    /// TODO: rid of GetGameBoardDataAsync and GetCurrentPlayerAsync functions as they are unnecessary given the game design
+    /// </summary>
     public class Functions
     {
         // This const is the name of the environment variable that the serverless.template will use to set
@@ -153,7 +158,6 @@ namespace OthelloAWSServerless
             ThrowExceptionIfNull(request);
 
             var playerdata = JsonConvert.DeserializeObject<OthelloServerlessPlayers>(request?.Body);
-            OthelloPlayerKind firstPlayerKind = OthelloPlayerKind(playerdata.FirstPlayer);
             bool? IsUseAI = playerdata.UseAI;
             Othello.GameDifficultyMode? difficulty = playerdata.Difficulty;
             bool? isHumanWhite = playerdata.IsHumanWhite;
@@ -168,7 +172,7 @@ namespace OthelloAWSServerless
             else
             {
                 othelloGameAdapter.GameCreateNewHumanVSHuman(playerdata.PlayerNameWhite, playerdata.PlayerNameBlack,
-                    firstPlayerKind, false);
+                    playerdata.FirstPlayerKind, false);
             }
 
             var othellogame = await SaveGameRepresentationToDdb(context, Guid.NewGuid().ToString(), othelloGameAdapter).ConfigureAwait(false);
@@ -284,7 +288,7 @@ namespace OthelloAWSServerless
             var exepectedPlayer = othelloGameAdapter.GameUpdatePlayer();
 
             var movedata = JsonConvert.DeserializeObject<OthelloServerlessMakeMove>(request?.Body);
-            var playerkind = OthelloPlayerKind(movedata.CurrentPlayer);
+            var playerkind = movedata.CurrentPlayer.PlayerKind;
             var fliplist = othelloGameAdapter.GameMakeMove(movedata.GameX, movedata.GameY, exepectedPlayer, out var isInvalidMove);
 
             //generate final response body
@@ -343,7 +347,7 @@ namespace OthelloAWSServerless
             var expectedPlayer = othelloGameAdapter.GameUpdatePlayer();
 
             var movedata = JsonConvert.DeserializeObject<OthelloServerlessMakeMove>(request?.Body);
-            var playerkind = OthelloPlayerKind(movedata.CurrentPlayer);
+            var playerkind = movedata.CurrentPlayer.PlayerKind;
             var fliplist = othelloGameAdapter.GameAIMakeMove();
             var expectedAIPlayer = othelloGameAdapter.GameGetAiPlayer().AiPlayer;
 
@@ -432,14 +436,6 @@ namespace OthelloAWSServerless
             if (request.QueryStringParameters != null && request.QueryStringParameters.ContainsKey(DebugStringName))
                 debugflag = request.QueryStringParameters[DebugStringName];
             return debugflag;
-        }
-
-        private static OthelloPlayerKind OthelloPlayerKind(string parsesource)
-        {
-            OthelloPlayerKind playerkind;
-            if (!Enum.TryParse(parsesource, out playerkind))
-                throw new Exception(string.Format(CultureInfo.InvariantCulture, "failed enum parse"));
-            return playerkind;
         }
         private static APIGatewayProxyResponse ApiGatewayProxyResponseMissingGameId()
         {

@@ -11,7 +11,7 @@
     public enum OthelloBoardType { TokenMatrix, CharMatrix, StringSequence, Bit};
 
     //GameState Modes used by the application (game) loop
-    public enum GameStateMode { Debug, NewGame, NewAlternateGame, SwitchPlayer, LoadGame, SaveGame, InputMove, AIMove, TestMode, Undo, Redo, DoNothing };
+    public enum GameStateMode { Debug, NewGame, NewAlternateGame, SwitchPlayer, LoadGame, SaveGame, InputMove, AIMove, TestMode, Undo, Redo, DoNothing, NewServerlessAIGame, NewHumansGame, DestroyGame };
 
     //game modes determine if human vs human or human vs computer (A.I.)
     public enum GameMode { HumanVSHuman, HumanVSComputer };

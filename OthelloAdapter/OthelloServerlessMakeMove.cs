@@ -7,7 +7,7 @@ namespace OthelloAWSServerless
     {
         public int GameX { get; set; }
         public int GameY { get; set; }
-        public string CurrentPlayer { get; set; }
+        public OthelloGamePlayer CurrentPlayer { get; set; }
     }
 
     public class OthelloServerlessMakeMoveFliplist
