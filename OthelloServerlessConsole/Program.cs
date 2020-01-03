@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using System.Configuration;
+
 using RestSharp;
 using Newtonsoft.Json;
 
@@ -16,6 +18,14 @@ namespace OthelloServerlessConsole
     class Program
     {
         private const string GameIdQueryParameter = "Id";
+        private const string PlayerWhiteString = "Player White";
+        private const string PlayerBlackString = "Player Black";
+        private const string InstructionPressEscToExitString = "Press <Esc> to Exit";
+        private const string InstructionUseMenuString = "Menu: N:NewAIGame, F1:NewHumanVsHumanGame, L:LoadGame, S: SaveGame, 4: InputMove, 5: A.I.\n";
+        private const string CurrentScoreString = "Current score: {0}:{1}, {2}:{3}";
+        private const string CurrentPlayerString = "Current player: {0}, {1}";
+
+
         static bool gameContinue;
         static GameStateMode gameMode;
         private static OthelloAdapter adapter;
@@ -30,8 +40,11 @@ namespace OthelloServerlessConsole
         private static string Id { get; set; }
         private static DateTime UpdatedDatetime { get; set; }
 
+        private static string restEndpoint { get; set; }
         private static RestClient client;
 
+
+        private static string TurnRenderingString = $"Turn: {turn}";
         private static StringBuilder messageBuffer { get; set; }
 
         static void Main()
@@ -66,10 +79,11 @@ namespace OthelloServerlessConsole
 
             adapter = new OthelloAdapter();
 
-            client = new RestClient("https://7q06k0lshh.execute-api.ap-northeast-1.amazonaws.com/Prod");
+            restEndpoint = ConfigurationManager.AppSettings["OthelloServerlessEndpoint"];
+            client = new RestClient(restEndpoint);
 
-            playerWhite = new OthelloGamePlayer(OthelloPlayerKind.White, "Player White");
-            playerBlack = new OthelloGamePlayer(OthelloPlayerKind.Black, "Player Black");
+            playerWhite = new OthelloGamePlayer(OthelloPlayerKind.White, PlayerWhiteString);
+            playerBlack = new OthelloGamePlayer(OthelloPlayerKind.Black, PlayerBlackString);
 
             messageBuffer = new StringBuilder();
         }
@@ -125,16 +139,16 @@ namespace OthelloServerlessConsole
         private static void Render()
         {
             Console.Clear();
-            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Press <Esc> to Exit"));
-            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Menu: N:NewAIGame, F1:NewHumanVsHumanGame, L:LoadGame, S: SaveGame, 4: InputMove, 5: A.I., 6: Run Basic Tests\n"));
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, InstructionPressEscToExitString));
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, InstructionUseMenuString));
 
             adapter.GameDebugGetBoardInString();
-            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Current player: {0}, {1}", currentPlayer.PlayerName, currentPlayer.PlayerKind));
-            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Current score: {0}:{1}, {2}:{3}", 
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, CurrentPlayerString, currentPlayer.PlayerName, currentPlayer.PlayerKind));
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, CurrentScoreString, 
                 playerWhite, playerWhiteScore, 
                 playerBlack, playerBlackScore));
 
-            Console.WriteLine(string.Format("Turn: {0}", turn));
+            Console.WriteLine(TurnRenderingString);
 
             if (isGameEnded)
             {
@@ -183,7 +197,7 @@ namespace OthelloServerlessConsole
             var data = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response.Content);
 
             var flipliststr = string.Join(",", data.Fliplist.Select(x => x.ToString()));
-            var message = string.Format(CultureInfo.CurrentCulture, "move by AI. http response:{0}, FlipList: {1}",
+            var message = string.Format(CultureInfo.CurrentCulture, "move by human. http response:{0}, FlipList: {1}",
                 response.StatusCode,
                 flipliststr);
             messageBuffer.AppendLine(message);
