@@ -32,6 +32,9 @@ About Projects within the VS Solution:
   OthelloServerless.Tests
     Test to make sure serverless version works as intended.
 
+  OthelloServerlessConsole
+    A client game console application that uses the AWS serverless solution.
+
 TODOs:
   A.I feature based on ML prediction.
 
