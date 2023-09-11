@@ -8,8 +8,6 @@ namespace Othello
 
     public class OthelloDataGen
     {
-        private List<OthelloState> statesCollection;
-
         public void LoadStates()
         {
 

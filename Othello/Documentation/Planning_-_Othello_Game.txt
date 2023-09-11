@@ -1,3 +1,72 @@
+*****************************************************2023 Project***************************************************************************
+* Thoughts/ Background: Now is never a bad time to go into ML. Specifically, I aim to implement ""Step 5: Create a machine learned A.I. Create database that stores "good move + board patterns". A.I is trained using machine learning and executes movesaccording to the moves it learnt."".
+		The key idea is to treat Othello as a kind of ranking problem. The motivation for this isn't academic, and is more for learning how to train ranking models. Because we can.
+		
+		There seems to be a wide variety of common methods such as minimax (already implemented in 2019 in this project), genetic algorithms and neural networks. (https://repository.lsu.edu/cgi/viewcontent.cgi?article=1766&context=gradschool_theses 2011)
+		Other existing literature seems to point at making use of neural networks for deep learning to play othello, such as on using convolutional neural networks (https://arxiv.org/pdf/1711.06583.pdf 2012). 
+		None so far seems to talk about making use of gradient boosted decision trees or trying to model this as a ranking problem. There is one in 2017 that talks about making use of regression (https://pats.cs.cf.ac.uk/@archive_file?p=708&n=final&f=1-Final_Report.pdf&SIG=48a08fc35e0169234716d776bec6f534c2e97babbba9edc889d4c99291178a38)
+		It appears possible that learning to play Othello can be modelled as both classification and regression type problem. Note that my previous work on this has nothing to do with literature available.
+
+		Similar to how a search engine will rank documents per search query, it seems possible to model the query as a state of the board and the next move ( othello token to be placed)
+		It may not exactly be the case as every "query" is dependent on previous "queries", and the output is dependent on the number of turns taken, and how likely one is close to an end game. 
+		Certain state may likely lose to a lost game, and might be a challenge to try to model that.
+
+
+* An option using .NET is Microsoft's ML.NET library. As of this writing, ML.NET latest version is 2.0.0. * Other framework options are LightGBM.
+  # Read https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.treeextensions.fasttree?view=ml-dotnet#microsoft-ml-treeextensions-fasttree(microsoft-ml-rankingcatalog-rankingtrainers-microsoft-ml-trainers-fasttree-fasttreerankingtrainer-options)
+		read also : https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.trainers.fasttree.fasttreerankingtrainer?view=ml-dotnet
+     Preparation: Download code and put it into Othello Solution - Done.
+	 Lift from documentation:
+		FastTree is an efficient implementation of the MART gradient boosting algorithm. Gradient boosting is a machine learning technique for regression problems. 
+			https://arxiv.org/abs/1505.01866. 
+		MART (Multiple Additive Regression Trees) is an implementation of the gradient tree boosting methods for predictive data mining (regression and classification).
+			https://en.wikipedia.org/wiki/Gradient_boosting
+			Or better explained in: https://jerryfriedman.su.domains/r-mart/tutorial/tutorial.pdf
+		It builds each regression tree in a step-wise fashion, using a predefined loss function to measure the error for each step and corrects for it in the next. 
+		MART learns an ensemble of regression trees, which is a decision tree with scalar values in its leaves. 
+		A decision (or regression) tree is a binary tree-like flow chart, where at each interior node one decides which of the two child nodes to continue to based on one of the feature values from the input. 
+		At each leaf node, a value is returned. In the interior nodes, the decision is based on the test x <= v where x is the value of the feature in the input sample and v is one of the possible values of this feature. 
+		The functions that can be produced by a regression tree are all the piece-wise constant functions. https://en.wikipedia.org/wiki/Piecewise
+
+		So this prediction model is actually an ensemble of weaker prediction models. 
+		In regression problems, boosting builds a series of such trees in a step-wise fashion and then selects the optimal tree using an arbitrary differentiable loss function.
+
+		The ensemble of trees is produced by computing, in each step, a regression tree that approximates the gradient of the loss function, and adding it to the previous tree with coefficients that minimize the loss of the new tree. 
+.
+		The output of the ensemble produced by MART on a given instance is the sum of the tree outputs. 
+		In case of a ranking problem, the instances are ordered by the output value of the ensemble. 
+		Note that In case of a regression problem, the output is the predicted value of the function. Note also that the output of the ensemble produced by MART on a given instance is the sum of the tree outputs. 
+		The only difference is how we make use of the output.
+
+		The relationship to LambdaMART is not written: https://towardsdatascience.com/learning-to-rank-a-complete-guide-to-ranking-using-machine-learning-4c9688d370d4
+
+
+		A data point in training is composed of labels, group id and features. 
+			Features: y_ = f(x_) , weights to x is essentially features, like a vector (See n-tuples below as thoughts for features)
+			Group ID: It partitions the dataset for each query and document pairs. In the world of Othello, my thoughts are to have the same group ID for the same player. 
+				In query-document ranking problems, grouping is used for the model to learn relative importance of different features from different users. So a different game is played by a different player with different decision on moves.
+				For this particular phase of the project, there aren't multiple players, so it might better to use the same group ID (same player).
+				https://towardsdatascience.com/how-to-implement-learning-to-rank-model-using-python-569cd9c49b08
+			Label: A score, possibly an indication of a good move (higher scores mean higher chances to win). Maybe initial label can be making use of the heuristics output from min-max algorithm. Later can try giving more knowledge like the end-game states after n moves.
+
+
+  # Execution steps:
+     Step 1. Read and try .NET ML tutorials on ranking.
+			
+	 Step 2. Modify Othello code to generate TokenState and NextToken Pairs. 
+			TokenState refers to tuples of Othello token coordinates that are already on the board where each n-tuple is (gameID, x,y, tokentype: back or white or empty, turn)
+			NextToken is a n-tuple (x,y, tokentype: black or white, turn)
+	 Step 2.5 Consider the weighted objective function to minimize opponent pair counts, maximize own pair counts, and final game win, i.e. m_1 * min (opponent) + m_2 * max (own) * m_3 (maximize final own tokens)
+			Evaluation can be NDCG based. Supported easily by the framework.
+	 Step 3. Modify Othello code to store these tuples, perhaps in NoSQL DB. Why? Why not just files. Easier querying?
+	 Step 4. Generate training pairs from A.I - player plays. Maybe a dozen play should do.
+	 Step 5. Generate training pairs from A.I - A.I plays
+	 Step 6. Integrate ML Ranked A.I. into A.I code as part of strategy pattern. Should be as simple as adding a routine.
+	 Step 7. Change UI to support ML Ranked A.I. as a target A.I player. Store all outcomes in DB.
+
+ 
+
+
 *****************************************************2019 Project***************************************************************************
 
 * OthelloServerless: uses AWS services, mainly Lambda to support mulitple instances of A.I games for multiple players, and DynamoDB to store game states.
