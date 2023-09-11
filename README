@@ -37,4 +37,5 @@ About Projects within the VS Solution:
 
 TODOs:
   A.I feature based on ML prediction.
+  Storing States, and Moves using DynamoDB Tables, and using one of AWS services to train a ML model.
 
