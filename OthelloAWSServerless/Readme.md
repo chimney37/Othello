@@ -41,13 +41,33 @@ Deploy application
     dotnet lambda deploy-serverless
 ```
 
-#steps to follow from postman (from debugging)
+# steps to follow from postman (from debugging)
 refer to OthelloServerless.postman_collection.json on how to use the REST API, including request bodies, query string parameters and path parameters
 
-#steps to follow from OthelloServerlessConsole
+# steps to follow from OthelloServerlessConsole
 this is a console-based skeleton game application that makes use of the REST APIs.
 
-#What is the game design?
+## Memo-keeping pain points after upgrading .net runtimes for AWS Serverless (Jan 2025)
+* Problems during Local Testing (fixed)
+  * deployments: needed to change function-runtime from netcoreapp2.1 to net8.0. Separately, the AWS toolkit automatically added "s3-bucket" fyi.
+  * access credentials: changed [default] to the newly created [<user>] profile in .aws or "dotnet test", then it succeeded. Might be bad idea to change from <default>. When in trouble, go to the AWS Console: https://signin.aws.amazon.com, hints: check credentials under IAM Dashboard.
+  * Needed to enable BinaryFormatter or it will not work with the net8.0 targetframework https://stackoverflow.com/questions/69796653/binaryformatter-not-supported-in-net-5-app-when-loading-bitmap-resource
+* Problems After deployment to Prod (root caused)
+  * 502: bad gateway: internal error. Debugging involves checking the PUT REST resource directly and use the raw body within attached OthelloServerless.postman_collection.json, and get the raw jSON request body. Use that to debug using API:OthelloGamesStack Resources PUT directly.
+  * With the problem above, found the following error, which could be resolved by adding DynamoDBFullAccessPermissions or a better to the `OthelloGamesStack-AddGameRole-F86nqQBkjiWx` IAM role by following https://dynobase.dev/dynamodb-errors/is-not-authorized-to-perform-dynamodb-on-resource/
+ ```
+  "errorMessage": "User: arn:aws:sts::001744512275:assumed-role/OthelloGamesStack-AddGameRole-F86nqQBkjiWx/OthelloGamesStack-AddGame-DggTCZVLUIXP 
+ is not authorized to perform: dynamodb:UpdateItem on resource: arn:aws:dynamodb:ap-northeast-1:001744512275:table/OthelloGamesStack-OthelloGameTable-PNPHJUDRQVXG because no identity-based policy allows the dynamodb:UpdateItem action
+ ```
+* Problems Related to adding necessary changes in Cloudformation template
+  * https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/lambda-build-test-severless-app.html, look for `Policies` . Look at IAM Role Console to check that permissions are added to the required roles
+* Problems Related to testing using the `OthelloServerlessConsole` application
+  * Most testing should be done using postman. 
+  * Console app testing basic testing can be done by first choosing `NewHumanVsHumanGame` option followed by `Move`. Similary, `New AI Game` followed by `AI` (A.I. move) is also acceptable though more complex to test.
+  * Expected issue: If `Move` is done without initialization, app will have an exception as there is no such Game State in DynamoDB. This can be fixed.
+
+
+# What is the game design?
 Architecture:
     <game client> <---> <API gateway> <---> <Lambda> <---> <DynamoDB>
 The game is managed through a list of lambda functions similar to those that we see in the OthelloAdapter project in the top-level solution.
@@ -71,7 +91,7 @@ Specifically to the OthelloServerlessConsole application, the game loop waits on
 
 In other game loops, this may require a different design since the game loop may operate at a much higher frequency.
 
-#What are some design challanges and how to solve it?
+# What are design challanges and how to solve it?
 * Lambda cold start problem causes slow responses for the first time the APIs are called after a idle time. E.g. a non-VPC function instance is kept warm for 5 minutes at some point, after which the ephemeral container closes. 
 The problem is aggravated using .NET Core used in Lambda because at startup the JIT compiler, which is a process to convert machine agnostic assemblies to machine specific ones.
 AWS X-ray analytics indicate that GetGamesAsync, a function that gets all the list of games, on a cold start condition, took 8 seconds to execute on a lambda with memory size 256MB.
@@ -84,3 +104,8 @@ the problem is 2 fold because of 1) container instance start up time; 2) .NET JI
  * It was only clear after a prototype that the only thing that matters is that the game updates should only be done through a synchronization of the game representation through a lambda function call, given the data on the cloud.
  There isn't a need to get any other data about the game, and the only other set of functions are for the actions that change the game state, e.g. making new game, making moves.
 * Cliffhangers: now there's no lambda function to wipe the DynamoDB clean, and the only way to do this is to wipe it via the AWS console or AWS explorer.
+
+
+# Future Ideas
+* Enable a backend Deep-Learnt based AI model
+* Do something fun with Agentic LLM-based gaming - maybe game helper, followed by interesting AI player that taunts players or helps them

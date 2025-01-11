@@ -15,12 +15,12 @@
 					"raw": "{\n    \"Id\": \"9288a3dc-aba4-4f7c-b6cd-844504a89148\"\n}"
 				},
 				"url": {
-					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod",
+					"raw": "https://p0bj9c1zc9.execute-api.ap-northeast-1.amazonaws.com/Prod",
 					"protocol": "https",
 					"host": [
-						"xez1ssog7c",
+						"p0bj9c1zc9",
 						"execute-api",
-						"us-west-2",
+						"ap-northeast-1",
 						"amazonaws",
 						"com"
 					],
@@ -87,7 +87,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod",
+					"raw": "https://p0bj9c1zc9.execute-api.ap-northeast-1.amazonaws.com/Prod",
 					"protocol": "https",
 					"host": [
 						"xez1ssog7c",
@@ -115,7 +115,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod?Id=1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"raw": "https://p0bj9c1zc9.execute-api.ap-northeast-1.amazonaws.com/Prod?Id=1fd6f562-cf0b-4fb0-9502-978cc843c46c",
 					"protocol": "https",
 					"host": [
 						"xez1ssog7c",
@@ -150,7 +150,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"raw": "https://p0bj9c1zc9.execute-api.ap-northeast-1.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
 					"protocol": "https",
 					"host": [
 						"xez1ssog7c",
@@ -180,7 +180,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"raw": "https://p0bj9c1zc9.execute-api.ap-northeast-1.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
 					"protocol": "https",
 					"host": [
 						"xez1ssog7c",
@@ -210,7 +210,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "https://xez1ssog7c.execute-api.us-west-2.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
+					"raw": "https://p0bj9c1zc9.execute-api.ap-northeast-1.amazonaws.com/Prod/1fd6f562-cf0b-4fb0-9502-978cc843c46c",
 					"protocol": "https",
 					"host": [
 						"xez1ssog7c",

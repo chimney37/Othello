@@ -6,7 +6,7 @@
         "dotnet lambda help",
         "All the command line options for the Lambda command can be specified in this file."
     ],
-    "profile"     : "lxuser",
+    "profile"     : "default",
     "region"      : "ap-northeast-1",
     "configuration" : "Release",
     "framework"     : "net8.0",

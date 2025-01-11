@@ -44,7 +44,7 @@
         "MemorySize": 256,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
@@ -72,7 +72,7 @@
         "MemorySize": 3008,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
@@ -100,7 +100,7 @@
         "MemorySize": 3008,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
@@ -124,11 +124,11 @@
         "Handler": "OthelloAWSServerless::OthelloAWSServerless.Functions::RemoveGameAsync",
         "Runtime": "dotnet8",
         "CodeUri": "",
-        "Description": "Function to remove a blog",
+        "Description": "Function to remove a game",
         "MemorySize": 3008,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
@@ -156,7 +156,7 @@
         "MemorySize": 256,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
@@ -184,7 +184,7 @@
         "MemorySize": 3008,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
@@ -212,7 +212,7 @@
         "MemorySize": 3008,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
@@ -240,7 +240,7 @@
         "MemorySize": 256,
         "Timeout": 30,
         "Role": null,
-        "Policies": [ "AWSLambda_FullAccess" ],
+        "Policies": [ "AWSLambda_FullAccess", "AmazonDynamoDBFullAccess"],
         "Environment" : {
           "Variables" : {
             "OthelloGameTable" : { "Fn::If" : ["CreateGameTable", {"Ref":"OthelloGameTable"}, { "Ref" : "TableName" } ] }
