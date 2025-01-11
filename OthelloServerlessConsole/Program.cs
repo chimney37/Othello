@@ -186,14 +186,14 @@ namespace OthelloServerlessConsole
 
         private static void OthelloServerlessRESTMakeMove(int x, int y)
         {
-            var request = new RestRequest(string.Format(CultureInfo.InvariantCulture, "move/{0}", Id), Method.PUT);
+            var request = new RestRequest(string.Format(CultureInfo.InvariantCulture, "move/{0}", Id), Method.Put);
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
             myMoves.CurrentPlayer = adapter.GameUpdatePlayer();
             myMoves.GameX = x;
             myMoves.GameY = y;
             request.AddJsonBody(myMoves);
 
-            IRestResponse response = client.Execute(request);
+            RestResponse response = client.Execute(request);
             var data = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response.Content);
 
             var flipliststr = string.Join(",", data.Fliplist.Select(x => x.ToString()));
@@ -207,12 +207,12 @@ namespace OthelloServerlessConsole
         {
             if (Id != null && adapter.GameGetMode() == GameMode.HumanVSComputer)
             {
-                var request = new RestRequest(string.Format(CultureInfo.InvariantCulture, "movebyai/{0}", Id), Method.PUT);
+                var request = new RestRequest(string.Format(CultureInfo.InvariantCulture, "movebyai/{0}", Id), Method.Put);
                 OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
                 myMoves.CurrentPlayer = adapter.GameUpdatePlayer();
                 request.AddJsonBody(myMoves);
 
-                IRestResponse response = client.Execute(request);
+                RestResponse response = client.Execute(request);
                 var data = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response.Content);
 
                 var flipliststr = string.Join(",", data.Fliplist.Select(x => x.ToString()));
@@ -230,11 +230,11 @@ namespace OthelloServerlessConsole
 
         private static void OthelloServerlessRESTCreateNewGame(Func<OthelloServerlessPlayers> createNewOthelloGame)
         {
-            var request = new RestRequest("/", Method.PUT);
+            var request = new RestRequest("/", Method.Put);
             var body = createNewOthelloGame();
             request.AddJsonBody(body);
 
-            IRestResponse response = client.Execute(request);
+            RestResponse response = client.Execute(request);
             var data = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Content);
             adapter.GetGameFromJSON(data.OthelloGameStrRepresentation);
             Id = data.Id;
@@ -248,8 +248,8 @@ namespace OthelloServerlessConsole
 
         private static void OthelloServerlessRESTUpdateGame()
         {
-            var request = new RestRequest(Id, Method.GET);
-            IRestResponse response = client.Execute(request);
+            var request = new RestRequest(Id, Method.Get);
+            RestResponse response = client.Execute(request);
             var data = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Content);
             adapter.GetGameFromJSON(data.OthelloGameStrRepresentation);
 
@@ -262,10 +262,10 @@ namespace OthelloServerlessConsole
         {
             if (Id != null)
             {
-                var request = new RestRequest("/", Method.DELETE);
+                var request = new RestRequest("/", Method.Delete);
                 request.AddQueryParameter(GameIdQueryParameter, Id);
 
-                IRestResponse response = client.Execute(request);
+                RestResponse response = client.Execute(request);
 
                 var message = string.Format(CultureInfo.CurrentCulture,
                     "Deleted Game. Http response: {0}, gameId={1}",
