@@ -65,6 +65,8 @@ this is a console-based skeleton game application that makes use of the REST API
   * Most testing should be done using postman. 
   * Console app testing basic testing can be done by first choosing `NewHumanVsHumanGame` option followed by `Move`. Similary, `New AI Game` followed by `AI` (A.I. move) is also acceptable though more complex to test.
   * Expected issue: If `Move` is done without initialization, app will have an exception as there is no such Game State in DynamoDB. This can be fixed.
+* Tangents
+  * MFA authentication was enabled on AWS account (better, this doesn't affect authentication for development, only applies to Console login) 
 
 
 # What is the game design?
