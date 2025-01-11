@@ -43,14 +43,14 @@ namespace OthelloAWSServerless.Tests
             Functions functions = new Functions(this.DDBClient, this.TableName);
 
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
             // List the games
             request = new APIGatewayProxyRequest
             {
             };
             context = new TestLambdaContext();
-            response = await functions.GetGamesAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGamesAsync(request, context).ConfigureAwait(true);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation[] gamePosts = JsonConvert.DeserializeObject<OthelloGameRepresentation[]>(response.Body);
@@ -70,7 +70,7 @@ namespace OthelloAWSServerless.Tests
 
             // Test adding a new game using player parameters
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
             // Test getting the game back out
             request = new APIGatewayProxyRequest
@@ -78,7 +78,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(true);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
@@ -98,7 +98,7 @@ namespace OthelloAWSServerless.Tests
 
             // Test adding a new game using player parameters
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
             // Delete the game
             request = new APIGatewayProxyRequest
@@ -106,7 +106,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
             };
             context = new TestLambdaContext();
-            response = await functions.RemoveGameAsync(request, context).ConfigureAwait(false);
+            response = await functions.RemoveGameAsync(request, context).ConfigureAwait(true);
             Assert.Equal(200, response.StatusCode);
 
             // Make sure the game was deleted.
@@ -115,7 +115,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(true);
             Assert.Equal((int)HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -130,7 +130,7 @@ namespace OthelloAWSServerless.Tests
 
             // Add a new game using player parameters
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
             //Test we can get the game's current player
             request = new APIGatewayProxyRequest
@@ -138,7 +138,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetGameCurrentPlayerAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameCurrentPlayerAsync(request, context).ConfigureAwait(true);
             Assert.Equal(200, response.StatusCode);
 
             OthelloServerlessCurrentPlayer getcurrentPlayer = JsonConvert.DeserializeObject<OthelloServerlessCurrentPlayer>(response.Body);
@@ -156,7 +156,7 @@ namespace OthelloAWSServerless.Tests
 
             // Add a new game using player parameters
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
             // Test we can get an valid move response
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
@@ -171,7 +171,7 @@ namespace OthelloAWSServerless.Tests
             };
 
             context = new TestLambdaContext();
-            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(false);
+            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(true);
             var makemoveresponse = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response?.Body);
 
             Assert.Equal(200, response.StatusCode);
@@ -190,7 +190,7 @@ namespace OthelloAWSServerless.Tests
 
             // Add a new game using player parameters
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
 
             // Test we can get an valid move response
@@ -206,7 +206,7 @@ namespace OthelloAWSServerless.Tests
             };
 
             context = new TestLambdaContext();
-            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(false);
+            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(true);
             var makemoveresponse = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response?.Body);
 
             Assert.Equal(200, response.StatusCode);
@@ -225,7 +225,7 @@ namespace OthelloAWSServerless.Tests
 
             // Add a new game using player parameters
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
             // Test we can get an valid move response
             OthelloServerlessMakeMove myMoves = new OthelloServerlessMakeMove();
@@ -240,7 +240,7 @@ namespace OthelloAWSServerless.Tests
             };
 
             context = new TestLambdaContext();
-            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(false);
+            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(true);
             var makemoveresponse = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response?.Body);
 
             Assert.Equal(200, response.StatusCode);
@@ -259,7 +259,7 @@ namespace OthelloAWSServerless.Tests
 
             // Add a new game using player parameters
             var myGame = CreateNewOthelloHumanVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
 
             // Test we can get an valid move response
@@ -275,7 +275,7 @@ namespace OthelloAWSServerless.Tests
             };
 
             context = new TestLambdaContext();
-            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(false);
+            response = await functions.MakeGameMoveAsync(request, context).ConfigureAwait(true);
             var makemoveresponse = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response?.Body);
 
             Assert.Equal(200, response.StatusCode);
@@ -294,7 +294,7 @@ namespace OthelloAWSServerless.Tests
 
             // Test adding a new game using player parameters
             var myGame = CreateNewOthelloAIVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
             // Test getting the game back out
             request = new APIGatewayProxyRequest
@@ -302,7 +302,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(true);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
@@ -327,7 +327,7 @@ namespace OthelloAWSServerless.Tests
 
             // Test adding a new game using player parameters
             var myGame = CreateNewOthelloAIVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
 
             // Test getting the game back out
@@ -336,7 +336,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(true);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
@@ -354,7 +354,7 @@ namespace OthelloAWSServerless.Tests
                 Body = JsonConvert.SerializeObject(myMoves)
             };
             context = new TestLambdaContext();
-            response = await functions.MakeGameAIMoveAsync(request, context).ConfigureAwait(false);
+            response = await functions.MakeGameAIMoveAsync(request, context).ConfigureAwait(true);
             var makemoveresponse = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response?.Body);
 
             Assert.Equal(200, response.StatusCode);
@@ -373,7 +373,7 @@ namespace OthelloAWSServerless.Tests
 
             // Test adding a new game using player parameters
             var myGame = CreateNewOthelloAIVSHumanGame(out var myPlayers, out var currentPlayer);
-            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(false);
+            var game = await AddOthelloGameRepresentation(myPlayers, functions).ConfigureAwait(true);
 
 
             // Test getting the game back out
@@ -382,7 +382,7 @@ namespace OthelloAWSServerless.Tests
                 PathParameters = new Dictionary<string, string> { { Functions.IdQueryStringName, game.Id } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetGameAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameAsync(request, context).ConfigureAwait(true);
             Assert.Equal(200, response.StatusCode);
 
             OthelloGameRepresentation readGame = JsonConvert.DeserializeObject<OthelloGameRepresentation>(response.Body);
@@ -404,7 +404,7 @@ namespace OthelloAWSServerless.Tests
                 Body = JsonConvert.SerializeObject(myMoves)
             };
             context = new TestLambdaContext();
-            response = await functions.MakeGameAIMoveAsync(request, context).ConfigureAwait(false);
+            response = await functions.MakeGameAIMoveAsync(request, context).ConfigureAwait(true);
             var makemoveresponse = JsonConvert.DeserializeObject<OthelloServerlessMakeMoveFliplist>(response?.Body);
 
             Assert.Equal(200, response.StatusCode);
@@ -418,7 +418,7 @@ namespace OthelloAWSServerless.Tests
                 QueryStringParameters = new Dictionary<string, string> { { Functions.DebugStringName, "true" } }
             };
             context = new TestLambdaContext();
-            response = await functions.GetGameBoardDataAsync(request, context).ConfigureAwait(false);
+            response = await functions.GetGameBoardDataAsync(request, context).ConfigureAwait(true);
             var board = JsonConvert.DeserializeObject<string>(response?.Body);
             Assert.Equal(200, response.StatusCode);
             Assert.NotEqual(initialboard, board);
@@ -526,7 +526,7 @@ namespace OthelloAWSServerless.Tests
             do
             {
                 Thread.Sleep(1000);
-                response = await this.DDBClient.DescribeTableAsync(describeRequest).ConfigureAwait(false);
+                response = await this.DDBClient.DescribeTableAsync(describeRequest).ConfigureAwait(true);
             } while (response.Table.TableStatus != TableStatus.ACTIVE);
         }
 
