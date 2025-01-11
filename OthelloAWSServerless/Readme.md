@@ -17,7 +17,7 @@ To view deployed application open the Stack View window by double-clicking the s
 
 ## steps to follow from the command line:
 
-deploy application using the [Amazon.Lambda.Tools Global Tool](https://github.com/aws/aws-extensions-for-dotnet-cli#aws-lambda-amazonlambdatools) from the command line.
+deploy application using the [Amazon.Lambda.Tools Global Tool](https://github.com/aws/aws-extensions-for-dotnet-cli#aws-lambda-amazonlambdatools) from the command line (Developer Command Prompt for VS 20XX).
 
 Install Amazon.Lambda.Tools Global Tools if not already installed.
 ```
@@ -41,11 +41,11 @@ Deploy application
     dotnet lambda deploy-serverless
 ```
 
-#steps to follow from postman (fro debugging)
+#steps to follow from postman (from debugging)
 refer to OthelloServerless.postman_collection.json on how to use the REST API, including request bodies, query string parameters and path parameters
 
 #steps to follow from OthelloServerlessConsole
-this is a consoled based skeleton game application that makes use of the REST APIs.
+this is a console-based skeleton game application that makes use of the REST APIs.
 
 #What is the game design?
 Architecture:
