@@ -10,13 +10,13 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Newtonsoft.Json;
 
 using Xunit;
 
 using Othello;
 using OthelloAdapters;
+using Amazon.Runtime;
 
 namespace OthelloAWSServerless.Tests
 {
