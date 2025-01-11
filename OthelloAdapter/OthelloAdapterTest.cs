@@ -33,7 +33,7 @@ namespace OthelloAdapters
             var player = target.GameUpdatePlayer();
 
             var actual = OthelloPlayerKind.White;
-            Assert.AreEqual(player.PlayerKind, actual);
+            Assert.That(actual, Is.EqualTo(player.PlayerKind));
         }
 
         [TestCase]
@@ -48,7 +48,7 @@ namespace OthelloAdapters
             var actual = new OthelloAdapter();
             actual.GetGameFromJSON(json);
             var actualboard = target.GameDebugGetBoardInString();
-            Assert.AreEqual(expectedboard, actualboard);
+            Assert.That(actualboard, Is.EqualTo(expectedboard));
         }
 
         [TestCase]
@@ -62,7 +62,7 @@ namespace OthelloAdapters
             loadtarget.GameLoad();
             var player = loadtarget.GameUpdatePlayer();
             var actual = OthelloPlayerKind.White;
-            Assert.AreEqual(player.PlayerKind, actual);
+            Assert.That(actual, Is.EqualTo(player.PlayerKind));
         }
 
 
@@ -84,7 +84,7 @@ namespace OthelloAdapters
             var loadtarget = new OthelloAdapter();
             loadtarget.GameLoad();
             var actual = loadtarget.GameGetDifficultyMode();
-            Assert.AreEqual(GameDifficultyMode.Hard, actual);
+            Assert.That(actual, Is.EqualTo(GameDifficultyMode.Hard));
         }
     }
 }
